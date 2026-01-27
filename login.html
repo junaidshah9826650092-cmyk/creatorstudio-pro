@@ -158,7 +158,7 @@
         <div class="divider">OR CONTINUE WITH</div>
 
         <div class="social-login">
-            <div class="social-btn btn-google" onclick="location.href='index.html'">
+            <div class="social-btn btn-google" onclick="continueAsGuest()">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20"
                     alt="Google">
                 Sign in with Google
@@ -178,6 +178,12 @@
 
     <script>
         lucide.createIcons();
+        function continueAsGuest() {
+            localStorage.setItem('beast_user', 'Guest');
+            localStorage.setItem('beast_plan', 'FREE');
+            window.location.href = '/studio';
+        }
+
         async function handleLogin() {
             const username = document.getElementById('username').value;
             if (!username) return alert("Please enter your name, Beast!");

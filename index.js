@@ -16,10 +16,10 @@ const presets = {
 const savedUser = localStorage.getItem('beast_user');
 const savedPlan = localStorage.getItem('beast_plan');
 
-if (!savedUser) {
-    // Strict Guard: Redirect to login if not authenticated
+if (!savedUser && window.location.pathname !== '/') {
+    // If no user and not on login page, redirect to root
     window.location.href = '/';
-} else {
+} else if (savedUser) {
     document.addEventListener('DOMContentLoaded', () => {
         updateUserUI(savedUser, savedPlan || 'FREE');
     });
@@ -141,12 +141,7 @@ uploadInput.addEventListener('change', (e) => {
     }
 });
 
-exportBtn.addEventListener('click', () => {
-    const link = document.createElement('a');
-    link.download = `beast-design-${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png', 1.0);
-    link.click();
-});
+// Removed local download listener (consolidated into saveToBeastServer)
 
 function resetBeast() {
     uploadedImg = null;
