@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Beast Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body style="background: #030712; color: #fff; font-family: 'Outfit', sans-serif;">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 20px;">
+        <!-- Header -->
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 16px;">
+            <div>
+                <h1 style="margin: 0; font-size: 2rem; color: var(--primary);">🛡️ Admin Dashboard</h1>
+                <p style="margin: 5px 0 0 0; color: var(--text-secondary);">Welcome, <span id="admin-email">Admin</span>
+                </p>
+            </div>
+            <button class="btn-premium" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;">
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: rgba(99,102,241,0.2); padding: 15px; border-radius: 12px;">
+                        <i data-lucide="users" size="32" color="#6366f1"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Total Users</p>
+                        <h2 style="margin: 5px 0 0 0; font-size: 2rem;" id="total-users">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: rgba(236,72,153,0.2); padding: 15px; border-radius: 12px;">
+                        <i data-lucide="crown" size="32" color="#ec4899"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Premium Users</p>
+                        <h2 style="margin: 5px 0 0 0; font-size: 2rem;" id="premium-users">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: rgba(34,197,94,0.2); padding: 15px; border-radius: 12px;">
+                        <i data-lucide="image" size="32" color="#22c55e"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Total Designs</p>
+                        <h2 style="margin: 5px 0 0 0; font-size: 2rem;" id="total-designs">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: rgba(251,191,36,0.2); padding: 15px; border-radius: 12px;">
+                        <i data-lucide="dollar-sign" size="32" color="#fbbf24"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Revenue (Est.)</p>
+                        <h2 style="margin: 5px 0 0 0; font-size: 2rem;" id="total-revenue">₹0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px;">
+            <h2 style="margin: 0 0 20px 0;">All Users</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Username</th>
+                            <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Plan</th>
+                            <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Credits</th>
+                            <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table">
+                        <tr>
+                            <td colspan="4" style="padding: 30px; text-align: center; color: var(--text-secondary);">
+                                Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Admin Protection
+        const adminEmail = 'junaidshah78634@gmail.com';
+        const currentUser = localStorage.getItem('beast_user');
+
+        if (currentUser !== adminEmail) {
+            alert('⛔ Unauthorized! Admin access only.');
+            window.location.href = '/';
+        }
+
+        document.getElementById('admin-email').textContent = currentUser;
+
+        // Fetch Admin Data
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/admin/stats');
+                const data = await res.json();
+
+                document.getElementById('total-users').textContent = data.totalUsers || 0;
+                document.getElementById('premium-users').textContent = data.premiumUsers || 0;
+                document.getElementById('total-designs').textContent = data.totalDesigns || 0;
+                document.getElementById('total-revenue').textContent = '₹' + (data.revenue || 0);
+
+                // Load Users
+                const usersTable = document.getElementById('users-table');
+                if (data.users && data.users.length > 0) {
+                    usersTable.innerHTML = data.users.map(user => `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px;">${user.username}</td>
+                            <td style="padding: 15px;">
+                                <span style="background: ${user.plan === 'PRO' ? '#6366f1' : '#374151'}; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem;">
+                                    ${user.plan}
+                                </span>
+                            </td>
+                            <td style="padding: 15px;">${user.credits}</td>
+                            <td style="padding: 15px;">
+                                <button class="btn-premium" style="padding: 8px 16px; font-size: 0.85rem;" onclick="editUser('${user.username}')">Edit</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    usersTable.innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: var(--text-secondary);">No users yet</td></tr>';
+                }
+            } catch (err) {
+                console.error('Admin load error:', err);
+                alert('Failed to load dashboard');
+            }
+        }
+
+        function editUser(username) {
+            const newCredits = prompt(`Update credits for ${username}:`, '100');
+            if (newCredits) {
+                fetch('/api/admin/update-credits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, credits: parseInt(newCredits) })
+                }).then(() => {
+                    alert('Credits updated!');
+                    loadDashboard();
+                });
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        loadDashboard();
+    </script>
+
+    <style>
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+        }
+    </style>
+</body>
+
+</html>

@@ -164,6 +164,10 @@ def privacy():
 def terms():
     return send_from_directory(BASE_DIR, 'terms.html')
 
+@app.route('/admin')
+def admin_panel():
+    return send_from_directory(BASE_DIR, 'admin.html')
+
 # FINAL SYNC VERSION 2.1
 @app.route('/ads.txt')
 def ads_txt():
@@ -240,6 +244,60 @@ def save_design():
         return jsonify({"status": "success", "file": filename})
     
     return jsonify({"status": "error", "message": "No image data"}), 400
+
+# Admin Routes
+@app.route('/api/admin/stats', methods=['GET'])
+def admin_stats():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # Total users
+        c.execute("SELECT COUNT(*) FROM users")
+        total_users = c.fetchone()[0]
+        
+        # Premium users
+        c.execute("SELECT COUNT(*) FROM users WHERE plan='PRO'")
+        premium_users = c.fetchone()[0]
+        
+        # Total designs
+        c.execute("SELECT COUNT(*) FROM designs")
+        total_designs = c.fetchone()[0]
+        
+        # Revenue estimate (PRO users * 500)
+        revenue = premium_users * 500
+        
+        # All users
+        c.execute("SELECT username, plan, credits FROM users ORDER BY id DESC")
+        users = [{"username": row[0], "plan": row[1], "credits": row[2]} for row in c.fetchall()]
+        
+        conn.close()
+        
+        return jsonify({
+            "totalUsers": total_users,
+            "premiumUsers": premium_users,
+            "totalDesigns": total_designs,
+            "revenue": revenue,
+            "users": users
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/admin/update-credits', methods=['POST'])
+def update_credits():
+    data = request.json
+    username = data.get('username')
+    credits = data.get('credits', 0)
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("UPDATE users SET credits=? WHERE username=?", (credits, username))
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
