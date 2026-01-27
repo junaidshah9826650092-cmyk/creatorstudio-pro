@@ -12,6 +12,7 @@ CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'beast_studio.db')
 DESIGNS_PATH = os.path.join(BASE_DIR, 'designs')
+BEAST_SERVER_API_KEY = "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxx" # Replace with your real OpenRouter Pro Key
 
 def init_db():
     try:
@@ -43,35 +44,95 @@ if not os.path.exists(DESIGNS_PATH):
 @app.route('/api/generate-logo', methods=['POST'])
 def generate_logo():
     data = request.json
+    username = data.get('username')
     prompt = data.get('prompt')
-    api_key = data.get('apiKey')
-    provider = data.get('provider', 'openrouter') # openrouter, openai, gemini
+    user_api_key = data.get('apiKey')
+    provider = data.get('provider', 'openrouter')
     model = data.get('model', 'google/gemini-2.0-flash-exp:free')
 
-    if not api_key:
-        return jsonify({"status": "error", "message": "API Key is required"}), 400
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT plan, credits FROM users WHERE username=?", (username,))
+    user = c.fetchone()
+    
+    if not user:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+    
+    plan, credits = user[0], user[1]
+    
+    # Logic: If PRO/BEAST, use server key, otherwise use user key
+    final_api_key = user_api_key
+    credit_cost = 5 # Default cost
+    
+    if plan in ['PRO', 'BEAST']:
+        final_api_key = BEAST_SERVER_API_KEY
+        credit_cost = 10 if plan == 'PRO' else 2 # BEAST plan gets cheaper credits
+        
+    if not final_api_key or "xxxx" in final_api_key:
+        if plan == 'FREE':
+            return jsonify({"status": "error", "message": "FREE users must provide their own API Key"}), 400
+        else:
+            return jsonify({"status": "error", "message": "Internal AI Server Error. Contact Admin."}), 500
+
+    if credits < credit_cost:
+        return jsonify({"status": "error", "message": f"Low Credits! You need {credit_cost} credits, you have {credits}."}), 403
 
     try:
-        if provider == 'openrouter':
-            response = requests.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": model,
-                    "messages": [{"role": "user", "content": f"Create a professional minimalist logo description for: {prompt}. Give me colors and layout."}]
-                }
-            )
-            return jsonify(response.json())
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {final_api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": f"Create a professional minimalist logo description for: {prompt}. Give me colors and layout."}]
+            }
+        )
         
-        elif provider == 'gemini':
-            # Simplified Gemini implementation
-            return jsonify({"status": "success", "message": "Gemini integration active"})
-            
+        # Deduct credits if successful
+        if response.status_code == 200:
+            new_credits = credits - credit_cost
+            c.execute("UPDATE users SET credits=? WHERE username=?", (new_credits, username))
+            conn.commit()
+            res_data = response.json()
+            res_data['remaining_credits'] = new_credits
+            return jsonify(res_data)
+        
+        return jsonify(response.json()), response.status_code
+        
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/user-status', methods=['POST'])
+def get_user_status():
+    data = request.json
+    username = data.get('username')
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT plan, credits FROM users WHERE username=?", (username,))
+    user = c.fetchone()
+    conn.close()
+    if user:
+        return jsonify({"status": "success", "plan": user[0], "credits": user[1]})
+    return jsonify({"status": "error", "message": "User not found"}), 404
+
+@app.route('/api/buy-plan', methods=['POST'])
+def buy_plan():
+    data = request.json
+    username = data.get('username')
+    plan_type = data.get('plan') # 'PRO' or 'BEAST'
+    
+    credits_to_add = 300 if plan_type == 'PRO' else 1000
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE users SET plan=?, credits=credits+? WHERE username=?", (plan_type, credits_to_add, username))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success", "message": f"Successfully upgraded to {plan_type}! {credits_to_add} credits added."})
 
 @app.route('/')
 def index():

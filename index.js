@@ -21,7 +21,7 @@ if (!savedUser && !window.location.pathname.includes('/login')) {
 
 document.addEventListener('DOMContentLoaded', () => {
     if (savedUser) {
-        updateUserUI(savedUser, localStorage.getItem('beast_plan') || 'FREE');
+        syncUserStatus();
     }
 });
 
@@ -179,12 +179,15 @@ window.closeAIModal = () => {
 };
 
 async function generateWithAI() {
+    const username = localStorage.getItem('beast_user');
+    const prompt = document.getElementById('ai-prompt').value;
     const provider = document.getElementById('ai-provider').value;
     const apiKey = document.getElementById('ai-api-key').value;
     const model = document.getElementById('ai-model').value;
-    const prompt = document.getElementById('ai-prompt').value; // Updated to read from modal textarea
 
-    if (!apiKey) return alert("Please enter your API Key!");
+    if (!apiKey && localStorage.getItem('beast_plan') === 'FREE') {
+        return alert("FREE users must provide an API Key!");
+    }
     if (!prompt) return alert("Please tell BEAST what to create!");
 
     const aiText = document.getElementById('ai-btn-text');
@@ -194,7 +197,7 @@ async function generateWithAI() {
         const response = await fetch('/api/generate-logo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, apiKey, provider, model })
+            body: JSON.stringify({ prompt, apiKey, provider, model, username })
         });
         const data = await response.json();
 
@@ -202,10 +205,11 @@ async function generateWithAI() {
             const resultText = data.choices[0].message.content;
             textInput.value = resultText.substring(0, 30);
             render();
+            syncUserStatus(); // Refresh credits
             alert("AI Design Idea Received!");
-            closeAIModal(); // Auto-close on success
+            closeAIModal();
         } else {
-            alert("AI Response Error. Check your API key.");
+            alert("Error: " + (data.message || "AI Response Error"));
         }
     } catch (e) {
         alert("AI Offline. Please check your connection.");
@@ -244,61 +248,91 @@ async function beastBackendLogin() {
     }
 }
 
-function updateUserUI(user, plan) {
+async function syncUserStatus() {
+    const user = localStorage.getItem('beast_user');
+    if (!user) return;
+    try {
+        const res = await fetch('/api/user-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            updateUserUI(user, data.plan, data.credits);
+            localStorage.setItem('beast_plan', data.plan);
+            localStorage.setItem('beast_credits', data.credits);
+        }
+    } catch (e) { console.warn("Status Sync Failed"); }
+}
+
+function updateUserUI(user, plan, credits = 0) {
     const btn = document.getElementById('main-login-btn');
     const display = document.getElementById('user-display');
-    const color = plan === 'PRO' ? '#fbbf24' : '#6366f1';
+    const badge = document.getElementById('credit-badge');
+    const creditCount = document.getElementById('user-credits');
+    const upgradeBtn = document.getElementById('upgrade-btn');
+    const adBars = document.querySelectorAll('.sponsored-bar, .ad-container');
 
-    if (display) {
-        display.innerHTML = `<span style="color:${color};">●</span> ${user}`;
+    const color = (plan === 'PRO' || plan === 'BEAST') ? '#fbbf24' : '#6366f1';
+
+    if (display) display.innerHTML = `<span style="color:${color};">●</span> ${user}`;
+    if (creditCount) creditCount.innerText = credits;
+    if (badge) badge.style.display = 'block';
+
+    // Hide Ads for Premium Users
+    if (plan !== 'FREE') {
+        adBars.forEach(bar => bar.style.display = 'none');
+        if (upgradeBtn) upgradeBtn.innerText = 'PRO ACTIVE';
     }
 
-    if (btn) {
-        btn.innerHTML = `<i data-lucide="shield-check" size="18" style="vertical-align:middle;"></i> ${plan} MODE`;
-    }
     lucide.createIcons();
 }
 
-async function saveToBeastServer() {
-    const imgData = canvas.toDataURL('image/png');
-    const name = textInput.value || "beast_design";
-    const username = localStorage.getItem('beast_user') || "Guest";
+window.openPricingModal = () => document.getElementById('pricing-modal').style.display = 'flex';
+window.closePricingModal = () => document.getElementById('pricing-modal').style.display = 'none';
 
-    // 1. Mandatory Local Download
-    const link = document.createElement('a');
-    link.download = `${name}-${Date.now()}.png`;
-    link.href = imgData;
-    link.click();
+async function buyPlan(planType) {
+    const user = localStorage.getItem('beast_user');
+    if (!user) return alert("Please login first!");
 
-    // 2. Optional Server Save
-    try {
-        const response = await fetch('/api/save-design', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: imgData, name, username })
-        });
-        const data = await response.json();
-        if (data.status === 'success') {
-            console.log("Design saved to server:", data.file);
-        }
-    } catch (e) {
-        console.warn("Backend offline. Design preserved locally.");
+    const res = await fetch('/api/buy-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, plan: planType })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        alert(data.message);
+        closePricingModal();
+        syncUserStatus();
     }
 }
 
-window.onGoogleSignIn = (resp) => {
-    // Decoding JWT from Google (Simple version for display)
+window.onGoogleSignIn = async (resp) => {
     try {
-        const payload = JSON.parse(atob(resp.credential.split('.')[1]));
-        console.log("Beast Authenticated:", payload.name);
+        // Robust JWT Decoding
+        const base64Url = resp.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        const payload = JSON.parse(jsonPayload);
+
+        // Auto-Register/Login on Backend
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: payload.name })
+        });
+        const data = await res.json();
 
         localStorage.setItem('beast_user', payload.name);
-        localStorage.setItem('beast_plan', 'FREE');
-        updateUserUI(payload.name, 'FREE');
-
-        alert(`Welcome, ${payload.name}! You are now in the Studio.`);
+        syncUserStatus();
+        window.location.href = '/';
     } catch (e) {
-        console.error("Google Auth Error:", e);
+        console.error("Auth System Error:", e);
     }
 };
 

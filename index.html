@@ -43,8 +43,15 @@
                 <!-- Dynamic Auth UI will be handled by index.js -->
                 <div id="auth-ui-container" style="display: flex; align-items: center; gap: 15px;">
                     <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
+                    <div id="credit-badge"
+                        style="background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; padding: 4px 10px; border-radius: 8px; font-size: 12px; color: #fbbf24; font-weight: 700; display: none;">
+                        <i data-lucide="coins" size="14" style="vertical-align: middle;"></i> <span
+                            id="user-credits">0</span>
+                    </div>
                     <div id="user-display" style="color: var(--text-secondary); font-size: 14px; font-weight: 600;">
                     </div>
+                    <button class="btn-premium" onclick="openPricingModal()" id="upgrade-btn"
+                        style="padding: 6px 15px; font-size: 11px;">UPGRADE</button>
                 </div>
             </div>
         </nav>
@@ -178,6 +185,66 @@
             <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-YOUR_ADSENSE_ID"
                 data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <!-- Beast Pricing Modal -->
+        <div id="pricing-modal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:4000; align-items:center; justify-content:center; backdrop-filter:blur(15px);">
+            <div
+                style="background:var(--bg-card); width:95%; max-width:800px; padding:2rem; border-radius:30px; border:1px solid var(--glass-border); text-align:center;">
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Choose Your <span
+                        style="color:var(--primary)">BEAST</span> Power</h2>
+                <p style="color:var(--text-secondary); margin-bottom: 2.5rem;">Unlock no-ads, internal AI, and massive
+                    credits.</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                    <!-- Free Plan -->
+                    <div
+                        style="background: var(--glass); padding: 2rem; border-radius: 20px; border: 1px solid var(--glass-border);">
+                        <h3>FREE</h3>
+                        <div style="font-size: 2rem; margin: 1rem 0;">$0</div>
+                        <ul
+                            style="list-style: none; text-align: left; font-size: 13px; color: var(--text-secondary); margin-bottom: 2rem;">
+                            <li>• Own API Key needed</li>
+                            <li>• Contains Ads</li>
+                            <li>• 10 Free Credits</li>
+                        </ul>
+                        <button class="btn-premium" style="background: grey; width: 100%;" disabled>CURRENT</button>
+                    </div>
+
+                    <!-- PRO Plan -->
+                    <div
+                        style="background: rgba(99, 102, 241, 0.1); padding: 2rem; border-radius: 20px; border: 2px solid var(--primary); transform: scale(1.05);">
+                        <h3 style="color:var(--primary)">PRO</h3>
+                        <div style="font-size: 2rem; margin: 1rem 0;">$19</div>
+                        <ul
+                            style="list-style: none; text-align: left; font-size: 13px; color: var(--text-secondary); margin-bottom: 2rem;">
+                            <li>• <b>No Ads</b></li>
+                            <li>• <b>No API Key Needed</b></li>
+                            <li>• 300 Beast Credits</li>
+                        </ul>
+                        <button class="btn-premium" style="width: 100%;" onclick="buyPlan('PRO')">UPGRADE PRO</button>
+                    </div>
+
+                    <!-- BEAST Plan -->
+                    <div
+                        style="background: rgba(236, 72, 153, 0.1); padding: 2rem; border-radius: 20px; border: 1px solid var(--secondary);">
+                        <h3 style="color:var(--secondary)">BEAST</h3>
+                        <div style="font-size: 2rem; margin: 1rem 0;">$49</div>
+                        <ul
+                            style="list-style: none; text-align: left; font-size: 13px; color: var(--text-secondary); margin-bottom: 2rem;">
+                            <li>• Ultra Low AI Cost</li>
+                            <li>• Priority Server</li>
+                            <li>• 1000 Beast Credits</li>
+                        </ul>
+                        <button class="btn-premium" style="background: var(--secondary); width: 100%;"
+                            onclick="buyPlan('BEAST')">GO BEAST</button>
+                    </div>
+                </div>
+                <button onclick="closePricingModal()"
+                    style="margin-top: 2rem; background: transparent; border: none; color: white; cursor: pointer; opacity: 0.6;">Close
+                    for now</button>
+            </div>
         </div>
 
         <!-- Beast AI Assistant Modal -->
