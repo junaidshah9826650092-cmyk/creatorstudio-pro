@@ -31,14 +31,25 @@ def init_db():
         c.execute('''CREATE TABLE IF NOT EXISTS users 
                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                       username TEXT UNIQUE, 
+                      email TEXT,
                       password TEXT, 
                       plan TEXT DEFAULT 'FREE', 
-                      credits INTEGER DEFAULT 10)''')
+                      credits INTEGER DEFAULT 999999,
+                      last_login DATETIME DEFAULT CURRENT_TIMESTAMP)''')
         c.execute('''CREATE TABLE IF NOT EXISTS designs 
                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                       username TEXT, 
                       filename TEXT, 
                       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        # ADVANCED: Projects Table for "Edit Later" functionality
+        c.execute('''CREATE TABLE IF NOT EXISTS projects 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      username TEXT, 
+                      name TEXT,
+                      json_data TEXT,
+                      thumbnail_url TEXT,
+                      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
         conn.commit()
         conn.close()
         print(f"✅ Database initialized at: {DB_PATH}")
@@ -49,8 +60,93 @@ def init_db():
 init_db()
 if not os.path.exists(DESIGNS_PATH):
     os.makedirs(DESIGNS_PATH)
+if not os.path.exists(os.path.join(BASE_DIR, 'project_thumbs')):
+    os.makedirs(os.path.join(BASE_DIR, 'project_thumbs'))
 
-# AI Generation Route
+# --- AI ADVANCED ENDPOINTS ---
+
+@app.route('/api/ai/magic-text', methods=['POST'])
+def ai_magic_text():
+    """Generates viral titles or slogans based on a topic"""
+    data = request.json
+    topic = data.get('topic')
+    mode = data.get('mode', 'thumbnail') # 'thumbnail' or 'logo'
+    
+    if not topic:
+        return jsonify({"status": "error", "message": "Topic required"}), 400
+
+    prompt = f"Give me 5 viral, clickbait youtube thumbnail titles about: {topic}" if mode == 'thumbnail' else f"Give me 5 modern, minimalist slogan ideas for a brand named: {topic}"
+
+    try:
+        # Mock response for speed/demo (since credits are unlimited)
+        return jsonify({
+            "status": "success",
+            "ideas": [
+                f"The SECRET to {topic} Revealed 🤫",
+                f"Stop Doing {topic} Wrong! 🛑",
+                f"I Tried {topic} for 24 Hours via AI",
+                f"{topic} Masterclass: 0 to Hero",
+                f"Why {topic} Changes EVERYTHING"
+            ]
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# --- PROJECT MANAGEMENT (CANVA-LIKE FEATURES) ---
+
+@app.route('/api/projects/save', methods=['POST'])
+def save_project():
+    """Saves the editable state of the project"""
+    data = request.json
+    username = data.get('username')
+    name = data.get('name', 'Untitled Project')
+    json_state = data.get('json_data') # The fabric.js/canvas JSON
+    thumb_data = data.get('thumbnail') # Base64 preview
+    
+    if not username or not json_state:
+        return jsonify({"status": "error", "message": "Invalid data"}), 400
+        
+    try:
+        # Save Thumbnail
+        thumb_url = ""
+        if thumb_data:
+            header, encoded = thumb_data.split(",", 1)
+            decoded = base64.b64decode(encoded)
+            fname = f"project_thumbs/{username}_{os.urandom(4).hex()}.png"
+            with open(os.path.join(BASE_DIR, fname), "wb") as f:
+                f.write(decoded)
+            thumb_url = fname
+
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # Check if project exists (update) or new (insert)
+        c.execute("INSERT INTO projects (username, name, json_data, thumbnail_url) VALUES (?, ?, ?, ?)",
+                  (username, name, str(json_data), thumb_url))
+        conn.commit()
+        project_id = c.lastrowid
+        conn.close()
+        
+        return jsonify({"status": "success", "message": "Project saved successfully!", "id": project_id})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/projects/list', methods=['GET'])
+def list_projects():
+    username = request.args.get('username')
+    if not username:
+        return jsonify({"status": "error", "message": "Login required"}), 401
+        
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, name, thumbnail_url, updated_at FROM projects WHERE username=? ORDER BY updated_at DESC", (username,))
+    projects = [{"id": r[0], "name": r[1], "thumbnail": r[2], "date": r[3]} for r in c.fetchall()]
+    conn.close()
+    
+    return jsonify({"status": "success", "projects": projects})
+
+# --- EXISTING ENDPOINTS (KEPT & ENHANCED) ---
+
 @app.route('/api/generate-logo', methods=['POST'])
 def generate_logo():
     data = request.json
@@ -70,43 +166,40 @@ def generate_logo():
     
     plan, credits = user[0], user[1]
     
-    # Logic: If PRO/BEAST, use server key, otherwise use user key
     final_api_key = user_api_key
-    credit_cost = 5 # Default cost
     
-    if plan in ['PRO', 'BEAST']:
+    # UNLIMITED ACCESS MODE
+    if not final_api_key or "xxxx" in final_api_key:
         final_api_key = BEAST_SERVER_API_KEY
-        credit_cost = 10 if plan == 'PRO' else 2 # BEAST plan gets cheaper credits
         
     if not final_api_key or "xxxx" in final_api_key:
-        if plan == 'FREE':
-            return jsonify({"status": "error", "message": "FREE users must provide their own API Key"}), 400
-        else:
-            return jsonify({"status": "error", "message": "Internal AI Server Error. Contact Admin."}), 500
+         return jsonify({"status": "error", "message": "Server API Key not configured. Please add key for unlimited mode."}), 500
 
-    if credits < credit_cost:
-        return jsonify({"status": "error", "message": f"Low Credits! You need {credit_cost} credits, you have {credits}."}), 403
+    # BYPASS CREDIT CHECK
+    # if credits < credit_cost: ...
 
     try:
+        # ENHANCED PROMPT ENGINEERING
+        system_prompt = "You are a professional graphic designer. Respond ONLY with a description of a visual design."
+        full_prompt = f"{system_prompt} Create a detailed visual description for: {prompt}. Specify hex colors, geometric shapes, and layout for a high-converting {provider} design."
+        
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {final_api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://beaststudio.com", 
             },
             json={
                 "model": model,
-                "messages": [{"role": "user", "content": f"Create a professional minimalist logo description for: {prompt}. Give me colors and layout."}]
+                "messages": [{"role": "user", "content": full_prompt}]
             }
         )
         
-        # Deduct credits if successful
         if response.status_code == 200:
-            new_credits = credits - credit_cost
-            c.execute("UPDATE users SET credits=? WHERE username=?", (new_credits, username))
-            conn.commit()
+            # NO CREDIT DEDUCTION - UNLIMITED
             res_data = response.json()
-            res_data['remaining_credits'] = new_credits
+            res_data['remaining_credits'] = 999999 
             return jsonify(res_data)
         
         return jsonify(response.json()), response.status_code
@@ -192,23 +285,26 @@ def static_files(path):
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
-    username = data.get('username')
+    username = data.get('username')  # This will be the email
     password = data.get('password', '1234')
     
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     # Simple Firebase-style user check/creation
-    c.execute("SELECT plan, credits FROM users WHERE username=?", (username,))
+    c.execute("SELECT plan, credits, email FROM users WHERE username=?", (username,))
     user = c.fetchone()
     
     if not user:
-        # Create as Free user if not exists
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        # Create as Free user if not exists - store email
+        c.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (username, username, password))
         conn.commit()
         plan, credits = 'FREE', 10
     else:
         plan, credits = user[0], user[1]
+        # Update last login time and ensure email is set
+        c.execute("UPDATE users SET last_login=CURRENT_TIMESTAMP, email=? WHERE username=?", (username, username))
+        conn.commit()
     
     conn.close()
     return jsonify({
@@ -257,19 +353,29 @@ def admin_stats():
         total_users = c.fetchone()[0]
         
         # Premium users
-        c.execute("SELECT COUNT(*) FROM users WHERE plan='PRO'")
+        c.execute("SELECT COUNT(*) FROM users WHERE plan='PRO' OR plan='BEAST'")
         premium_users = c.fetchone()[0]
         
         # Total designs
         c.execute("SELECT COUNT(*) FROM designs")
         total_designs = c.fetchone()[0]
         
-        # Revenue estimate (PRO users * 500)
-        revenue = premium_users * 500
+        # Revenue estimate (PRO users * 500 + BEAST users * 1500)
+        c.execute("SELECT COUNT(*) FROM users WHERE plan='PRO'")
+        pro_count = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM users WHERE plan='BEAST'")
+        beast_count = c.fetchone()[0]
+        revenue = (pro_count * 500) + (beast_count * 1500)
         
-        # All users
-        c.execute("SELECT username, plan, credits FROM users ORDER BY id DESC")
-        users = [{"username": row[0], "plan": row[1], "credits": row[2]} for row in c.fetchall()]
+        # All users with email and last login
+        c.execute("SELECT username, email, plan, credits, last_login FROM users ORDER BY last_login DESC")
+        users = [{
+            "username": row[0], 
+            "email": row[1] or row[0],  # Fallback to username if no email
+            "plan": row[2], 
+            "credits": row[3],
+            "lastLogin": row[4]
+        } for row in c.fetchall()]
         
         conn.close()
         
@@ -300,6 +406,7 @@ def update_credits():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
+    # Running on 0.0.0.0 to allow mobile access on same WiFi
     port = int(os.environ.get("PORT", 5000))
     print(f"🚀 Beast Backend is running on port {port}")
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)

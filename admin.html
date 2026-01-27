@@ -78,20 +78,23 @@
 
         <!-- Users Table -->
         <div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px;">
-            <h2 style="margin: 0 0 20px 0;">All Users</h2>
+            <h2 style="margin: 0 0 20px 0;">All Registered Users</h2>
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Email / Gmail
+                            </th>
                             <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Username</th>
                             <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Plan</th>
                             <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Credits</th>
+                            <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Last Login</th>
                             <th style="padding: 15px; text-align: left; color: var(--text-secondary);">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="users-table">
                         <tr>
-                            <td colspan="4" style="padding: 30px; text-align: center; color: var(--text-secondary);">
+                            <td colspan="6" style="padding: 30px; text-align: center; color: var(--text-secondary);">
                                 Loading...</td>
                         </tr>
                     </tbody>
@@ -125,25 +128,40 @@
                 document.getElementById('total-designs').textContent = data.totalDesigns || 0;
                 document.getElementById('total-revenue').textContent = '₹' + (data.revenue || 0);
 
-                // Load Users
+                // Load Users with Email and Last Login
                 const usersTable = document.getElementById('users-table');
                 if (data.users && data.users.length > 0) {
-                    usersTable.innerHTML = data.users.map(user => `
+                    usersTable.innerHTML = data.users.map(user => {
+                        // Format last login
+                        const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never';
+                        // Determine plan color
+                        const planColor = user.plan === 'BEAST' ? '#fbbf24' : user.plan === 'PRO' ? '#6366f1' : '#374151';
+                        // Highlight admin email
+                        const isAdmin = user.email === 'junaidshah78634@gmail.com';
+                        const emailStyle = isAdmin ? 'color: #fbbf24; font-weight: 700;' : '';
+
+                        return `
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px; ${emailStyle}">
+                                ${isAdmin ? '🛡️ ' : ''}${user.email}
+                            </td>
                             <td style="padding: 15px;">${user.username}</td>
                             <td style="padding: 15px;">
-                                <span style="background: ${user.plan === 'PRO' ? '#6366f1' : '#374151'}; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem;">
+                                <span style="background: ${planColor}; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem;">
                                     ${user.plan}
                                 </span>
                             </td>
                             <td style="padding: 15px;">${user.credits}</td>
+                            <td style="padding: 15px; color: var(--text-secondary); font-size: 0.85rem;">
+                                ${lastLogin}
+                            </td>
                             <td style="padding: 15px;">
                                 <button class="btn-premium" style="padding: 8px 16px; font-size: 0.85rem;" onclick="editUser('${user.username}')">Edit</button>
                             </td>
                         </tr>
-                    `).join('');
+                    `}).join('');
                 } else {
-                    usersTable.innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: var(--text-secondary);">No users yet</td></tr>';
+                    usersTable.innerHTML = '<tr><td colspan="6" style="padding: 30px; text-align: center; color: var(--text-secondary);">No users yet</td></tr>';
                 }
             } catch (err) {
                 console.error('Admin load error:', err);
