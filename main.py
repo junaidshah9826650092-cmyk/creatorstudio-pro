@@ -154,6 +154,19 @@ def privacy():
 def terms():
     return send_from_directory(BASE_DIR, 'terms.html')
 
+# Explicit SEO and AdSense Routes
+@app.route('/ads.txt')
+def ads_txt():
+    return send_from_directory(BASE_DIR, 'ads.txt')
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(BASE_DIR, 'robots.txt')
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    return send_from_directory(BASE_DIR, 'sitemap.xml')
+
 @app.route('/<path:path>')
 def static_files(path):
     return send_from_directory(BASE_DIR, path)
