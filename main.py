@@ -9,33 +9,36 @@ app = Flask(__name__, static_folder='.')
 CORS(app)
 
 # --- BEAST FIREBASE (SQLite Logic) ---
-DB_PATH = 'beast_studio.db'
+DB_PATH = os.path.join(os.getcwd(), 'beast_studio.db')
+DESIGNS_PATH = os.path.join(os.getcwd(), 'designs')
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    # Users table: name, plan (free/paid), ai_credits, joined_date
-    c.execute('''CREATE TABLE IF NOT EXISTS users 
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                  username TEXT UNIQUE, 
-                  password TEXT, 
-                  plan TEXT DEFAULT 'FREE', 
-                  credits INTEGER DEFAULT 10)''')
-    
-    # Designs table: user_id, filename, timestamp
-    c.execute('''CREATE TABLE IF NOT EXISTS designs 
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                  username TEXT, 
-                  filename TEXT, 
-                  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
-    conn.commit()
-    conn.close()
+    try:
+        print(f"Checking database at: {DB_PATH}")
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS users 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      username TEXT UNIQUE, 
+                      password TEXT, 
+                      plan TEXT DEFAULT 'FREE', 
+                      credits INTEGER DEFAULT 10)''')
+        c.execute('''CREATE TABLE IF NOT EXISTS designs 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      username TEXT, 
+                      filename TEXT, 
+                      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        conn.commit()
+        conn.close()
+        print("✅ Database initialized successfully")
+    except Exception as e:
+        print(f"❌ Database error: {str(e)}")
 
+# Initialization
 init_db()
-
-# Create storage folder
-if not os.path.exists('designs'):
-    os.makedirs('designs')
+if not os.path.exists(DESIGNS_PATH):
+    os.makedirs(DESIGNS_PATH)
+    print(f"✅ Created designs folder at: {DESIGNS_PATH}")
 
 # AI Generation Route
 @app.route('/api/generate-logo', methods=['POST'])
