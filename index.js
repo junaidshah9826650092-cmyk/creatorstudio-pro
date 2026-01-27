@@ -12,6 +12,19 @@ const presets = {
     'ios': { w: 1024, h: 1024 }
 };
 
+// Check Auth & Guard
+const savedUser = localStorage.getItem('beast_user');
+const savedPlan = localStorage.getItem('beast_plan');
+
+if (!savedUser) {
+    // Strict Guard: Redirect to login if not authenticated
+    window.location.href = '/';
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        updateUserUI(savedUser, savedPlan || 'FREE');
+    });
+}
+
 let currentType = 'yt-thumb';
 let uploadedImg = null;
 
@@ -142,13 +155,135 @@ function resetBeast() {
     render();
 }
 
-// Auth Handlers
+// AI & Backend Handlers
+function toggleModelList() {
+    const provider = document.getElementById('ai-provider').value;
+    const modelList = document.getElementById('ai-model');
+    modelList.innerHTML = '';
+
+    if (provider === 'openrouter') {
+        modelList.innerHTML = `
+            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Free</option>
+            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B Free</option>
+            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 Free</option>
+            <option value="openai/gpt-4o">GPT-4o (Pro)</option>
+        `;
+    } else if (provider === 'gemini') {
+        modelList.innerHTML = `<option value="gemini-pro">Gemini Pro</option>`;
+    } else {
+        modelList.innerHTML = `<option value="gpt-3.5-turbo">GPT-3.5 Turbo</option><option value="gpt-4">GPT-4</option>`;
+    }
+}
+
+async function generateWithAI() {
+    const prompt = textInput.value;
+    const apiKey = document.getElementById('ai-api-key').value;
+    const provider = document.getElementById('ai-provider').value;
+    const model = document.getElementById('ai-model').value;
+
+    if (!apiKey) return alert("Please enter your API Key!");
+
+    const btn = document.querySelector('button[onclick="generateWithAI()"]');
+    btn.innerHTML = '<i data-lucide="loader" class="spin"></i> THINKING...';
+    lucide.createIcons();
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/generate-logo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, apiKey, provider, model })
+        });
+        const data = await response.json();
+
+        if (data.choices && data.choices[0].message) {
+            const aiText = data.choices[0].message.content;
+            // Parse AI response to update the canvas (simple version: update text)
+            textInput.value = aiText.substring(0, 30); // Limiting for UI
+            render();
+            alert("AI Logo Idea: " + aiText);
+        } else {
+            alert("AI Response: " + JSON.stringify(data));
+        }
+    } catch (e) {
+        alert("AI Error: Check if main.py is running and your API key is valid.");
+    } finally {
+        btn.innerHTML = '<i data-lucide="sparkles" size="16"></i> AI GENERATE';
+        lucide.createIcons();
+    }
+}
+
+function openBeastLogin() {
+    document.getElementById('login-modal').style.display = 'flex';
+}
+
+async function beastBackendLogin() {
+    const username = document.getElementById('beast-user').value;
+    if (!username) return alert("Please enter a name!");
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+            document.getElementById('login-modal').style.display = 'none';
+            localStorage.setItem('beast_user', data.user);
+            localStorage.setItem('beast_plan', data.plan);
+            localStorage.setItem('beast_credits', data.credits);
+
+            updateUserUI(data.user, data.plan);
+            alert(data.message);
+        }
+    } catch (e) {
+        document.getElementById('login-modal').style.display = 'none';
+        alert("Beast Studio: Offline Mode Enabled");
+    }
+}
+
+function updateUserUI(user, plan) {
+    const btn = document.querySelector('.btn-premium');
+    const color = plan === 'PRO' ? '#fbbf24' : '#94a3b8';
+    btn.innerHTML = `<i data-lucide="shield-check" color="${color}" size="18" style="vertical-align:middle;"></i> ${user} (${plan})`;
+    lucide.createIcons();
+}
+
+async function saveToBeastServer() {
+    const imgData = canvas.toDataURL('image/png');
+    const name = textInput.value || "beast_design";
+    const username = localStorage.getItem('beast_user') || "Guest";
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/save-design', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imgData, name, username })
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert("Design saved to server: " + data.file);
+        }
+    } catch (e) {
+        alert("Backend offline. Saved to local.");
+        const link = document.createElement('a');
+        link.download = `${name}.png`;
+        link.href = imgData;
+        link.click();
+    }
+}
+
 window.onGoogleSignIn = (resp) => {
-    console.log("Beast User Authenticated");
-    alert("Google Sign-In Successful! Welcome to the Studio.");
+    console.log("Beast User Authenticated via Google");
+    alert("Google Sign-In Successful!");
 };
 
+window.openBeastLogin = openBeastLogin;
+window.beastBackendLogin = beastBackendLogin;
 window.resetBeast = resetBeast;
+
+// Update Export button to use backend if available
+exportBtn.onclick = saveToBeastServer;
 
 // Start
 window.addEventListener('resize', initBeast);

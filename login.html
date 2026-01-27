@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | BEAST STUDIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--bg-dark);
+            background-image: var(--mesh);
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: 40px;
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--grad);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .login-input {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 1rem;
+            border-radius: 16px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            border-color: var(--primary);
+        }
+
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 1rem;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .btn-google {
+            background: #fff;
+            color: #000;
+            border: none;
+        }
+
+        .btn-google:hover {
+            background: #f1f1f1;
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--glass-border);
+            margin: 0 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="login-logo">
+            <i data-lucide="zap" color="#fff" size="40"></i>
+        </div>
+        <h1>BEAST STUDIO</h1>
+        <p>Your AI-Powered Creative Hub</p>
+
+        <div class="input-group">
+            <input type="text" id="username" class="login-input" placeholder="Beast Username">
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" class="login-input" placeholder="Secure Password">
+        </div>
+
+        <button class="btn-premium" style="width: 100%; height: 55px; font-size: 1.1rem;" onclick="handleLogin()">
+            ENTER THE STUDIO
+        </button>
+
+        <div class="divider">OR CONTINUE WITH</div>
+
+        <div class="social-login">
+            <div class="social-btn btn-google" onclick="location.href='index.html'">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20"
+                    alt="Google">
+                Sign in with Google
+            </div>
+            <div class="social-btn">
+                <i data-lucide="github" size="20"></i>
+                Sign in with GitHub
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <span style="color:var(--text-secondary); font-size: 0.9rem;">New Creator?</span>
+            <a href="#" style="color:var(--primary); font-weight: 600; text-decoration: none; margin-left: 5px;">Join
+                the Pride</a>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        async function handleLogin() {
+            const username = document.getElementById('username').value;
+            if (!username) return alert("Please enter your name, Beast!");
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    localStorage.setItem('beast_user', data.user);
+                    localStorage.setItem('beast_plan', data.plan);
+                    localStorage.setItem('beast_credits', data.credits);
+                    window.location.href = '/studio';
+                }
+            } catch (e) {
+                // Local fallback dev mode
+                localStorage.setItem('beast_user', username);
+                window.location.href = '/studio';
+            }
+        }
+    </script>
+</body>
+
+</html>

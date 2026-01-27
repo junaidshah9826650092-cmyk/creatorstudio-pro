@@ -32,18 +32,36 @@
             </div>
 
             <div class="auth-stack">
-                <!-- Check if Client ID exists, otherwise show premium fallback -->
                 <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID_GOES_HERE" data-context="signin"
                     data-ux_mode="popup" data-callback="onGoogleSignIn" data-auto_prompt="false">
                 </div>
                 <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
 
-                <button class="btn-premium" onclick="alert('Welcome Master! Your Beast Studio is ready.')">
-                    <i data-lucide="crown" size="18" style="vertical-align: middle; margin-right: 6px;"></i>
-                    PRO ACCESS
+                <button class="btn-premium" onclick="openBeastLogin()">
+                    <i data-lucide="user-check" size="18" style="vertical-align: middle; margin-right: 6px;"></i>
+                    BEAST LOGIN
                 </button>
             </div>
         </nav>
+
+        <!-- Beast Login Modal -->
+        <div id="login-modal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
+            <div
+                style="background:var(--bg-card); padding:2.5rem; border-radius:30px; border:1px solid var(--glass-border); width:400px; text-align:center;">
+                <i data-lucide="shield-check" color="var(--primary)" size="50" style="margin-bottom:1rem;"></i>
+                <h2 style="margin-bottom:1rem;">Beast Authentication</h2>
+                <p style="color:var(--text-secondary); margin-bottom:1.5rem; font-size:14px;">Google login failing? Use
+                    your Beast Username to bypass the 400 error.</p>
+                <input type="text" id="beast-user" placeholder="Enter Beast Name..." class="input-box"
+                    style="background:var(--glass); border:1px solid var(--glass-border); padding:12px; border-radius:12px; width:100%; color:white; margin-bottom:1.5rem;">
+                <button class="btn-premium" style="width:100%;" onclick="beastBackendLogin()">ENTER STUDIO</button>
+                <div style="margin-top:1rem;">
+                    <a href="#" onclick="document.getElementById('login-modal').style.display='none'"
+                        style="color:var(--text-secondary); font-size:12px; text-decoration:none;">Cancel</a>
+                </div>
+            </div>
+        </div>
 
         <section class="workspace">
             <!-- Sidebar -->
@@ -87,6 +105,31 @@
                             <input type="color" id="text-color" value="#ffffff" class="color-input">
                         </div>
                     </div>
+                </div>
+
+                <div class="control-group">
+                    <span class="section-label">AI Control Panel</span>
+                    <div class="input-wrapper">
+                        <select id="ai-provider" class="input-box" onchange="toggleModelList()">
+                            <option value="openrouter">OpenRouter (Free/Pro)</option>
+                            <option value="gemini">Google Gemini</option>
+                            <option value="openai">OpenAI</option>
+                        </select>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="password" id="ai-api-key" class="input-box" placeholder="Enter API Key...">
+                    </div>
+                    <div class="input-wrapper">
+                        <select id="ai-model" class="input-box">
+                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Free</option>
+                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B Free</option>
+                            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        </select>
+                    </div>
+                    <button class="btn-premium" style="width:100%; border-radius:12px; height:45px;"
+                        onclick="generateWithAI()">
+                        <i data-lucide="sparkles" size="16"></i> AI GENERATE
+                    </button>
                 </div>
 
                 <div class="control-group">
