@@ -177,14 +177,24 @@
         lucide.createIcons();
         window.onGoogleSignIn = (resp) => {
             try {
-                const payload = JSON.parse(atob(resp.credential.split('.')[1]));
+                // Robust JWT Decoding
+                const base64Url = resp.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const payload = JSON.parse(jsonPayload);
+                console.log("Beast Authenticated:", payload.name);
+
                 localStorage.setItem('beast_user', payload.name);
                 localStorage.setItem('beast_plan', 'FREE');
-                const studioPage = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') ? '/studio' : 'index.html';
-                window.location.href = studioPage;
+
+                // Absolute Redirect to Studio
+                window.location.href = window.location.origin + '/index.html';
             } catch (e) {
                 console.error("Google Auth Error:", e);
-                alert("Login failed. Try Guest mode.");
+                alert("Login Error. Please try again or use another browser.");
             }
         };
 

@@ -112,39 +112,7 @@
                     </div>
                 </div>
 
-                <div class="control-group">
-                    <span class="section-label">AI Control Panel</span>
-                    <!-- Sidebar Banner Ad -->
-                    <div class="ad-container"
-                        style="margin-bottom: 1rem; border: 1px dashed var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.1);">
-                        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-YOUR_ADSENSE_ID"
-                            data-ad-slot="SIDEBAR_AD_ID" data-ad-format="auto" data-full-width-responsive="true"></ins>
-                    </div>
-
-                    <div class="input-wrapper">
-                        <select id="ai-provider" class="input-box" onchange="toggleModelList()">
-                            <option value="openrouter">OpenRouter (Free/Pro)</option>
-                            <option value="gemini">Google Gemini</option>
-                            <option value="openai">OpenAI</option>
-                        </select>
-                    </div>
-                    <div class="input-wrapper">
-                        <input type="password" id="ai-api-key" class="input-box" placeholder="Enter API Key...">
-                    </div>
-                    <div class="input-wrapper">
-                        <select id="ai-model" class="input-box">
-                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Free</option>
-                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B Free</option>
-                            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                        </select>
-                    </div>
-                    <button class="btn-premium"
-                        style="width:100%; border-radius:12px; height:45px; background: var(--grad); position: relative; overflow: hidden;"
-                        onclick="generateWithAI()">
-                        <i data-lucide="sparkles" size="16"></i>
-                        <span id="ai-btn-text">AI GENERATE</span>
-                    </button>
-                </div>
+                <!-- AI Section removed from sidebar and moved to separate Modal -->
 
                 <div class="control-group">
                     <span class="section-label">Environment</span>
@@ -180,6 +148,10 @@
 
                 <!-- Floating Tools -->
                 <div class="toolbar">
+                    <div class="tool-item" onclick="openAIModal()">
+                        <i data-lucide="sparkles" style="color:var(--secondary)"></i>
+                        <span>AI Beast</span>
+                    </div>
                     <div class="tool-item" onclick="addGraphic('square')">
                         <i data-lucide="square"></i>
                         <span>Shapes</span>
@@ -206,6 +178,52 @@
             <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-YOUR_ADSENSE_ID"
                 data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <!-- Beast AI Assistant Modal -->
+        <div id="ai-modal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+            <div
+                style="background:var(--bg-card); width:90%; max-width:500px; padding:2rem; border-radius:24px; border:1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                    <h2 style="display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="brain-circuit" color="var(--secondary)"></i>
+                        AI Assistant
+                    </h2>
+                    <i data-lucide="x" style="cursor:pointer; opacity:0.6;" onclick="closeAIModal()"></i>
+                </div>
+
+                <div class="control-group">
+                    <span class="section-label">AI Configuration</span>
+                    <div class="input-wrapper">
+                        <select id="ai-provider" class="input-box">
+                            <option value="openrouter">OpenRouter (Pro)</option>
+                            <option value="gemini">Google Gemini</option>
+                        </select>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="password" id="ai-api-key" class="input-box" placeholder="Your API Secret Key">
+                    </div>
+                    <div class="input-wrapper">
+                        <select id="ai-model" class="input-box">
+                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
+                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B</option>
+                        </select>
+                    </div>
+
+                    <span class="section-label" style="margin-top:1rem;">What should BEAST create?</span>
+                    <div class="input-wrapper">
+                        <textarea id="ai-prompt" class="input-box" style="height:80px; resize:none"
+                            placeholder="Describe your brand or logo idea..."></textarea>
+                    </div>
+
+                    <button class="btn-premium" style="width:100%; height:50px; margin-top:1rem;"
+                        onclick="generateWithAI()">
+                        <i data-lucide="wand-2" style="margin-right:8px;"></i>
+                        <span id="ai-btn-text">INITIALIZE GENERATION</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <footer>

@@ -12,21 +12,15 @@ const presets = {
     'ios': { w: 1024, h: 1024 }
 };
 
-// Strict Auth Guard
+// Final Strict Auth Guard
 const savedUser = localStorage.getItem('beast_user');
-const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-const loginPage = isLocal ? 'login.html' : 'login.html'; // Ensuring it always points to login.html
 
 if (!savedUser && !window.location.pathname.includes('login.html')) {
-    window.location.href = loginPage;
-} else if (savedUser === 'Guest') {
-    // Force logout if someone was a guest before
-    localStorage.removeItem('beast_user');
-    window.location.href = loginPage;
+    window.location.href = 'login.html';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (savedUser && savedUser !== 'Guest') {
+    if (savedUser) {
         updateUserUI(savedUser, localStorage.getItem('beast_plan') || 'FREE');
     }
 });
@@ -176,16 +170,25 @@ function toggleModelList() {
     }
 }
 
+window.openAIModal = () => {
+    document.getElementById('ai-modal').style.display = 'flex';
+    lucide.createIcons();
+};
+window.closeAIModal = () => {
+    document.getElementById('ai-modal').style.display = 'none';
+};
+
 async function generateWithAI() {
-    const prompt = textInput.value;
-    const apiKey = document.getElementById('ai-api-key').value;
     const provider = document.getElementById('ai-provider').value;
+    const apiKey = document.getElementById('ai-api-key').value;
     const model = document.getElementById('ai-model').value;
+    const prompt = document.getElementById('ai-prompt').value; // Updated to read from modal textarea
 
     if (!apiKey) return alert("Please enter your API Key!");
+    if (!prompt) return alert("Please tell BEAST what to create!");
 
     const aiText = document.getElementById('ai-btn-text');
-    if (aiText) aiText.innerText = 'THINKING...';
+    if (aiText) aiText.innerText = 'INITIALIZING BEAST AI...';
 
     try {
         const response = await fetch('/api/generate-logo', {
@@ -199,14 +202,15 @@ async function generateWithAI() {
             const resultText = data.choices[0].message.content;
             textInput.value = resultText.substring(0, 30);
             render();
-            alert("AI Logo Idea Generated!");
+            alert("AI Design Idea Received!");
+            closeAIModal(); // Auto-close on success
         } else {
             alert("AI Response Error. Check your API key.");
         }
     } catch (e) {
         alert("AI Offline. Please check your connection.");
     } finally {
-        if (aiText) aiText.innerText = 'AI GENERATE';
+        if (aiText) aiText.innerText = 'INITIALIZE GENERATION';
     }
 }
 

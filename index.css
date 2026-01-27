@@ -27,10 +27,9 @@ body {
     background-image: var(--mesh);
     color: var(--text-primary);
     font-family: 'Outfit', sans-serif;
-    overflow-x: hidden;
-    overflow-y: auto;
-    /* ENABLE SCROLLING */
-    min-height: 100vh;
+    overflow: hidden;
+    /* LOCK GLOBAL SCROLL */
+    height: 100vh;
     touch-action: manipulation;
 }
 
@@ -136,7 +135,9 @@ nav {
 .workspace {
     display: flex;
     flex: 1;
-    min-height: calc(100vh - 70px);
+    height: calc(100vh - 70px);
+    /* Fill remaining height */
+    overflow: hidden;
 }
 
 .sidebar {
@@ -149,6 +150,8 @@ nav {
     flex-direction: column;
     gap: 2.5rem;
     overflow-y: auto;
+    /* INDEPENDENT SCROLL */
+    height: 100%;
 }
 
 .section-label {
