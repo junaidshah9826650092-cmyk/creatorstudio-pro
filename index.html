@@ -4,321 +4,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CreatorStudio BEAST | Premium AI Design Studio</title>
+    <title>Creator Studio – Free Tools for YouTube Creators</title>
     <meta name="description"
-        content="Professional AI-powered logo and thumbnail designer. Create pro graphics in seconds with BEAST STUDIO.">
-    <meta name="keywords" content="AI logo maker, thumbnail designer, creator studio, beast mode graphics">
-    <link rel="canonical" href="https://creatorstudio-pro.onrender.com" />
+        content="Create professional logos, thumbnails, and YouTube channel graphics online for free. Best AI-powered tools for new creators.">
+    <meta name="keywords" content="logo maker, thumbnail maker, youtube tools, creator studio free, ai designer">
 
-    <!-- Beast Font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="index.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Google Login Script -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_ID"
-        crossorigin="anonymous"></script>
-
-    <!-- Logo for Search Engines (Favicon) -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="apple-touch-icon" href="favicon.svg">
-
-    <!-- Meta Tags for Search Logo & Social Sharing -->
-    <meta property="og:title" content="CreatorStudio BEAST | Premium AI Design Studio">
-    <meta property="og:description" content="Professional AI-powered logo and thumbnail designer.">
-    <meta property="og:image" content="https://creatorstudio-pro.onrender.com/favicon.svg">
-    <meta property="og:url" content="https://creatorstudio-pro.onrender.com">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://creatorstudio-pro.onrender.com/favicon.svg">
 </head>
 
-<body>
+<body style="overflow-y: auto;">
     <div class="app-container">
         <!-- Navigation -->
-        <nav>
+        <nav style="position: sticky; top:0; background: rgba(3,7,18,0.9); z-index:1000;">
             <div class="brand">
-                <div class="brand-icon">
-                    <i data-lucide="zap" color="#fff" size="24"></i>
-                </div>
+                <div class="brand-icon"><i data-lucide="zap" color="#fff" size="24"></i></div>
                 <span>BEAST<span style="color:var(--primary)">STUDIO</span></span>
             </div>
-
             <div class="auth-stack">
-                <div id="g_id_onload"
-                    data-client_id="792653327676-kn08t8c5vduqbmva15nngmrcfvuv2l60.apps.googleusercontent.com"
-                    data-context="signin" data-ux_mode="popup" data-callback="onGoogleSignIn" data-auto_prompt="false">
-                </div>
-                <!-- Dynamic Auth UI will be handled by index.js -->
-                <div id="auth-ui-container" style="display: flex; align-items: center; gap: 15px;">
-                    <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
-                    <div id="credit-badge"
-                        style="background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; padding: 4px 10px; border-radius: 8px; font-size: 12px; color: #fbbf24; font-weight: 700; display: none;">
-                        <i data-lucide="coins" size="14" style="vertical-align: middle;"></i> <span
-                            id="user-credits">0</span>
-                    </div>
-                    <div id="user-display" style="color: var(--text-secondary); font-size: 14px; font-weight: 600;">
-                    </div>
-                    <button class="btn-premium" onclick="openPricingModal()" id="upgrade-btn"
-                        style="padding: 6px 15px; font-size: 11px;">UPGRADE</button>
-                </div>
+                <button class="btn-premium" onclick="window.location.href='/studio'">START CREATING</button>
             </div>
         </nav>
 
-        <!-- Beast Login Modal -->
-        <div id="login-modal"
-            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
-            <div
-                style="background:var(--bg-card); padding:2.5rem; border-radius:30px; border:1px solid var(--glass-border); width:400px; text-align:center;">
-                <i data-lucide="shield-check" color="var(--primary)" size="50" style="margin-bottom:1rem;"></i>
-                <h2 style="margin-bottom:1rem;">Beast Authentication</h2>
-                <p style="color:var(--text-secondary); margin-bottom:1.5rem; font-size:14px;">Google login failing? Use
-                    your Beast Username to bypass the 400 error.</p>
-                <input type="text" id="beast-user" placeholder="Enter Beast Name..." class="input-box"
-                    style="background:var(--glass); border:1px solid var(--glass-border); padding:12px; border-radius:12px; width:100%; color:white; margin-bottom:1.5rem;">
-                <button class="btn-premium" style="width:100%;" onclick="beastBackendLogin()">ENTER STUDIO</button>
-                <div style="margin-top:1rem;">
-                    <a href="#" onclick="document.getElementById('login-modal').style.display='none'"
-                        style="color:var(--text-secondary); font-size:12px; text-decoration:none;">Cancel</a>
+        <!-- HERO SECTION -->
+        <header
+            style="padding: 100px 20px; text-align: center; background: radial-gradient(circle at center, rgba(99,102,241,0.15) 0%, transparent 70%);">
+            <h1
+                style="font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem;">
+                Free Tools for <br><span
+                    style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">YouTube
+                    Creators</span>
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 1.2rem; max-width: 600px; margin: 0 auto 2.5rem;">
+                Create Pro Logos, Thumbnails & Channel Assets in minutes. Powered by AI, built for the next generation
+                of creators.
+            </p>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn-premium" style="height: 60px; padding: 0 40px; font-size: 1.1rem;"
+                    onclick="window.location.href='/studio'">START CREATING NOW</button>
+                <button class="btn-premium"
+                    style="height: 60px; padding: 0 40px; font-size: 1.1rem; background: transparent; border: 1px solid var(--glass-border);"
+                    onclick="document.getElementById('tools-section').scrollIntoView({behavior:'smooth'})">EXPLORE
+                    TOOLS</button>
+            </div>
+        </header>
+
+        <!-- TOOLS SECTION -->
+        <section id="tools-section" style="padding: 80px 20px; max-width: 1200px; margin: 0 auto;">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem;">The <span
+                    style="color:var(--primary)">Beast</span> Toolkit</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                <!-- Logo Maker -->
+                <div class="preset-chip"
+                    style="padding: 40px; text-align: left; align-items: flex-start; cursor: default;">
+                    <i data-lucide="palette" color="var(--primary)" size="40" style="margin-bottom: 1.5rem;"></i>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Logo Maker</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Design minimalist and professional
+                        channel logos instantly using AI design suggestions.</p>
+                    <button class="btn-premium" style="width:100%" onclick="window.location.href='/studio'">Open
+                        Tool</button>
+                </div>
+                <!-- Thumbnail Maker -->
+                <div class="preset-chip"
+                    style="padding: 40px; text-align: left; align-items: flex-start; cursor: default;">
+                    <i data-lucide="youtube" color="#ef4444" size="40" style="margin-bottom: 1.5rem;"></i>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Thumbnail Designer</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Create eye-catching YouTube thumbnails
+                        with optimized sizes for maximum CTR.</p>
+                    <button class="btn-premium" style="width:100%" onclick="window.location.href='/studio'">Open
+                        Tool</button>
+                </div>
+                <!-- Banner Maker -->
+                <div class="preset-chip"
+                    style="padding: 40px; text-align: left; align-items: flex-start; cursor: default;">
+                    <i data-lucide="layout" color="var(--secondary)" size="40" style="margin-bottom: 1.5rem;"></i>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Banner Art</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">High-resolution channel banners that
+                        look great on TV, Desktop, and Mobile.</p>
+                    <button class="btn-premium" style="width:100%" onclick="window.location.href='/studio'">Open
+                        Tool</button>
                 </div>
             </div>
-        </div>
-
-        <section class="workspace">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div>
-                    <span class="section-label">Select Workspace</span>
-                    <div class="preset-selector">
-                        <div class="preset-chip active" data-type="yt-thumb">
-                            <i data-lucide="youtube" color="#ef4444" size="20"></i>
-                            <span>Thumbnail</span>
-                        </div>
-                        <div class="preset-chip" data-type="logo">
-                            <i data-lucide="palette" color="#6366f1" size="20"></i>
-                            <span>Pro Logo</span>
-                        </div>
-                        <div class="preset-chip" data-type="insta">
-                            <i data-lucide="instagram" color="#ec4899" size="20"></i>
-                            <span>Instagram</span>
-                        </div>
-                        <div class="preset-chip" data-type="ios">
-                            <i data-lucide="apple" color="#94a3b8" size="20"></i>
-                            <span>iOS Icon</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <span class="section-label">Typography</span>
-                    <div class="input-wrapper">
-                        <input type="text" id="editor-text" class="input-box" value="BEAST MODE"
-                            placeholder="Type here...">
-                    </div>
-
-                    <div class="row-controls">
-                        <div class="input-wrapper" style="flex: 1;">
-                            <span class="section-label" style="font-size: 0.6rem; margin: 0 0 5px 0;">Size</span>
-                            <input type="range" id="size-slider" min="20" max="300" value="100">
-                        </div>
-                        <div class="input-wrapper"
-                            style="width: 60px; display: flex; align-items: center; justify-content: center;">
-                            <input type="color" id="text-color" value="#ffffff" class="color-input">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AI Section removed from sidebar and moved to separate Modal -->
-
-                <div class="control-group">
-                    <span class="section-label">Environment</span>
-                    <div class="input-wrapper" style="margin-bottom: 10px;">
-                        <span class="section-label" style="font-size: 0.6rem; margin: 0 0 5px 0;">Background Base</span>
-                        <input type="color" id="bg-color" value="#6366f1"
-                            style="width: 100%; height: 35px; border-radius: 8px; border: none; cursor: pointer;">
-                    </div>
-                    <div class="input-wrapper">
-                        <select id="gradient-type" class="input-box">
-                            <option value="none">Solid Color</option>
-                            <option value="linear">Vibrant Linear</option>
-                            <option value="radial">Glow Radial</option>
-                            <option value="mesh">Mesh Gradient</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div style="margin-top: auto;">
-                    <button id="export-btn" class="btn-premium"
-                        style="width: 100%; height: 55px; font-size: 1rem; letter-spacing: 1px;">
-                        <i data-lucide="download-cloud" style="vertical-align: middle; margin-right: 8px;"></i>
-                        EXPORT HD
-                    </button>
-                </div>
-            </aside>
-
-            <!-- Main Viewport -->
-            <main class="viewport">
-                <div class="canvas-wrapper animate-ready">
-                    <canvas id="beast-canvas"></canvas>
-                </div>
-
-                <!-- Floating Tools -->
-                <div class="toolbar">
-                    <div class="tool-item" onclick="openAIModal()">
-                        <i data-lucide="sparkles" style="color:var(--secondary)"></i>
-                        <span>AI Beast</span>
-                    </div>
-                    <div class="tool-item" onclick="addGraphic('square')">
-                        <i data-lucide="square"></i>
-                        <span>Shapes</span>
-                    </div>
-                    <div class="tool-item" onclick="document.getElementById('upload-input').click()">
-                        <i data-lucide="image-plus"></i>
-                        <span>Upload</span>
-                    </div>
-                    <div class="tool-item" onclick="resetBeast()">
-                        <i data-lucide="rotate-ccw"></i>
-                        <span>Reset</span>
-                    </div>
-                    <div class="tool-item">
-                        <i data-lucide="layers-3"></i>
-                        <span>Layers</span>
-                    </div>
-                </div>
-                <input type="file" id="upload-input" hidden accept="image/*">
-            </main>
         </section>
 
-        <!-- Bottom Ad Spot -->
-        <div class="sponsored-bar">
-            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-YOUR_ADSENSE_ID"
-                data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="auto" data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-
-        <!-- Beast Pricing Modal -->
-        <div id="pricing-modal"
-            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:4000; align-items:center; justify-content:center; backdrop-filter:blur(15px);">
+        <!-- WHY CHOOSE US -->
+        <section style="background: rgba(255,255,255,0.02); padding: 80px 20px;">
             <div
-                style="background:var(--bg-card); width:95%; max-width:800px; padding:2rem; border-radius:30px; border:1px solid var(--glass-border); text-align:center;">
-                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Choose Your <span
-                        style="color:var(--primary)">BEAST</span> Power</h2>
-                <p style="color:var(--text-secondary); margin-bottom: 2.5rem;">Unlock no-ads, internal AI, and massive
-                    credits.</p>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-                    <!-- Free Plan -->
-                    <div
-                        style="background: var(--glass); padding: 2rem; border-radius: 20px; border: 1px solid var(--glass-border);">
-                        <h3>FREE</h3>
-                        <div style="font-size: 2rem; margin: 1rem 0;">$0</div>
-                        <ul
-                            style="list-style: none; text-align: left; font-size: 13px; color: var(--text-secondary); margin-bottom: 2rem;">
-                            <li>• Own API Key needed</li>
-                            <li>• Contains Ads</li>
-                            <li>• 10 Free Credits</li>
-                        </ul>
-                        <button class="btn-premium" style="background: grey; width: 100%;" disabled>CURRENT</button>
-                    </div>
-
-                    <!-- PRO Plan -->
-                    <div
-                        style="background: rgba(99, 102, 241, 0.1); padding: 2rem; border-radius: 20px; border: 2px solid var(--primary); transform: scale(1.05);">
-                        <h3 style="color:var(--primary)">PRO</h3>
-                        <div style="font-size: 2rem; margin: 1rem 0;">$19</div>
-                        <ul
-                            style="list-style: none; text-align: left; font-size: 13px; color: var(--text-secondary); margin-bottom: 2rem;">
-                            <li>• <b>No Ads</b></li>
-                            <li>• <b>No API Key Needed</b></li>
-                            <li>• 300 Beast Credits</li>
-                        </ul>
-                        <button class="btn-premium" style="width: 100%;" onclick="buyPlan('PRO')">UPGRADE PRO</button>
-                    </div>
-
-                    <!-- BEAST Plan -->
-                    <div
-                        style="background: rgba(236, 72, 153, 0.1); padding: 2rem; border-radius: 20px; border: 1px solid var(--secondary);">
-                        <h3 style="color:var(--secondary)">BEAST</h3>
-                        <div style="font-size: 2rem; margin: 1rem 0;">$49</div>
-                        <ul
-                            style="list-style: none; text-align: left; font-size: 13px; color: var(--text-secondary); margin-bottom: 2rem;">
-                            <li>• Ultra Low AI Cost</li>
-                            <li>• Priority Server</li>
-                            <li>• 1000 Beast Credits</li>
-                        </ul>
-                        <button class="btn-premium" style="background: var(--secondary); width: 100%;"
-                            onclick="buyPlan('BEAST')">GO BEAST</button>
-                    </div>
+                style="max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center;">
+                <div>
+                    <h4 style="font-size: 1.5rem; margin-bottom:0.5rem; color:var(--primary)">100% FREE</h4>
+                    <p style="color:var(--text-secondary); font-size:14px;">No hidden charges, use forever.</p>
                 </div>
-                <button onclick="closePricingModal()"
-                    style="margin-top: 2rem; background: transparent; border: none; color: white; cursor: pointer; opacity: 0.6;">Close
-                    for now</button>
-            </div>
-        </div>
-
-        <!-- Beast AI Assistant Modal -->
-        <div id="ai-modal"
-            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
-            <div
-                style="background:var(--bg-card); width:90%; max-width:500px; padding:2rem; border-radius:24px; border:1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-                    <h2 style="display:flex; align-items:center; gap:10px;">
-                        <i data-lucide="brain-circuit" color="var(--secondary)"></i>
-                        AI Assistant
-                    </h2>
-                    <i data-lucide="x" style="cursor:pointer; opacity:0.6;" onclick="closeAIModal()"></i>
+                <div>
+                    <h4 style="font-size: 1.5rem; margin-bottom:0.5rem; color:var(--primary)">NO SIGNUP</h4>
+                    <p style="color:var(--text-secondary); font-size:14px;">Instant access to the editor.</p>
                 </div>
-
-                <div class="control-group">
-                    <span class="section-label">AI Configuration</span>
-                    <div class="input-wrapper">
-                        <select id="ai-provider" class="input-box">
-                            <option value="openrouter">OpenRouter (Pro)</option>
-                            <option value="gemini">Google Gemini</option>
-                        </select>
-                    </div>
-                    <div class="input-wrapper">
-                        <input type="password" id="ai-api-key" class="input-box" placeholder="Your API Secret Key">
-                    </div>
-                    <div class="input-wrapper">
-                        <select id="ai-model" class="input-box">
-                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
-                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B</option>
-                        </select>
-                    </div>
-
-                    <span class="section-label" style="margin-top:1rem;">What should BEAST create?</span>
-                    <div class="input-wrapper">
-                        <textarea id="ai-prompt" class="input-box" style="height:80px; resize:none"
-                            placeholder="Describe your brand or logo idea..."></textarea>
-                    </div>
-
-                    <button class="btn-premium" style="width:100%; height:50px; margin-top:1rem;"
-                        onclick="generateWithAI()">
-                        <i data-lucide="wand-2" style="margin-right:8px;"></i>
-                        <span id="ai-btn-text">INITIALIZE GENERATION</span>
-                    </button>
+                <div>
+                    <h4 style="font-size: 1.5rem; margin-bottom:0.5rem; color:var(--primary)">FAST EXPORT</h4>
+                    <p style="color:var(--text-secondary); font-size:14px;">Download high-res PNGs instantly.</p>
+                </div>
+                <div>
+                    <h4 style="font-size: 1.5rem; margin-bottom:0.5rem; color:var(--primary)">AI POWERED</h4>
+                    <p style="color:var(--text-secondary); font-size:14px;">Smart design suggestions.</p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <footer>
+        <!-- ABOUT SECTION -->
+        <section style="padding: 80px 20px; max-width: 800px; margin: 0 auto; text-align: center;">
+            <h2 style="margin-bottom: 1.5rem;">About <span style="color:var(--primary)">Creator Studio</span></h2>
+            <p style="color: var(--text-secondary); line-height: 1.8; font-size: 1.1rem;">
+                Creator Studio is a free platform built to help new YouTubers design channel assets without expensive
+                software.
+                Whether you're just starting your journey or looking to rebrand, our tools are designed to be simple,
+                fast, and professional.
+                Founded by <strong>Junaid</strong>, our mission is to empower creators worldwide.
+            </p>
+        </section>
+
+        <!-- FOOTER -->
+        <footer style="padding: 60px 20px; border-top: 1px solid var(--glass-border); background: #030712;">
             <div
-                style="padding: 1rem; text-align: center; border-top: 1px solid var(--glass-border); font-size: 12px; color: var(--text-secondary);">
-                <span>&copy; 2026 BEAST STUDIO - Premium Designer</span>
-                <span style="margin: 0 15px;">|</span>
-                <a href="#" style="color: var(--primary); text-decoration: none;">Privacy Policy</a>
-                <span style="margin: 0 15px;">|</span>
-                <a href="#" style="color: var(--primary); text-decoration: none;">Terms of Service</a>
+                style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px;">
+                <div style="max-width:300px;">
+                    <div class="brand" style="font-size: 1.2rem; margin-bottom: 1rem;">
+                        <i data-lucide="zap" color="var(--primary)" size="20"></i> BEAST STUDIO
+                    </div>
+                    <p style="color:var(--text-secondary); font-size:12px;">The ultimate companion for every digital
+                        creator. Built for speed and creative freedom.</p>
+                </div>
+                <div style="display: flex; gap: 60px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <span class="section-label" style="margin-bottom: 5px;">Company</span>
+                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">About Us</a>
+                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">Contact</a>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <span class="section-label" style="margin-bottom: 5px;">Legal</span>
+                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">Privacy Policy</a>
+                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 60px; color:var(--text-secondary); font-size:12px;">
+                &copy; 2026 BEAST STUDIO. Owned and Operated by <strong>Junaid</strong>.
             </div>
         </footer>
     </div>
-
-    <script src="index.js"></script>
+    <script>lucide.createIcons();</script>
 </body>
 
 </html>

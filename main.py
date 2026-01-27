@@ -144,7 +144,7 @@ def login_page():
 
 @app.route('/studio')
 def studio():
-    return send_from_directory(BASE_DIR, 'index.html')
+    return send_from_directory(BASE_DIR, 'studio.html')
 
 @app.route('/<path:path>')
 def static_files(path):

@@ -12,15 +12,16 @@ const presets = {
     'ios': { w: 1024, h: 1024 }
 };
 
-// Final Strict Auth Guard
+// Final Strict Auth Guard (Only for Studio)
 const savedUser = localStorage.getItem('beast_user');
+const isStudio = window.location.pathname.includes('/studio');
 
-if (!savedUser && !window.location.pathname.includes('/login')) {
+if (isStudio && !savedUser) {
     window.location.href = '/login';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (savedUser) {
+    if (savedUser && isStudio) {
         syncUserStatus();
     }
 });
@@ -39,12 +40,14 @@ const uploadInput = document.getElementById('upload-input');
 const presetChips = document.querySelectorAll('.preset-chip');
 
 function initBeast() {
+    if (!canvas) return; // Stop if not on studio page
     const config = presets[currentType];
     canvas.width = config.w;
     canvas.height = config.h;
 
     // Smooth Scale
     const container = document.querySelector('.viewport');
+    if (!container) return;
     const zoom = Math.min((container.clientWidth - 160) / config.w, (container.clientHeight - 160) / config.h);
 
     canvas.style.width = (config.w * zoom) + 'px';
@@ -54,6 +57,7 @@ function initBeast() {
 }
 
 function render() {
+    if (!canvas || !ctx) return;
     const w = canvas.width;
     const h = canvas.height;
 
