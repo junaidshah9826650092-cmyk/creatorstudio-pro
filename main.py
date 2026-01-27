@@ -12,7 +12,17 @@ CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'beast_studio.db')
 DESIGNS_PATH = os.path.join(BASE_DIR, 'designs')
-BEAST_SERVER_API_KEY = "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxx" # Replace with your real OpenRouter Pro Key
+BEAST_SERVER_API_KEY = os.environ.get("BEAST_API_KEY", "sk-or-v1-xxxxxxxx") # Security: Use Env Var
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    # Security: Explicit CSP for AdSense and Google Auth
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://pagead2.googlesyndication.com https://unpkg.com https://*.google.com https://*.googlesyndication.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; frame-src https://accounts.google.com https://googleads.g.doubleclick.net https://*.google.com;"
+    return response
 
 def init_db():
     try:
