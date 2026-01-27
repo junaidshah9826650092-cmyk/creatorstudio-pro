@@ -9,12 +9,12 @@ app = Flask(__name__, static_folder='.')
 CORS(app)
 
 # --- BEAST FIREBASE (SQLite Logic) ---
-DB_PATH = os.path.join(os.getcwd(), 'beast_studio.db')
-DESIGNS_PATH = os.path.join(os.getcwd(), 'designs')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'beast_studio.db')
+DESIGNS_PATH = os.path.join(BASE_DIR, 'designs')
 
 def init_db():
     try:
-        print(f"Checking database at: {DB_PATH}")
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS users 
@@ -30,7 +30,7 @@ def init_db():
                       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
         conn.commit()
         conn.close()
-        print("✅ Database initialized successfully")
+        print(f"✅ Database initialized at: {DB_PATH}")
     except Exception as e:
         print(f"❌ Database error: {str(e)}")
 
@@ -38,7 +38,6 @@ def init_db():
 init_db()
 if not os.path.exists(DESIGNS_PATH):
     os.makedirs(DESIGNS_PATH)
-    print(f"✅ Created designs folder at: {DESIGNS_PATH}")
 
 # AI Generation Route
 @app.route('/api/generate-logo', methods=['POST'])

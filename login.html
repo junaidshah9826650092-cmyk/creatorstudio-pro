@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="index.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body {
             display: flex;
@@ -158,14 +159,15 @@
         <div class="divider">OR CONTINUE WITH</div>
 
         <div class="social-login">
-            <div class="social-btn btn-google" onclick="continueAsGuest()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20"
-                    alt="Google">
-                Sign in with Google
+            <div id="g_id_onload"
+                data-client_id="792653327676-kn08t8c5vduqbmva15nngmrcfvuv2l60.apps.googleusercontent.com"
+                data-context="signin" data-ux_mode="popup" data-callback="onGoogleSignIn" data-auto_prompt="false">
             </div>
-            <div class="social-btn">
-                <i data-lucide="github" size="20"></i>
-                Sign in with GitHub
+            <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
+
+            <div class="social-btn" onclick="continueAsGuest()">
+                <i data-lucide="user" size="20"></i>
+                Continue as Guest
             </div>
         </div>
 
@@ -178,6 +180,19 @@
 
     <script>
         lucide.createIcons();
+        window.onGoogleSignIn = (resp) => {
+            try {
+                const payload = JSON.parse(atob(resp.credential.split('.')[1]));
+                localStorage.setItem('beast_user', payload.name);
+                localStorage.setItem('beast_plan', 'FREE');
+                const studioPage = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') ? '/studio' : 'index.html';
+                window.location.href = studioPage;
+            } catch (e) {
+                console.error("Google Auth Error:", e);
+                alert("Login failed. Try Guest mode.");
+            }
+        };
+
         const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
         const studioPage = isLocal ? '/studio' : 'index.html';
 

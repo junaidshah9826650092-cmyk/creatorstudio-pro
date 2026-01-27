@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CreatorStudio BEAST | Premium Designer</title>
+    <title>CreatorStudio BEAST | Premium AI Design Studio</title>
+    <meta name="description"
+        content="Professional AI-powered logo and thumbnail designer. Create pro graphics in seconds with BEAST STUDIO.">
+    <meta name="keywords" content="AI logo maker, thumbnail designer, creator studio, beast mode graphics">
+    <link rel="canonical" href="https://creatorstudio-pro.onrender.com" />
 
     <!-- Beast Font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -135,9 +139,11 @@
                             <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
                         </select>
                     </div>
-                    <button class="btn-premium" style="width:100%; border-radius:12px; height:45px;"
+                    <button class="btn-premium"
+                        style="width:100%; border-radius:12px; height:45px; background: var(--grad); position: relative; overflow: hidden;"
                         onclick="generateWithAI()">
-                        <i data-lucide="sparkles" size="16"></i> AI GENERATE
+                        <i data-lucide="sparkles" size="16"></i>
+                        <span id="ai-btn-text">AI GENERATE</span>
                     </button>
                 </div>
 
@@ -196,15 +202,23 @@
             </main>
         </section>
 
-        <!-- Ad Spot -->
-        <div class="sponsored-bar" style="height: auto; padding: 10px;">
-            <!-- BEAST STUDIO AD UNIT -->
+        <!-- Bottom Ad Spot -->
+        <div class="sponsored-bar">
             <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-YOUR_ADSENSE_ID"
                 data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="auto" data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
+
+        <footer>
+            <div
+                style="padding: 1rem; text-align: center; border-top: 1px solid var(--glass-border); font-size: 12px; color: var(--text-secondary);">
+                <span>&copy; 2026 BEAST STUDIO - Premium Designer</span>
+                <span style="margin: 0 15px;">|</span>
+                <a href="#" style="color: var(--primary); text-decoration: none;">Privacy Policy</a>
+                <span style="margin: 0 15px;">|</span>
+                <a href="#" style="color: var(--primary); text-decoration: none;">Terms of Service</a>
+            </div>
+        </footer>
     </div>
 
     <script src="index.js"></script>

@@ -181,9 +181,8 @@ async function generateWithAI() {
 
     if (!apiKey) return alert("Please enter your API Key!");
 
-    const btn = document.querySelector('button[onclick="generateWithAI()"]');
-    btn.innerHTML = '<i data-lucide="loader" class="spin"></i> THINKING...';
-    lucide.createIcons();
+    const aiText = document.getElementById('ai-btn-text');
+    if (aiText) aiText.innerText = 'THINKING...';
 
     try {
         const response = await fetch('/api/generate-logo', {
@@ -194,19 +193,17 @@ async function generateWithAI() {
         const data = await response.json();
 
         if (data.choices && data.choices[0].message) {
-            const aiText = data.choices[0].message.content;
-            // Parse AI response to update the canvas (simple version: update text)
-            textInput.value = aiText.substring(0, 30); // Limiting for UI
+            const resultText = data.choices[0].message.content;
+            textInput.value = resultText.substring(0, 30);
             render();
-            alert("AI Logo Idea: " + aiText);
+            alert("AI Logo Idea Generated!");
         } else {
-            alert("AI Response: " + JSON.stringify(data));
+            alert("AI Response Error. Check your API key.");
         }
     } catch (e) {
-        alert("AI Error: Check if main.py is running and your API key is valid.");
+        alert("AI Offline. Please check your connection.");
     } finally {
-        btn.innerHTML = '<i data-lucide="sparkles" size="16"></i> AI GENERATE';
-        lucide.createIcons();
+        if (aiText) aiText.innerText = 'AI GENERATE';
     }
 }
 
