@@ -15,8 +15,8 @@ const presets = {
 // Final Strict Auth Guard
 const savedUser = localStorage.getItem('beast_user');
 
-if (!savedUser && !window.location.pathname.includes('login.html')) {
-    window.location.href = 'login.html';
+if (!savedUser && !window.location.pathname.includes('/login')) {
+    window.location.href = '/login';
 }
 
 document.addEventListener('DOMContentLoaded', () => {

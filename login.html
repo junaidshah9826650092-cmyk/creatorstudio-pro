@@ -190,8 +190,8 @@
                 localStorage.setItem('beast_user', payload.name);
                 localStorage.setItem('beast_plan', 'FREE');
 
-                // Absolute Redirect to Studio
-                window.location.href = window.location.origin + '/index.html';
+                // Absolute Redirect to Studio (Root)
+                window.location.href = window.location.origin + '/';
             } catch (e) {
                 console.error("Google Auth Error:", e);
                 alert("Login Error. Please try again or use another browser.");

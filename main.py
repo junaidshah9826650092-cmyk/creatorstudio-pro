@@ -75,15 +75,19 @@ def generate_logo():
 
 @app.route('/')
 def index():
-    return send_from_directory('.', 'login.html')
+    return send_from_directory(BASE_DIR, 'index.html')
+
+@app.route('/login')
+def login_page():
+    return send_from_directory(BASE_DIR, 'login.html')
 
 @app.route('/studio')
 def studio():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory(BASE_DIR, 'index.html')
 
 @app.route('/<path:path>')
-def static_proxy(path):
-    return send_from_directory('.', path)
+def static_files(path):
+    return send_from_directory(BASE_DIR, path)
 
 @app.route('/api/login', methods=['POST'])
 def login():
