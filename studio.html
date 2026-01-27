@@ -12,13 +12,12 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-    <!-- Google AdSense (Safest Setup) -->
+    <!-- Google AdSense (Auto Ads & Final ID Sync) -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6894674624448360"
         crossorigin="anonymous"></script>
     <script>
         (adsbygoogle = window.adsbygoogle || []).push({
             google_ad_client: "ca-pub-6894674624448360",
-            enable_page_level_ads: true
         });
     </script>
 </head>
@@ -98,11 +97,11 @@
                     </select>
                 </div>
 
-                <!-- SIDEBAR AD (Multiplex/Video style) -->
+                <!-- VIDEO/MULTIPLEX AD: Large Sidebar -->
                 <div class="ad-container"
-                    style="border: 1px dashed var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.1); margin: 20px 0;">
+                    style="border: 1px dashed var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.1); margin: 20px 0; min-height: 250px;">
                     <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed"
-                        data-ad-client="ca-pub-6894674624448360" data-ad-slot="SIDEBAR_AD_SLOT"></ins>
+                        data-ad-client="ca-pub-6894674624448360" data-ad-slot="SIDEBAR_VIDEO_SLOT"></ins>
                     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
                 </div>
 
@@ -121,6 +120,15 @@
             <main class="viewport">
                 <div class="canvas-wrapper animate-ready">
                     <canvas id="beast-canvas"></canvas>
+                </div>
+
+                <!-- HORIZONTAL BANNER AD: Under Canvas -->
+                <div
+                    style="width: 100%; max-width: 728px; margin: 20px auto; border: 1px dashed var(--glass-border); border-radius: 8px; overflow: hidden;">
+                    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6894674624448360"
+                        data-ad-slot="STUDIO_BANNER_SLOT" data-ad-format="horizontal"
+                        data-full-width-responsive="true"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
                 </div>
 
                 <div class="toolbar">

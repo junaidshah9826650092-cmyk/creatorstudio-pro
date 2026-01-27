@@ -154,7 +154,7 @@ def privacy():
 def terms():
     return send_from_directory(BASE_DIR, 'terms.html')
 
-# Explicit SEO and AdSense Routes
+# FINAL SYNC VERSION 2.1
 @app.route('/ads.txt')
 def ads_txt():
     return "google.com, pub-6894674624448360, DIRECT, f08c47fec0942fa0"
