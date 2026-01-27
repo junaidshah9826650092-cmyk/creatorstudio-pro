@@ -178,10 +178,13 @@
 
     <script>
         lucide.createIcons();
+        const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+        const studioPage = isLocal ? '/studio' : 'index.html';
+
         function continueAsGuest() {
             localStorage.setItem('beast_user', 'Guest');
             localStorage.setItem('beast_plan', 'FREE');
-            window.location.href = '/studio';
+            window.location.href = studioPage;
         }
 
         async function handleLogin() {
@@ -189,7 +192,7 @@
             if (!username) return alert("Please enter your name, Beast!");
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/login', {
+                const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username })
@@ -199,12 +202,12 @@
                     localStorage.setItem('beast_user', data.user);
                     localStorage.setItem('beast_plan', data.plan);
                     localStorage.setItem('beast_credits', data.credits);
-                    window.location.href = '/studio';
+                    window.location.href = studioPage;
                 }
             } catch (e) {
                 // Local fallback dev mode
                 localStorage.setItem('beast_user', username);
-                window.location.href = '/studio';
+                window.location.href = studioPage;
             }
         }
     </script>

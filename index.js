@@ -16,9 +16,12 @@ const presets = {
 const savedUser = localStorage.getItem('beast_user');
 const savedPlan = localStorage.getItem('beast_plan');
 
-if (!savedUser && window.location.pathname !== '/') {
-    // If no user and not on login page, redirect to root
-    window.location.href = '/';
+// GitHub Pages Friendly Redirect
+const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+const loginPage = isLocal ? '/' : 'login.html';
+
+if (!savedUser && !window.location.pathname.includes('login.html') && window.location.pathname !== '/') {
+    window.location.href = loginPage;
 } else if (savedUser) {
     document.addEventListener('DOMContentLoaded', () => {
         updateUserUI(savedUser, savedPlan || 'FREE');
@@ -183,7 +186,7 @@ async function generateWithAI() {
     lucide.createIcons();
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/generate-logo', {
+        const response = await fetch('/api/generate-logo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt, apiKey, provider, model })
@@ -216,7 +219,7 @@ async function beastBackendLogin() {
     if (!username) return alert("Please enter a name!");
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/login', {
+        const response = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username })
@@ -238,9 +241,17 @@ async function beastBackendLogin() {
 }
 
 function updateUserUI(user, plan) {
-    const btn = document.querySelector('.btn-premium');
-    const color = plan === 'PRO' ? '#fbbf24' : '#94a3b8';
-    btn.innerHTML = `<i data-lucide="shield-check" color="${color}" size="18" style="vertical-align:middle;"></i> ${user} (${plan})`;
+    const btn = document.getElementById('main-login-btn');
+    const display = document.getElementById('user-display');
+    const color = plan === 'PRO' ? '#fbbf24' : '#6366f1';
+
+    if (display) {
+        display.innerHTML = `<span style="color:${color};">●</span> ${user}`;
+    }
+
+    if (btn) {
+        btn.innerHTML = `<i data-lucide="shield-check" size="18" style="vertical-align:middle;"></i> ${plan} MODE`;
+    }
     lucide.createIcons();
 }
 
@@ -249,28 +260,42 @@ async function saveToBeastServer() {
     const name = textInput.value || "beast_design";
     const username = localStorage.getItem('beast_user') || "Guest";
 
+    // 1. Mandatory Local Download
+    const link = document.createElement('a');
+    link.download = `${name}-${Date.now()}.png`;
+    link.href = imgData;
+    link.click();
+
+    // 2. Optional Server Save
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/save-design', {
+        const response = await fetch('/api/save-design', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ image: imgData, name, username })
         });
         const data = await response.json();
         if (data.status === 'success') {
-            alert("Design saved to server: " + data.file);
+            console.log("Design saved to server:", data.file);
         }
     } catch (e) {
-        alert("Backend offline. Saved to local.");
-        const link = document.createElement('a');
-        link.download = `${name}.png`;
-        link.href = imgData;
-        link.click();
+        console.warn("Backend offline. Design preserved locally.");
     }
 }
 
 window.onGoogleSignIn = (resp) => {
-    console.log("Beast User Authenticated via Google");
-    alert("Google Sign-In Successful!");
+    // Decoding JWT from Google (Simple version for display)
+    try {
+        const payload = JSON.parse(atob(resp.credential.split('.')[1]));
+        console.log("Beast Authenticated:", payload.name);
+
+        localStorage.setItem('beast_user', payload.name);
+        localStorage.setItem('beast_plan', 'FREE');
+        updateUserUI(payload.name, 'FREE');
+
+        alert(`Welcome, ${payload.name}! You are now in the Studio.`);
+    } catch (e) {
+        console.error("Google Auth Error:", e);
+    }
 };
 
 window.openBeastLogin = openBeastLogin;
