@@ -146,6 +146,14 @@ def login_page():
 def studio():
     return send_from_directory(BASE_DIR, 'studio.html')
 
+@app.route('/privacy')
+def privacy():
+    return send_from_directory(BASE_DIR, 'privacy-policy.html')
+
+@app.route('/terms')
+def terms():
+    return send_from_directory(BASE_DIR, 'terms.html')
+
 @app.route('/<path:path>')
 def static_files(path):
     return send_from_directory(BASE_DIR, path)

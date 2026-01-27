@@ -12,8 +12,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="index.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Google AdSense (Auto Ads Enabled - Safest for Account) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_ID"
+        crossorigin="anonymous"></script>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({
+            google_ad_client: "ca-pub-YOUR_ADSENSE_ID",
+            enable_page_level_ads: true
+        });
+    </script>
 </head>
 
 <body style="overflow-y: auto;">
@@ -35,7 +42,7 @@
             <h1
                 style="font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem;">
                 Free Tools for <br><span
-                    style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">YouTube
+                    style="background: var(--grad); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">YouTube
                     Creators</span>
             </h1>
             <p style="color: var(--text-secondary); font-size: 1.2rem; max-width: 600px; margin: 0 auto 2.5rem;">
@@ -49,6 +56,14 @@
                     style="height: 60px; padding: 0 40px; font-size: 1.1rem; background: transparent; border: 1px solid var(--glass-border);"
                     onclick="document.getElementById('tools-section').scrollIntoView({behavior:'smooth'})">EXPLORE
                     TOOLS</button>
+            </div>
+
+            <!-- SAFE AD ZONE: After Hero -->
+            <div id="ad-hero" class="sponsored-bar"
+                style="margin-top: 50px; max-width: 970px; margin-left: auto; margin-right: auto;">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-YOUR_ADSENSE_ID"
+                    data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
         </header>
 
@@ -139,13 +154,14 @@
                 <div style="display: flex; gap: 60px;">
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <span class="section-label" style="margin-bottom: 5px;">Company</span>
-                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">About Us</a>
-                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">Contact</a>
+                        <a href="/privacy" style="color:white; text-decoration:none; font-size:14px;">About Us</a>
+                        <a href="mailto:contact@junaid.com"
+                            style="color:white; text-decoration:none; font-size:14px;">Contact</a>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <span class="section-label" style="margin-bottom: 5px;">Legal</span>
-                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">Privacy Policy</a>
-                        <a href="#" style="color:white; text-decoration:none; font-size:14px;">Terms of Service</a>
+                        <a href="/privacy" style="color:white; text-decoration:none; font-size:14px;">Privacy Policy</a>
+                        <a href="/terms" style="color:white; text-decoration:none; font-size:14px;">Terms of Service</a>
                     </div>
                 </div>
             </div>
