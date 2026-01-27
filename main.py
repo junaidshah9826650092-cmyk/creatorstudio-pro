@@ -159,6 +159,10 @@ def terms():
 def ads_txt():
     return "google.com, pub-6894674624448360, DIRECT, f08c47fec0942fa0"
 
+@app.route('/test-ads')
+def test_ads():
+    return "TEST: pub-6894674624448360"
+
 @app.route('/robots.txt')
 def robots_txt():
     return send_from_directory(BASE_DIR, 'robots.txt')
