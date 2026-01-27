@@ -40,13 +40,12 @@
                     data-client_id="792653327676-kn08t8c5vduqbmva15nngmrcfvuv2l60.apps.googleusercontent.com"
                     data-context="signin" data-ux_mode="popup" data-callback="onGoogleSignIn" data-auto_prompt="false">
                 </div>
-                <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
-
-                <div id="user-display" style="color: var(--text-secondary); font-size: 14px; font-weight: 600;"></div>
-                <button class="btn-premium" onclick="openBeastLogin()" id="main-login-btn">
-                    <i data-lucide="user-check" size="18" style="vertical-align: middle; margin-right: 6px;"></i>
-                    BEAST LOGIN
-                </button>
+                <!-- Dynamic Auth UI will be handled by index.js -->
+                <div id="auth-ui-container" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
+                    <div id="user-display" style="color: var(--text-secondary); font-size: 14px; font-weight: 600;">
+                    </div>
+                </div>
             </div>
         </nav>
 

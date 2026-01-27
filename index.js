@@ -12,21 +12,24 @@ const presets = {
     'ios': { w: 1024, h: 1024 }
 };
 
-// Check Auth & Guard
+// Strict Auth Guard
 const savedUser = localStorage.getItem('beast_user');
-const savedPlan = localStorage.getItem('beast_plan');
-
-// GitHub Pages Friendly Redirect
 const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-const loginPage = isLocal ? '/' : 'login.html';
+const loginPage = isLocal ? 'login.html' : 'login.html'; // Ensuring it always points to login.html
 
-if (!savedUser && !window.location.pathname.includes('login.html') && window.location.pathname !== '/') {
+if (!savedUser && !window.location.pathname.includes('login.html')) {
     window.location.href = loginPage;
-} else if (savedUser) {
-    document.addEventListener('DOMContentLoaded', () => {
-        updateUserUI(savedUser, savedPlan || 'FREE');
-    });
+} else if (savedUser === 'Guest') {
+    // Force logout if someone was a guest before
+    localStorage.removeItem('beast_user');
+    window.location.href = loginPage;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (savedUser && savedUser !== 'Guest') {
+        updateUserUI(savedUser, localStorage.getItem('beast_plan') || 'FREE');
+    }
+});
 
 let currentType = 'yt-thumb';
 let uploadedImg = null;
