@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://creatorstudio-pro.onrender.com/sitemap.xml
