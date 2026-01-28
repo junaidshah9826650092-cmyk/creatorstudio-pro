@@ -273,31 +273,16 @@
                             a little bit of body text</button>
 
                         <div style="border-top: 1px solid var(--glass-border); padding-top: 20px;">
-                            <span class="section-label">Layer Actions</span>
-                            <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-                                <button class="btn-premium" onclick="duplicateLayer()" title="Duplicate"
-                                    style="flex:1; padding:10px;"><i data-lucide="copy" size="16"></i></button>
-                                <button class="btn-premium" onclick="deleteLayer()" title="Delete"
-                                    style="flex:1; padding:10px; background:rgba(239,68,68,0.2); color:#ef4444;"><i
-                                        data-lucide="trash-2" size="16"></i></button>
-                                <button class="btn-premium" onclick="moveLayer('up')" title="Bring Forward"
-                                    style="flex:1; padding:10px;"><i data-lucide="arrow-up-circle"
-                                        size="16"></i></button>
-                                <button class="btn-premium" onclick="moveLayer('down')" title="Send Backward"
-                                    style="flex:1; padding:10px;"><i data-lucide="arrow-down-circle"
-                                        size="16"></i></button>
-                            </div>
-
-                            <span class="section-label">Opacity</span>
-                            <input type="range" class="input-box" min="0" max="1" step="0.1" value="1"
-                                oninput="updateOpacity(this.value)" style="margin-bottom: 15px;">
-
-                            <span class="section-label">Edit Selection</span>
-                            <input type="text" id="prop-text" class="input-box" placeholder="Select text..."
-                                oninput="updateObject('text', this.value)" style="margin-bottom: 10px;">
-                            <div style="display: flex; gap: 10px;">
-                                <input type="range" id="size-slider" min="10" max="300" style="flex: 1;">
-                                <input type="color" id="text-color" class="color-input">
+                            <span class="section-label">Quick Styles</span>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="template-thumb"
+                                    onclick="addTextLayer('NEON', canvas.width/2, canvas.height/2)"
+                                    style="cursor:pointer; background: #000; border-radius: 8px; padding: 10px; color: #00f3ff; text-align: center; font-weight: 800; border: 1px solid #00f3ff; text-shadow: 0 0 5px #00f3ff;">
+                                    NEON</div>
+                                <div class="template-thumb"
+                                    onclick="addTextLayer('RETRO', canvas.width/2, canvas.height/2)"
+                                    style="cursor:pointer; background: #ff00ff; border-radius: 8px; padding: 10px; color: white; text-align: center; font-weight: 800; border: 1px solid white;">
+                                    RETRO</div>
                             </div>
                         </div>
                     </div>
@@ -511,6 +496,25 @@
                         <label style="font-size: 10px; opacity: 0.6; display: block; margin-bottom: 5px;">Color</label>
                         <input type="color" id="prop-color" oninput="updateObject('color', this.value)"
                             style="width: 100%; height: 35px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; cursor: pointer;">
+                    </div>
+
+                    <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                        <span style="font-size: 10px; opacity: 0.6; display: block; margin-bottom: 10px;">Layer
+                            Actions</span>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <button onclick="duplicateLayer()" class="btn-premium"
+                                style="padding: 8px; font-size: 11px; background: rgba(255,255,255,0.05);"><i
+                                    data-lucide="copy" size="14"></i> Copy</button>
+                            <button onclick="deleteLayer()" class="btn-premium"
+                                style="padding: 8px; font-size: 11px; background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i
+                                    data-lucide="trash-2" size="14"></i> Delete</button>
+                            <button onclick="moveLayer('up')" class="btn-premium"
+                                style="grid-column: span 2; padding: 8px; font-size: 11px; background: rgba(255,255,255,0.05);"><i
+                                    data-lucide="arrow-up-circle" size="14"></i> Bring to Forward</button>
+                            <button onclick="moveLayer('down')" class="btn-premium"
+                                style="grid-column: span 2; padding: 8px; font-size: 11px; background: rgba(255,255,255,0.05);"><i
+                                    data-lucide="arrow-down-circle" size="14"></i> Send to Backward</button>
+                        </div>
                     </div>
                 </div>
             </aside>

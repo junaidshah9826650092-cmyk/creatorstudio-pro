@@ -89,7 +89,7 @@ function initBeast() {
     saveState();
     syncUserStatus();
     render();
-    console.log("🚀 Beast Engine Ready");
+    console.log("🚀 Beast Engine Ready. Layers:", layers.length);
 }
 
 let resizeTimeout;
@@ -123,7 +123,7 @@ function updateCursor(e) {
     const { x, y } = getMousePos(e);
 
     if (selectedId) {
-        const layer = layers.find(l => l.id === selectedId);
+        const layer = layers.find(l => String(l.id) === String(selectedId));
         if (layer && !layer.locked) {
             const handle = getHandleAt(x, y, layer);
             if (handle) {
@@ -240,7 +240,7 @@ function deleteLayer() {
 }
 
 function moveLayer(dir) {
-    const idx = layers.findIndex(l => l.id === selectedId);
+    const idx = layers.findIndex(l => String(l.id) === String(selectedId));
     if (idx === -1) return;
 
     if (dir === 'up' && idx < layers.length - 1) {
@@ -289,7 +289,7 @@ function handleMouseDown(e) {
 
     // 1. Check if clicking handles of selected object
     if (selectedId) {
-        const layer = layers.find(l => l.id === selectedId);
+        const layer = layers.find(l => String(l.id) === String(selectedId));
         if (layer && !layer.locked) {
             const handle = getHandleAt(x, y, layer);
             if (handle) {
@@ -340,7 +340,7 @@ function handleMouseMove(e) {
     }
 
     const { x, y } = getMousePos(e);
-    const layer = layers.find(l => l.id === selectedId);
+    const layer = layers.find(l => String(l.id) === String(selectedId));
     if (!layer) return;
 
     if (isDragging) {
@@ -452,7 +452,7 @@ function render() {
     });
 
     if (selectedId) {
-        const selLayer = layers.find(l => l.id === selectedId);
+        const selLayer = layers.find(l => String(l.id) === String(selectedId));
         if (selLayer && !selLayer.hidden) drawSelectionBox(selLayer);
     }
 
@@ -472,9 +472,9 @@ function updateLayerPanel() {
     }
 
     list.innerHTML = [...layers].reverse().map(l => `
-        <div class="layer-item ${l.id === selectedId ? 'active' : ''}" onclick="selectLayer('${l.id}')" 
-             style="background: ${l.id === selectedId ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)'}; 
-                    padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid ${l.id === selectedId ? 'var(--primary)' : 'transparent'}">
+        <div class="layer-item ${String(l.id) === String(selectedId) ? 'active' : ''}" onclick="selectLayer('${l.id}')" 
+             style="background: ${String(l.id) === String(selectedId) ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)'}; 
+                    padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid ${String(l.id) === String(selectedId) ? 'var(--primary)' : 'transparent'}">
             <i data-lucide="${l.type === 'text' ? 'type' : (l.type === 'image' ? 'image' : 'shapes')}" size="14"></i>
             <span style="font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 ${l.type === 'text' ? l.text : l.type}
@@ -552,7 +552,7 @@ function selectLayer(id) {
 
 function syncPropertyPanel() {
     const propsPanel = document.getElementById('properties-panel');
-    const sel = layers.find(l => l.id === selectedId);
+    const sel = layers.find(l => String(l.id) === String(selectedId));
 
     if (!sel || !propsPanel) {
         if (propsPanel) propsPanel.style.display = 'none';
@@ -582,7 +582,7 @@ function syncPropertyPanel() {
 }
 
 function updateObject(key, value) {
-    const sel = layers.find(l => l.id === selectedId);
+    const sel = layers.find(l => String(l.id) === String(selectedId));
     if (!sel) return;
 
     if (key === 'fontSize' || key === 'opacity') value = parseFloat(value);
@@ -627,7 +627,7 @@ function handleKeyDown(e) {
 
 function copyLayer() {
     if (!selectedId) return;
-    const l = layers.find(l => l.id === selectedId);
+    const l = layers.find(l => String(l.id) === String(selectedId));
     clipboardLayer = JSON.stringify(l);
     showToast("Layer Copied");
 }
@@ -646,7 +646,7 @@ function pasteLayer() {
 
 function duplicateLayer() {
     if (!selectedId) return;
-    const original = layers.find(l => l.id === selectedId);
+    const original = layers.find(l => String(l.id) === String(selectedId));
     const copy = { ...original, id: Date.now() + Math.random(), x: original.x + 20, y: original.y + 20 };
     layers.push(copy);
     selectLayer(copy.id);
