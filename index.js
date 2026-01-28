@@ -12,6 +12,28 @@ let activeHandle = null; // 'nw', 'ne', 'sw', 'se'
 let dragStartX, dragStartY;
 let lastX, lastY;
 let showGrid = false;
+let gridSpacing = 40;
+
+const MASTER_TEMPLATES = {
+    'gaming_reaction': {
+        name: 'Epic Reaction',
+        layers: [
+            { type: 'shape', shapeType: 'rect', x: 640, y: 360, width: 1280, height: 720, color: '#111827', opacity: 1, locked: true },
+            { type: 'shape', shapeType: 'triangle', x: 200, y: 200, width: 300, height: 300, color: '#ef4444', opacity: 0.8 },
+            { type: 'text', text: 'EPIC REACTION!', x: 640, y: 150, fontSize: 100, fontWeight: '900', color: '#fbbf24', fontFamily: 'Outfit' },
+            { type: 'text', text: 'You Won\'t Believe This...', x: 640, y: 550, fontSize: 50, fontWeight: '600', color: '#ffffff', fontFamily: 'Outfit' }
+        ]
+    },
+    'clean_vlog': {
+        name: 'Clean Minimal',
+        layers: [
+            { type: 'shape', shapeType: 'rect', x: 640, y: 360, width: 1280, height: 720, color: '#f8fafc', opacity: 1, locked: true },
+            { type: 'shape', shapeType: 'circle', x: 1000, y: 200, width: 400, height: 400, color: '#6366f1', opacity: 0.2 },
+            { type: 'text', text: 'MY MORNING ROUTINE', x: 400, y: 360, fontSize: 70, fontWeight: '900', color: '#1e293b', fontFamily: 'Outfit' },
+            { type: 'text', text: 'Episode 04', x: 400, y: 440, fontSize: 30, fontWeight: '500', color: '#64748b', fontFamily: 'Outfit' }
+        ]
+    }
+};
 
 // History for Undo/Redo
 let history = [];
@@ -33,43 +55,9 @@ function initBeast() {
     // Event Listeners
     canvas.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
-    const MASTER_TEMPLATES = {
-        'gaming_reaction': {
-            name: 'Epic Reaction',
-            layers: [
-                { type: 'shape', shapeType: 'rect', x: 640, y: 360, width: 1280, height: 720, color: '#111827', opacity: 1, locked: true },
-                { type: 'shape', shapeType: 'triangle', x: 200, y: 200, width: 300, height: 300, color: '#ef4444', opacity: 0.8 },
-                { type: 'text', text: 'EPIC REACTION!', x: 640, y: 150, fontSize: 100, fontWeight: '900', color: '#fbbf24', fontFamily: 'Outfit' },
-                { type: 'text', text: 'You Won\'t Believe This...', x: 640, y: 550, fontSize: 50, fontWeight: '600', color: '#ffffff', fontFamily: 'Outfit' }
-            ]
-        },
-        'clean_vlog': {
-            name: 'Clean Minimal',
-            layers: [
-                { type: 'shape', shapeType: 'rect', x: 640, y: 360, width: 1280, height: 720, color: '#f8fafc', opacity: 1, locked: true },
-                { type: 'shape', shapeType: 'circle', x: 1000, y: 200, width: 400, height: 400, color: '#6366f1', opacity: 0.2 },
-                { type: 'text', text: 'MY MORNING ROUTINE', x: 400, y: 360, fontSize: 70, fontWeight: '900', color: '#1e293b', fontFamily: 'Outfit' },
-                { type: 'text', text: 'Episode 04', x: 400, y: 440, fontSize: 30, fontWeight: '500', color: '#64748b', fontFamily: 'Outfit' }
-            ]
-        }
-    };
-
-    function loadBeastTemplate(key) {
-        const template = MASTER_TEMPLATES[key];
-        if (template) {
-            applyJSONTemplate(template);
-        }
-    }
-
-    window.addEventListener('load', initBeast);
-    window.addEventListener('resize', () => { render(); });
-
-
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('keydown', handleKeyDown);
-
-    // Add dummy layers for testing
-    addTextLayer("BEAST STUDIO", canvas.width / 2, canvas.height / 2);
+    window.addEventListener('resize', () => { render(); });
 
     // Image Upload Handling
     const upload = document.getElementById('upload-input');
@@ -84,8 +72,23 @@ function initBeast() {
         });
     }
 
-    saveState(); // Initial save
+    // Default Starting Layer
+    if (layers.length === 0) {
+        addTextLayer("BEAST STUDIO", canvas.width / 2, canvas.height / 2);
+    }
+
+    saveState();
     render();
+}
+
+function loadBeastTemplate(key) {
+    const template = MASTER_TEMPLATES[key];
+    if (template) {
+        layers = JSON.parse(JSON.stringify(template.layers));
+        saveState();
+        render();
+        showToast(`Template Loaded: ${template.name}`);
+    }
 }
 
 function resizeCanvas(w, h) {
@@ -147,6 +150,76 @@ function addImageLayer(src) {
         render();
     };
     img.src = src;
+}
+
+function addShapeLayer(type) {
+    const layer = {
+        id: Date.now() + Math.random(),
+        type: 'shape',
+        shapeType: type,
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        width: 200,
+        height: 200,
+        color: '#6366f1',
+        opacity: 1,
+        rotation: 0
+    };
+    layers.push(layer);
+    selectLayer(layer.id);
+    saveState();
+    render();
+}
+
+function deleteLayer() {
+    if (!selectedId) return;
+    layers = layers.filter(l => l.id !== selectedId);
+    selectedId = null;
+    saveState();
+    render();
+}
+
+function moveLayer(dir) {
+    const idx = layers.findIndex(l => l.id === selectedId);
+    if (idx === -1) return;
+
+    if (dir === 'up' && idx < layers.length - 1) {
+        [layers[idx], layers[idx + 1]] = [layers[idx + 1], layers[idx]];
+    } else if (dir === 'down' && idx > 0) {
+        [layers[idx], layers[idx - 1]] = [layers[idx - 1], layers[idx]];
+    }
+
+    saveState();
+    render();
+}
+
+async function saveDesign() {
+    const username = localStorage.getItem('beast_user') || 'Guest';
+    const dataURL = canvas.toDataURL('image/png');
+
+    showToast("Saving your beast design...");
+
+    try {
+        const response = await fetch('/api/save-design', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                image: dataURL,
+                name: 'beast_' + Date.now()
+            })
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+            showToast("Design Saved to Gallery!");
+        }
+    } catch (e) {
+        const link = document.createElement('a');
+        link.download = 'beast-design.png';
+        link.href = dataURL;
+        link.click();
+        showToast("Downloaded to your device!");
+    }
 }
 
 // --- SELECTION & INTERACTION ---
@@ -325,6 +398,33 @@ function render() {
 
     if (showGrid) drawGrid();
     updateLayerPanel();
+    syncPropertyPanel();
+}
+
+function toggleGrid() {
+    showGrid = !showGrid;
+    render();
+    showToast(showGrid ? "Grid Enabled" : "Grid Disabled");
+}
+
+function drawGrid() {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x <= canvas.width; x += gridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += gridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    ctx.restore();
 }
 
 function drawBackground() {
@@ -361,6 +461,47 @@ function drawSelectionBox(l) {
 
 function selectLayer(id) {
     selectedId = id;
+    render();
+}
+
+function syncPropertyPanel() {
+    const propsPanel = document.getElementById('properties-panel');
+    const sel = layers.find(l => l.id === selectedId);
+
+    if (!sel || !propsPanel) {
+        if (propsPanel) propsPanel.style.display = 'none';
+        return;
+    }
+
+    propsPanel.style.display = 'block';
+
+    // Sync Text Control
+    const textInput = document.getElementById('prop-text');
+    if (textInput && sel.type === 'text') {
+        textInput.parentElement.style.display = 'block';
+        textInput.value = sel.text;
+    } else if (textInput) {
+        textInput.parentElement.style.display = 'none';
+    }
+
+    // Sync Color
+    const colorInput = document.getElementById('prop-color');
+    if (colorInput) colorInput.value = sel.color || '#ffffff';
+
+    // Sync Font Size
+    const sizeInput = document.getElementById('prop-size');
+    if (sizeInput && sel.type === 'text') {
+        sizeInput.value = sel.fontSize;
+    }
+}
+
+function updateObject(key, value) {
+    const sel = layers.find(l => l.id === selectedId);
+    if (!sel) return;
+
+    if (key === 'fontSize') value = parseInt(value);
+    sel[key] = value;
+
     render();
 }
 
@@ -446,8 +587,20 @@ function historyUndo() {
 }
 
 function showToast(msg) {
-    console.log("Toast:", msg);
-    // You can keep your existing toast logic here
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = '0.3s ease-in';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // --- AUTH & SESSION ---

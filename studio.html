@@ -20,6 +20,42 @@
             google_ad_client: "ca-pub-6894674624448360",
         });
     </script>
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -35,7 +71,7 @@
 
             <!-- Dynamic Command Center (Fills Empty Logo Area) -->
             <div class="command-center">
-                <div class="cmd-btn" title="Undo (Ctrl+Z)" onclick="showToast('Undo feature coming soon')">
+                <div class="cmd-btn" title="Undo (Ctrl+Z)" onclick="historyUndo()">
                     <i data-lucide="undo-2" size="18"></i>
                 </div>
                 <div class="cmd-separator"></div>
@@ -49,8 +85,9 @@
                 <div class="cmd-btn" title="Grid View" onclick="toggleGrid()">
                     <i data-lucide="grid-3x3" size="18"></i>
                 </div>
-                <div class="cmd-btn active" title="Layers">
-                    <i data-lucide="layers" size="18"></i>
+                <div class="cmd-separator"></div>
+                <div class="cmd-btn" title="Save Project" onclick="saveDesign()" style="color:var(--primary)">
+                    <i data-lucide="save" size="18"></i>
                 </div>
             </div>
 
@@ -200,24 +237,25 @@
                         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px;">
                             <div class="shape-btn"
                                 style="aspect-ratio: 1; background: #334155; border-radius: 4px; display:flex; align-items:center; justify-content:center; cursor:pointer;"
-                                onclick="showToast('Shape: Square added')">
+                                onclick="addShapeLayer('rect')">
                                 <div style="width:20px; height:20px; background:white;"></div>
                             </div>
                             <div class="shape-btn"
                                 style="aspect-ratio: 1; background: #334155; border-radius: 4px; display:flex; align-items:center; justify-content:center; cursor:pointer;"
-                                onclick="showToast('Shape: Circle added')">
+                                onclick="addShapeLayer('circle')">
                                 <div style="width:20px; height:20px; background:white; border-radius:50%;"></div>
                             </div>
                             <div class="shape-btn"
                                 style="aspect-ratio: 1; background: #334155; border-radius: 4px; display:flex; align-items:center; justify-content:center; cursor:pointer;"
-                                onclick="showToast('Shape: Triangle added')">
+                                onclick="addShapeLayer('triangle')">
                                 <div
                                     style="width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:20px solid white;">
                                 </div>
                             </div>
-                            <div class="shape-btn"
-                                style="aspect-ratio: 1; background: #334155; border-radius: 4px; display:flex; align-items:center; justify-content:center; cursor:pointer;"
-                                onclick="showToast('Shape: Heart added')"><i data-lucide="heart" fill="white"></i></div>
+                            <div class="shape-btn" title="More shapes Pro only"
+                                style="aspect-ratio: 1; background: #1e293b; border-radius: 4px; display:flex; align-items:center; justify-content:center; cursor:not-allowed; opacity: 0.3;">
+                                <i data-lucide="lock" size="14"></i>
+                            </div>
                         </div>
                     </div>
 
@@ -444,23 +482,34 @@
                     </div>
                 </div>
 
-                <div id="property-panel"
+                <div id="properties-panel"
                     style="padding: 20px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); display: none;">
                     <h4 style="font-size: 11px; color: var(--primary); text-transform: uppercase; margin-bottom: 15px;">
                         Properties</h4>
+
+                    <div id="text-input-group" style="margin-bottom: 15px;">
+                        <label style="font-size: 10px; opacity: 0.6; display: block; margin-bottom: 5px;">Text
+                            Content</label>
+                        <input type="text" id="prop-text" oninput="updateObject('text', this.value)" class="input-box"
+                            style="width: 100%; font-size: 12px; padding: 10px;">
+                    </div>
+
                     <div class="control-group" style="margin-bottom: 15px;">
                         <label
                             style="font-size: 10px; opacity: 0.6; display: block; margin-bottom: 5px;">Opacity</label>
                         <input type="range" id="prop-opacity" min="0" max="1" step="0.1"
-                            oninput="updateSelectedProperty('opacity', this.value)" style="width: 100%;">
+                            oninput="updateObject('opacity', this.value)" style="width: 100%;">
                     </div>
-                    <div id="text-props" style="display: none;">
+
+                    <div id="text-props">
                         <label style="font-size: 10px; opacity: 0.6; display: block; margin-bottom: 5px;">Font
                             Size</label>
-                        <input type="number" id="prop-size" oninput="updateSelectedProperty('fontSize', this.value)"
-                            class="input-box" style="width: 100%; margin-bottom: 10px;">
-                        <input type="color" id="prop-color" oninput="updateSelectedProperty('color', this.value)"
-                            style="width: 100%; height: 30px; border-radius: 4px; border: none; cursor: pointer;">
+                        <input type="number" id="prop-size" oninput="updateObject('fontSize', this.value)"
+                            class="input-box" style="width: 100%; margin-bottom: 10px; font-size: 12px; padding: 10px;">
+
+                        <label style="font-size: 10px; opacity: 0.6; display: block; margin-bottom: 5px;">Color</label>
+                        <input type="color" id="prop-color" oninput="updateObject('color', this.value)"
+                            style="width: 100%; height: 35px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; cursor: pointer;">
                     </div>
                 </div>
             </aside>
@@ -543,6 +592,7 @@
         </svg>
     </a>
 
+    <div id="toast-container" class="toast-container"></div>
     <script src="index.js"></script>
 </body>
 
