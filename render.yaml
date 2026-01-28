@@ -3,7 +3,7 @@ services:
     name: beast-studio
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:application
+    startCommand: gunicorn main:app
     envVars:
       - key: PORT
         value: 5000
