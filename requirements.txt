@@ -1,6 +1,6 @@
 Flask==3.0.0
 requests==2.31.0
-gunicorn==21.2.0
+gunicorn==22.0.0
 flask-cors==4.0.0
 google-generativeai==0.3.2
 # RE-DEPLOY TRIGGER v4.0 - Gemini AI Update
