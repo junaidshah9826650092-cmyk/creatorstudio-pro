@@ -46,23 +46,42 @@ const HANDLE_SIZE = 8;
 
 function initBeast() {
     canvas = document.getElementById('beast-canvas');
-    if (!canvas) return;
+    if (!canvas) {
+        console.warn("Editor canvas not found. Skipping initialization.");
+        return;
+    }
     ctx = canvas.getContext('2d');
 
     // Set default size (16:9)
     resizeCanvas(1280, 720);
 
-    // Event Listeners
+    // Event Listeners (Canvas and Global)
     canvas.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('resize', () => { render(); });
+    window.addEventListener('resize', debouncedResize);
 
     // Initial Lucide check
-    if (window.lucide) lucide.createIcons();
+    requestAnimationFrame(() => {
+        if (window.lucide) lucide.createIcons();
+    });
 
-    // Default Starting Layer
+    // Load existing layers or default
+    const saved = localStorage.getItem('beast_last_design');
+    if (saved) {
+        try {
+            layers = JSON.parse(saved);
+            // Re-hydrate images
+            layers.forEach(l => {
+                if (l.type === 'image') {
+                    l.img = new Image();
+                    l.img.src = l.src;
+                }
+            });
+        } catch (e) { layers = []; }
+    }
+
     if (layers.length === 0) {
         addTextLayer("BEAST STUDIO", canvas.width / 2, canvas.height / 2);
     }
@@ -70,6 +89,15 @@ function initBeast() {
     saveState();
     syncUserStatus();
     render();
+    console.log("🚀 Beast Engine Ready");
+}
+
+let resizeTimeout;
+function debouncedResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (canvas) resizeCanvas(canvas.width, canvas.height);
+    }, 200);
 }
 
 function switchTab(tabId, el) {
@@ -679,17 +707,21 @@ function closePricingModal() {
 
 async function syncUserStatus() {
     const username = localStorage.getItem('beast_user');
-    if (!username) return;
+    if (!username || username === 'Guest') return;
 
     try {
-        const res = await fetch(`/api/user-status?username=${username}`);
+        const res = await fetch(`/api/user-status?username=${encodeURIComponent(username)}`);
+        if (!res.ok) throw new Error("Sync failure");
         const data = await res.json();
+
         if (data.status === 'success') {
             localStorage.setItem('beast_credits', data.credits);
             localStorage.setItem('beast_plan', data.plan);
             updateUserUI();
         }
-    } catch (e) { console.error("Sync failed"); }
+    } catch (e) {
+        console.error("User sync failed, using local offline data.");
+    }
 }
 
 function updateUserUI() {
