@@ -20,7 +20,7 @@
             google_ad_client: "ca-pub-6894674624448360",
         });
     </script>
-    <script src="index.js?v=3.2" defer></script>
+    <script src="index.js?v=4.2" defer></script>
     <style>
         .toast-container {
             position: fixed;
@@ -293,8 +293,8 @@
                                 oninput="updateOpacity(this.value)" style="margin-bottom: 15px;">
 
                             <span class="section-label">Edit Selection</span>
-                            <input type="text" id="editor-text" class="input-box" placeholder="Select text..."
-                                style="margin-bottom: 10px;">
+                            <input type="text" id="prop-text" class="input-box" placeholder="Select text..."
+                                oninput="updateObject('text', this.value)" style="margin-bottom: 10px;">
                             <div style="display: flex; gap: 10px;">
                                 <input type="range" id="size-slider" min="10" max="300" style="flex: 1;">
                                 <input type="color" id="text-color" class="color-input">
@@ -608,10 +608,11 @@
             }
             return false;
         };
-        // Initial Lucide icons if script loads late
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.lucide) lucide.createIcons();
-        });
+        // Initializer
+        window.onload = () => {
+            if (typeof checkAuth === 'function') checkAuth();
+            if (typeof initBeast === 'function') initBeast();
+        };
     </script>
 </body>
 

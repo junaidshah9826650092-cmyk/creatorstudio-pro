@@ -151,7 +151,11 @@ function resizeCanvas(w, h) {
     canvas.width = w;
     canvas.height = h;
     const wrapper = canvas.parentElement;
-    // Scale canvas to fit viewport while maintaining quality
+    if (!wrapper || wrapper.clientWidth < 100) {
+        canvas.style.transform = `scale(0.5)`; // Fallback
+        render();
+        return;
+    }
     const scale = Math.min((wrapper.clientWidth - 40) / w, (wrapper.clientHeight - 40) / h);
     canvas.style.transform = `scale(${scale})`;
     render();
@@ -161,7 +165,7 @@ function resizeCanvas(w, h) {
 
 function addTextLayer(text = "New Text", x = 100, y = 100) {
     const layer = {
-        id: Date.now() + Math.random(),
+        id: String(Date.now() + Math.random()),
         type: 'text',
         text: text,
         x: x,
@@ -189,7 +193,7 @@ function addImageLayer(src) {
         if (w > 600) { h *= 600 / w; w = 600; }
 
         const layer = {
-            id: Date.now() + Math.random(),
+            id: String(Date.now() + Math.random()),
             type: 'image',
             img: img,
             src: src,
@@ -210,7 +214,7 @@ function addImageLayer(src) {
 
 function addShapeLayer(type) {
     const layer = {
-        id: Date.now() + Math.random(),
+        id: String(Date.now() + Math.random()),
         type: 'shape',
         shapeType: type,
         x: canvas.width / 2,
@@ -468,7 +472,7 @@ function updateLayerPanel() {
     }
 
     list.innerHTML = [...layers].reverse().map(l => `
-        <div class="layer-item ${l.id === selectedId ? 'active' : ''}" onclick="selectLayer(${l.id})" 
+        <div class="layer-item ${l.id === selectedId ? 'active' : ''}" onclick="selectLayer('${l.id}')" 
              style="background: ${l.id === selectedId ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)'}; 
                     padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid ${l.id === selectedId ? 'var(--primary)' : 'transparent'}">
             <i data-lucide="${l.type === 'text' ? 'type' : (l.type === 'image' ? 'image' : 'shapes')}" size="14"></i>
@@ -542,7 +546,7 @@ function drawSelectionBox(l) {
 // --- UTILITIES ---
 
 function selectLayer(id) {
-    selectedId = id;
+    selectedId = String(id);
     render();
 }
 
@@ -581,10 +585,14 @@ function updateObject(key, value) {
     const sel = layers.find(l => l.id === selectedId);
     if (!sel) return;
 
-    if (key === 'fontSize') value = parseInt(value);
+    if (key === 'fontSize' || key === 'opacity') value = parseFloat(value);
     sel[key] = value;
 
     render();
+}
+
+function updateOpacity(val) {
+    updateObject('opacity', val);
 }
 
 let clipboardLayer = null;
@@ -827,8 +835,53 @@ function handleLogout() {
     window.location.href = 'login.html';
 }
 
-// Ensure init runs
-window.onload = () => {
-    checkAuth();
-    initBeast();
-};
+// --- AI STUDIO (GEMINI POWERED) ---
+
+async function generateAIStudioContent() {
+    const topic = document.getElementById('ai-topic').value;
+    const tool = document.getElementById('ai-tool-type').value;
+    const btn = document.getElementById('ai-gen-btn');
+    const loading = document.getElementById('ai-loading');
+    const results = document.getElementById('ai-results-container');
+    const list = document.getElementById('ai-output-list');
+
+    if (!topic) return showToast("Bhai, topic toh batao!");
+
+    btn.disabled = true;
+    loading.style.display = 'block';
+    results.style.display = 'none';
+
+    try {
+        const res = await fetch('/api/ai/magic-text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic, mode: tool.includes('logo') ? 'logo' : 'thumbnail' })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            list.innerHTML = data.ideas.map(idea => `
+                <div class="tool-card" style="padding: 15px; background: rgba(255,255,255,0.05); margin-bottom: 10px; cursor: pointer;" 
+                     onclick="addTextLayer('${idea.replace(/'/g, "\\'")}')">
+                    <p style="font-size: 13px; margin: 0;">${idea}</p>
+                    <small style="color: var(--primary); font-size: 10px;">Click to Add to Canvas</small>
+                </div>
+            `).join('');
+            results.style.display = 'flex';
+        }
+    } catch (e) {
+        showToast("AI is resting. Try again!");
+    } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+        if (window.lucide) lucide.createIcons();
+    }
+}
+
+function submitFounderSurvey() {
+    const input = document.getElementById('survey-input').value;
+    if (!input) return showToast("Share an idea first!");
+    showToast("Reward Claimed! 50 Credits Added.");
+    document.getElementById('survey-card').style.display = 'none';
+    // Ideally call API here
+}
