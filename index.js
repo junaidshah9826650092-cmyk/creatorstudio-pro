@@ -450,5 +450,28 @@ function showToast(msg) {
     // You can keep your existing toast logic here
 }
 
+// --- AUTH & SESSION ---
+function checkAuth() {
+    const user = localStorage.getItem('beast_user');
+    const display = document.getElementById('user-display');
+    const credits = document.getElementById('user-credits');
+
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    if (display) display.textContent = user;
+    if (credits) credits.textContent = localStorage.getItem('beast_credits') || '100';
+}
+
+function handleLogout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+
 // Ensure init runs
-window.onload = initBeast;
+window.onload = () => {
+    checkAuth();
+    initBeast();
+};

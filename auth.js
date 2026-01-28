@@ -391,17 +391,53 @@ if (signupForm) {
 // Social Login Functions
 // ==========================================
 
+function initGoogleAuth() {
+    if (typeof google === 'undefined') return;
+    google.accounts.id.initialize({
+        client_id: "792653327676-kn08t8c5vduqbmva15nngmrcfvuv2l60.apps.googleusercontent.com",
+        callback: onGoogleSignIn,
+        auto_select: false,
+        itp_support: true
+    });
+}
+
+function onGoogleSignIn(resp) {
+    try {
+        const base64Url = resp.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        const payload = JSON.parse(jsonPayload);
+        localStorage.setItem('beast_user', payload.name);
+        localStorage.setItem('beast_email', payload.email);
+        localStorage.setItem('beast_plan', 'FREE');
+        localStorage.setItem('beast_credits', '100');
+
+        showNotification(`Welcome, ${payload.name}! Authenticating...`, 'success');
+
+        setTimeout(() => {
+            window.location.href = 'studio.html';
+        }, 1500);
+    } catch (e) {
+        showNotification('Google Authentication Failed', 'error');
+    }
+}
+
 async function loginWithGoogle() {
-    showNotification('Google authentication coming soon!', 'info');
-    // TODO: Implement Google OAuth
-    // This would integrate with your backend's Google OAuth endpoint
+    initGoogleAuth();
+    google.accounts.id.prompt();
 }
 
 async function loginWithGithub() {
     showNotification('GitHub authentication coming soon!', 'info');
-    // TODO: Implement GitHub OAuth
-    // This would integrate with your backend's GitHub OAuth endpoint
 }
+
+// Check for Google Script on load
+window.addEventListener('load', () => {
+    if (window.google) initGoogleAuth();
+});
 
 // ==========================================
 // Notification System
