@@ -217,15 +217,23 @@ def generate_logo():
     finally:
         conn.close()
 
-@app.route('/api/user-status', methods=['POST'])
+@app.route('/api/user-status', methods=['GET', 'POST'])
 def get_user_status():
-    data = request.json
-    username = data.get('username')
+    if request.method == 'POST':
+        data = request.json or {}
+        username = data.get('username')
+    else:
+        username = request.args.get('username')
+
+    if not username:
+        return jsonify({"status": "error", "message": "Username required"}), 400
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT plan, credits FROM users WHERE username=?", (username,))
     user = c.fetchone()
     conn.close()
+    
     if user:
         return jsonify({"status": "success", "plan": user[0], "credits": user[1]})
     return jsonify({"status": "error", "message": "User not found"}), 404
