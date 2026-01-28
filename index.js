@@ -1,642 +1,454 @@
-// ==========================================
-// BEAST STUDIO - CANVA ENGINE (MULTI-LAYER)
-// ==========================================
+/**
+ * BEAST STUDIO - PRO DESIGN ENGINE v1.0
+ * Core: Object-Based State, Selection Engine, Transform Controls
+ */
 
-// Global State
 let canvas, ctx;
-let layers = []; // Array of objects {type, x, y, text, color, size, ...}
+let layers = [];
 let selectedId = null;
 let isDragging = false;
-let dragStart = { x: 0, y: 0 };
+let isResizing = false;
+let activeHandle = null; // 'nw', 'ne', 'sw', 'se'
+let dragStartX, dragStartY;
+let lastX, lastY;
 let showGrid = false;
-let uploadedImg = null; // Background image
 
-// Init
+// History for Undo/Redo
+let history = [];
+let historyIndex = -1;
+
+const SNAP_THRESHOLD = 8;
+const HANDLE_SIZE = 8;
+
+// --- INITIALIZATION ---
+
 function initBeast() {
     canvas = document.getElementById('beast-canvas');
-    if (!canvas) return; // Guard
-
+    if (!canvas) return;
     ctx = canvas.getContext('2d');
 
-    // Set HD Resolution
-    resizeCanvas(1920, 1080);
+    // Set default size (16:9)
+    resizeCanvas(1280, 720);
 
-    // Setup Listeners
-    setupCanvasEvents();
+    // Event Listeners
+    canvas.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    const MASTER_TEMPLATES = {
+        'gaming_reaction': {
+            name: 'Epic Reaction',
+            layers: [
+                { type: 'shape', shapeType: 'rect', x: 640, y: 360, width: 1280, height: 720, color: '#111827', opacity: 1, locked: true },
+                { type: 'shape', shapeType: 'triangle', x: 200, y: 200, width: 300, height: 300, color: '#ef4444', opacity: 0.8 },
+                { type: 'text', text: 'EPIC REACTION!', x: 640, y: 150, fontSize: 100, fontWeight: '900', color: '#fbbf24', fontFamily: 'Outfit' },
+                { type: 'text', text: 'You Won\'t Believe This...', x: 640, y: 550, fontSize: 50, fontWeight: '600', color: '#ffffff', fontFamily: 'Outfit' }
+            ]
+        },
+        'clean_vlog': {
+            name: 'Clean Minimal',
+            layers: [
+                { type: 'shape', shapeType: 'rect', x: 640, y: 360, width: 1280, height: 720, color: '#f8fafc', opacity: 1, locked: true },
+                { type: 'shape', shapeType: 'circle', x: 1000, y: 200, width: 400, height: 400, color: '#6366f1', opacity: 0.2 },
+                { type: 'text', text: 'MY MORNING ROUTINE', x: 400, y: 360, fontSize: 70, fontWeight: '900', color: '#1e293b', fontFamily: 'Outfit' },
+                { type: 'text', text: 'Episode 04', x: 400, y: 440, fontSize: 30, fontWeight: '500', color: '#64748b', fontFamily: 'Outfit' }
+            ]
+        }
+    };
 
-    // Initial Layer
-    if (layers.length === 0) {
-        addTextLayer('BEAST MODE');
-        layers[0].size = 120;
+    function loadBeastTemplate(key) {
+        const template = MASTER_TEMPLATES[key];
+        if (template) {
+            applyJSONTemplate(template);
+        }
     }
 
-    lucide.createIcons();
+    window.addEventListener('load', initBeast);
+    window.addEventListener('resize', () => { render(); });
+
+
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Add dummy layers for testing
+    addTextLayer("BEAST STUDIO", canvas.width / 2, canvas.height / 2);
+
+    // Image Upload Handling
+    const upload = document.getElementById('upload-input');
+    if (upload) {
+        upload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (f) => addImageLayer(f.target.result);
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    saveState(); // Initial save
     render();
 }
 
 function resizeCanvas(w, h) {
     canvas.width = w;
     canvas.height = h;
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto'; // Keep aspect ratio
+    const wrapper = canvas.parentElement;
+    // Scale canvas to fit viewport while maintaining quality
+    const scale = Math.min((wrapper.clientWidth - 40) / w, (wrapper.clientHeight - 40) / h);
+    canvas.style.transform = `scale(${scale})`;
     render();
 }
 
-// ==========================================
-// CORE LAYERS SYSTEM
-// ==========================================
+// --- OBJECT CREATION ---
 
-function addTextLayer(content = 'New Text') {
+function addTextLayer(text = "New Text", x = 100, y = 100) {
     const layer = {
-        id: Date.now(),
+        id: Date.now() + Math.random(),
         type: 'text',
-        text: content,
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        size: 80,
+        text: text,
+        x: x,
+        y: y,
+        fontSize: 60,
+        fontFamily: 'Outfit',
+        fontWeight: '900',
         color: '#ffffff',
-        font: 'Outfit',
-        weight: '800',
+        opacity: 1,
         width: 0, // Calculated on render
-        height: 0
+        height: 0,
+        rotation: 0
     };
     layers.push(layer);
     selectLayer(layer.id);
+    saveState();
     render();
-    showToast('Text Layer Added');
-}
-
-function selectLayer(id) {
-    selectedId = id;
-    const layer = layers.find(l => l.id === id);
-
-    if (layer) {
-        // Update UI controls
-        document.getElementById('editor-text').value = layer.text;
-        document.getElementById('size-slider').value = layer.size;
-        document.getElementById('text-color').value = layer.color;
-    }
-    render();
-}
-
-// ==========================================
-// RENDER ENGINE
-// ==========================================
-
-function render() {
-    if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
-
-    // 1. Clear & Background
-    ctx.clearRect(0, 0, w, h);
-    drawBackground(w, h);
-
-    // 2. Draw Layers
-    layers.forEach(layer => {
-        if (layer.type === 'text') {
-            drawTextLayer(layer);
-        }
-    });
-
-    // 3. Draw Selection Box
-    if (selectedId) {
-        const layer = layers.find(l => l.id === selectedId);
-        if (layer) drawSelectionBox(layer);
-    }
-
-    // 4. Overlays
-    if (showGrid) drawGridOverlay(w, h);
-}
-
-function drawBackground(w, h) {
-    const bgType = document.getElementById('gradient-type').value;
-    const color = document.getElementById('bg-color').value;
-
-    if (bgType === 'linear') {
-        let g = ctx.createLinearGradient(0, 0, w, h);
-        g.addColorStop(0, color);
-        g.addColorStop(1, '#000000');
-        ctx.fillStyle = g;
-    } else {
-        ctx.fillStyle = color;
-    }
-    ctx.fillRect(0, 0, w, h);
-}
-
-function drawTextLayer(layer) {
-    ctx.save();
-    ctx.font = `${layer.weight} ${layer.size}px '${layer.font}'`;
-    ctx.fillStyle = layer.color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetX = 5;
-    ctx.shadowOffsetY = 5;
-
-    ctx.fillText(layer.text, layer.x, layer.y);
-
-    // Measure for hit detection
-    const metrics = ctx.measureText(layer.text);
-    layer.width = metrics.width;
-    layer.height = layer.size; // Approx
-
-    ctx.restore();
-}
-
-function drawSelectionBox(layer) {
-    const padding = 20;
-    const w = layer.width + padding * 2;
-    const h = layer.height + padding * 2;
-
-    ctx.save();
-    ctx.strokeStyle = '#6366f1'; // Primary color
-    ctx.lineWidth = 4;
-    ctx.setLineDash([10, 5]);
-    // Center alignment adjustment
-    ctx.strokeRect(layer.x - w / 2, layer.y - h / 2, w, h);
-
-    // Handles
-    ctx.fillStyle = 'white';
-    ctx.fillRect(layer.x - w / 2 - 6, layer.y - h / 2 - 6, 12, 12);
-    ctx.fillRect(layer.x + w / 2 - 6, layer.y + h / 2 - 6, 12, 12);
-
-    ctx.restore();
-}
-
-function drawGridOverlay(w, h) {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = 1;
-
-    // Rule of thirds
-    ctx.beginPath();
-    ctx.moveTo(w / 3, 0); ctx.lineTo(w / 3, h);
-    ctx.moveTo(w * 2 / 3, 0); ctx.lineTo(w * 2 / 3, h);
-    ctx.moveTo(0, h / 3); ctx.lineTo(w, h / 3);
-    ctx.moveTo(0, h * 2 / 3); ctx.lineTo(w, h * 2 / 3);
-    ctx.stroke();
-    ctx.restore();
-}
-
-// ==========================================
-// INTERACTIVTY (DRAG & DROP)
-// ==========================================
-
-function setupCanvasEvents() {
-    // Mouse
-    canvas.addEventListener('mousedown', handleStart);
-    canvas.addEventListener('mousemove', handleMove);
-    canvas.addEventListener('mouseup', handleEnd);
-    // Touch
-    canvas.addEventListener('touchstart', (e) => handleStart(e.touches[0]));
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e.touches[0]); });
-    canvas.addEventListener('touchend', handleEnd);
-}
-
-function getCanvasCoords(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY
-    };
-}
-
-function handleStart(e) {
-    const pos = getCanvasCoords(e);
-
-    // Check Hit (Reverse order for top-most first)
-    // Simple box hit detection
-    const clickedId = layers.slice().reverse().find(l => {
-        const halfW = l.width / 2 + 20; // + padding
-        const halfH = l.height / 2 + 20;
-        return (pos.x >= l.x - halfW && pos.x <= l.x + halfW &&
-            pos.y >= l.y - halfH && pos.y <= l.y + halfH);
-    })?.id;
-
-    if (clickedId) {
-        selectLayer(clickedId);
-        isDragging = true;
-        dragStart = pos;
-    } else {
-        selectedId = null;
-        render(); // Clear selection
-    }
-}
-
-function handleMove(e) {
-    if (!isDragging || !selectedId) {
-        // Cursor management
-        const pos = getCanvasCoords(e);
-        const hovering = layers.some(l => {
-            const halfW = l.width / 2 + 20;
-            const halfH = l.height / 2 + 20;
-            return (pos.x >= l.x - halfW && pos.x <= l.x + halfW &&
-                pos.y >= l.y - halfH && pos.y <= l.y + halfH);
-        });
-        canvas.style.cursor = hovering ? 'move' : 'default';
-        return;
-    }
-
-    const pos = getCanvasCoords(e);
-    const dx = pos.x - dragStart.x;
-    const dy = pos.y - dragStart.y;
-
-    const layer = layers.find(l => l.id === selectedId);
-    if (layer) {
-        layer.x += dx;
-        layer.y += dy;
-        render();
-    }
-
-    dragStart = pos;
-}
-
-function handleEnd() {
-    isDragging = false;
-}
-
-// ==========================================
-// UI TABS SYSTEM
-// ==========================================
-function switchTab(tabName, element) {
-    // 1. Update Rail Icons
-    document.querySelectorAll('.nav-item').forEach(el => {
-        el.classList.remove('active');
-        el.querySelector('div').style.background = 'transparent';
-        el.style.color = '#94a3b8';
-    });
-
-    // Activate clicked
-    if (element) {
-        element.classList.add('active');
-        element.querySelector('div').style.background = 'rgba(255,255,255,0.05)';
-        element.style.color = tabName === 'magic' ? '#fbbf24' : 'white';
-    } else {
-        // Fallback if called programmatically
-        const target = document.querySelector(`.nav-item[onclick*="'${tabName}'"]`);
-        if (target) {
-            target.classList.add('active');
-            target.querySelector('div').style.background = 'rgba(255,255,255,0.05)';
-        }
-    }
-
-    // 2. Show Content Panel
-    document.querySelectorAll('.panel-content').forEach(el => el.style.display = 'none');
-    document.getElementById(`tab-${tabName}`).style.display = 'block';
-}
-
-// ==========================================
-// UI BINDINGS
-// ==========================================
-
-// Typography Inputs
-document.getElementById('editor-text').addEventListener('input', (e) => {
-    if (selectedId) {
-        const layer = layers.find(l => l.id === selectedId);
-        layer.text = e.target.value;
-        render();
-    }
-});
-
-document.getElementById('size-slider').addEventListener('input', (e) => {
-    if (selectedId) {
-        const layer = layers.find(l => l.id === selectedId);
-        layer.size = parseInt(e.target.value);
-        render();
-    }
-});
-
-document.getElementById('text-color').addEventListener('input', (e) => {
-    if (selectedId) {
-        const layer = layers.find(l => l.id === selectedId);
-        layer.color = e.target.value;
-        render();
-    }
-});
-
-document.getElementById('bg-color').addEventListener('input', render);
-document.getElementById('gradient-type').addEventListener('change', render);
-
-document.querySelectorAll('.preset-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-
-        const type = chip.dataset.type;
-        if (type === 'yt-thumb') resizeCanvas(1920, 1080);
-        if (type === 'logo') resizeCanvas(1080, 1080);
-        if (type === 'insta') resizeCanvas(1080, 1350);
-        if (type === 'ios') resizeCanvas(1024, 1024);
-
-        showToast('Canvas Resized: ' + type);
-    });
-});
-
-// Helpers
-function toggleGrid() {
-    showGrid = !showGrid;
-    render();
-    showToast(showGrid ? "Grid ON" : "Grid OFF");
-}
-
-function showToast(msg) {
-    let toast = document.getElementById('beast-toast');
-    if (!toast) {
-        // ... (Style same as before, injecting if needed or assume existent)
-        toast = document.createElement('div');
-        toast.id = 'beast-toast';
-        toast.style.cssText = "position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#0f172a; color:white; padding:10px 20px; border-radius:50px; z-index:9999;";
-        document.body.appendChild(toast);
-    }
-    toast.innerText = msg;
-    toast.style.display = 'block';
-    setTimeout(() => toast.style.display = 'none', 2000);
-}
-
-// ==========================================
-// LAYER MANAGEMENT SYSTEM (CANVA PRO)
-// ==========================================
-
-function updateOpacity(val) {
-    if (!selectedId) return;
-    const layer = layers.find(l => l.id === selectedId);
-    if (layer) {
-        layer.opacity = parseFloat(val);
-        render();
-    }
-}
-
-function deleteLayer() {
-    if (!selectedId) return;
-    layers = layers.filter(l => l.id !== selectedId);
-    selectedId = null;
-    render();
-    showToast("Layer Deleted");
-}
-
-function duplicateLayer() {
-    if (!selectedId) return;
-    const original = layers.find(l => l.id === selectedId);
-    if (original) {
-        // Deep copy the object
-        const copy = JSON.parse(JSON.stringify(original));
-        copy.id = Date.now();
-        copy.x += 20; // Offset slightly
-        copy.y += 20;
-        layers.push(copy);
-        selectLayer(copy.id);
-        render();
-        showToast("Layer Duplicated");
-    }
-}
-
-function moveLayer(direction) {
-    if (!selectedId) return;
-    const index = layers.findIndex(l => l.id === selectedId);
-    if (index === -1) return;
-
-    if (direction === 'up' && index < layers.length - 1) {
-        // Swap with next
-        [layers[index], layers[index + 1]] = [layers[index + 1], layers[index]];
-    } else if (direction === 'down' && index > 0) {
-        // Swap with prev
-        [layers[index], layers[index - 1]] = [layers[index - 1], layers[index]];
-    }
-    render();
-}
-
-// Update Render for Opacity
-function render() {
-    if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
-
-    ctx.clearRect(0, 0, w, h);
-    drawBackground(w, h);
-
-    layers.forEach(layer => {
-        ctx.save();
-        ctx.globalAlpha = layer.opacity !== undefined ? layer.opacity : 1.0; // Opacity Support
-
-        if (layer.type === 'text') {
-            drawTextLayer(layer);
-        } else if (layer.type === 'image') {
-            ctx.drawImage(layer.img, layer.x - layer.width / 2, layer.y - layer.height / 2, layer.width, layer.height);
-        }
-        ctx.restore();
-    });
-
-    if (selectedId) {
-        const layer = layers.find(l => l.id === selectedId);
-        if (layer) drawSelectionBox(layer);
-    }
-
-    if (showGrid) drawGridOverlay(w, h);
-}
-
-// ==========================================
-// FILE UPLOADS SYSTEM
-// ==========================================
-
-// Hidden Input Change Listener (Add this element in HTML next step)
-function handleFileUpload(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            addImageLayer(e.target.result);
-            showToast("Image Uploaded Successfully");
-
-            // Add to uploads gallery
-            const gallery = document.getElementById('uploads-gallery');
-            if (gallery) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.style.width = "48%";
-                img.style.aspectRatio = "1";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
-                img.style.cursor = "pointer";
-                img.onclick = () => addImageLayer(e.target.result);
-                gallery.appendChild(img);
-            }
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
 }
 
 function addImageLayer(src) {
     const img = new Image();
     img.onload = () => {
-        // Fit to canvas if too big
         let w = img.width;
         let h = img.height;
-        if (w > 500) {
-            const ratio = 500 / w;
-            w = 500;
-            h = h * ratio;
-        }
+        if (w > 600) { h *= 600 / w; w = 600; }
 
         const layer = {
-            id: Date.now(),
+            id: Date.now() + Math.random(),
             type: 'image',
             img: img,
+            src: src,
             x: canvas.width / 2,
             y: canvas.height / 2,
             width: w,
-            height: h
+            height: h,
+            opacity: 1,
+            rotation: 0
         };
         layers.push(layer);
         selectLayer(layer.id);
-        render(); // Needs drawImage update
+        saveState();
+        render();
     };
     img.src = src;
 }
 
-// Update Render for Images
-function render() {
-    if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
+// --- SELECTION & INTERACTION ---
 
-    // 1. Background
-    // ... (Keep existing background logic) ...
-    ctx.clearRect(0, 0, w, h);
-    drawBackground(w, h);
+function handleMouseDown(e) {
+    const { x, y } = getMousePos(e);
 
-    // 2. Layers
-    layers.forEach(layer => {
-        if (layer.type === 'text') {
-            drawTextLayer(layer);
-        } else if (layer.type === 'image') {
-            // Draw Image Centered
-            ctx.save();
-            ctx.drawImage(layer.img, layer.x - layer.width / 2, layer.y - layer.height / 2, layer.width, layer.height);
-            ctx.restore();
-        }
-    });
-
-    // 3. Selection
+    // 1. Check if clicking handles of selected object
     if (selectedId) {
         const layer = layers.find(l => l.id === selectedId);
-        if (layer) drawSelectionBox(layer);
-    }
-
-    if (showGrid) drawGridOverlay(w, h);
-}
-
-// MISSING MAGIC TOOLS
-function triggerMagicEraser() {
-    if (!selectedId) { showToast("Select an image to erase!"); return; }
-    showToast("🧹 Eraser Tool Active (Simulated)");
-    canvas.style.cursor = 'crosshair';
-}
-
-function triggerMagicExpand() {
-    if (!selectedId) { showToast("Select an image to expand!"); return; }
-    showToast("↔️ Expanding Image 16:9 (Simulated)");
-    // Logic to upscale/outpaint would go here
-}
-
-// 1. Magic Media (Text to Image)
-function openMagicMedia() {
-    openAIModal(); // Reusing existing modal
-    document.getElementById('ai-btn-text').innerText = "GENERATE MEDIA";
-    showToast("Magic Media: Describe your image");
-}
-
-// 2. Magic Write (Contextual Copywriter)
-async function triggerMagicWrite() {
-    if (!selectedId) {
-        showToast("Select text layer first!");
-        return;
-    }
-
-    const layer = layers.find(l => l.id === selectedId);
-    if (layer.type !== 'text') return;
-
-    showToast("✨ Magic Write thinking...");
-
-    // Simulate API call to Magic Write Endpoint
-    // In production: fetch('api/ai/magic-text', { method: 'POST', body: JSON.stringify({ topic: layer.text, mode: 'slogan' }) })
-
-    // Simulating "Context Aware" Rewrite
-    const variants = [
-        "Elevate Your Brand",
-        "Design Future Now",
-        "Ultimate Creator Tools",
-        "Beast Mode Activated"
-    ];
-
-    // Fake typing effect
-    setTimeout(() => {
-        layer.text = variants[Math.floor(Math.random() * variants.length)];
-        render();
-        showToast("✨ text rewritten!");
-    }, 1500);
-}
-
-// 6. Magic Switch (Multi-Format Engine)
-function triggerMagicSwitch() {
-    // Simulating "Layout Recognition"
-    showToast("✨ Analyzing Layout...");
-
-    setTimeout(() => {
-        // Toggle between Square and Wide
-        if (canvas.width === 1920) {
-            resizeCanvas(1080, 1080); // Switch to Post
-            showToast("Switched to Square Post (1:1)");
-        } else {
-            resizeCanvas(1920, 1080); // Switch to Thumbnail
-            showToast("Switched to Thumbnail (16:9)");
+        if (layer && !layer.locked) {
+            const handle = getHandleAt(x, y, layer);
+            if (handle) {
+                isResizing = true;
+                activeHandle = handle;
+                return;
+            }
         }
+    }
 
-        // Auto Reposition Logic (Simple)
-        layers.forEach(l => {
-            l.x = canvas.width / 2;
-            l.y = canvas.height / 2;
-        });
+    // 2. Check hit-detection for layers (top to bottom)
+    const hitLayer = [...layers].reverse().find(l => !l.hidden && isPointInLayer(x, y, l));
+
+    if (hitLayer) {
+        selectLayer(hitLayer.id);
+        if (!hitLayer.locked) {
+            isDragging = true;
+            dragStartX = x - hitLayer.x;
+            dragStartY = y - hitLayer.y;
+        }
+    } else {
+        selectedId = null;
         render();
-    }, 1000);
+    }
 }
 
-// 7. Magic Morph (Texture & Effects)
-function triggerMagicMorph() {
-    if (!selectedId) {
-        showToast("Select a layer to Morph!");
+function getHandleAt(x, y, l) {
+    const hw = l.width / 2;
+    const hh = l.height / 2;
+    const handles = {
+        'se': [l.x + hw, l.y + hh],
+        'sw': [l.x - hw, l.y + hh],
+        'ne': [l.x + hw, l.y - hh],
+        'nw': [l.x - hw, l.y - hh]
+    };
+
+    for (const [key, [hx, hy]] of Object.entries(handles)) {
+        if (Math.abs(x - hx) < 15 && Math.abs(y - hy) < 15) return key;
+    }
+    return null;
+}
+
+function handleMouseMove(e) {
+    if (!isDragging && !isResizing) {
+        // Just update cursor
+        updateCursor(e);
         return;
     }
 
+    const { x, y } = getMousePos(e);
     const layer = layers.find(l => l.id === selectedId);
+    if (!layer) return;
 
-    // Cycle through effects
-    const effects = [
-        { color: '#fbbf24', shadow: '#b45309', font: 'Outfit' }, // Gold
-        { color: '#22d3ee', shadow: '#0891b2', font: 'Courier New' }, // Cyber
-        { color: '#f472b6', shadow: '#be185d', font: 'Impact' },     // Pop
-        { color: '#ffffff', shadow: '#000000', font: 'Outfit' }      // Reset
-    ];
-
-    const randomEffect = effects[Math.floor(Math.random() * effects.length)];
-
-    showToast("✨ Applying Magic Texture...");
-
-    layer.color = randomEffect.color;
-    layer.font = randomEffect.font;
-    // Note: Shadow logic is in render(), simplistic here
+    if (isDragging) {
+        layer.x = x - dragStartX;
+        layer.y = y - dragStartY;
+        applySnapping(layer);
+    } else if (isResizing) {
+        resizeLayer(layer, x, y);
+    }
 
     render();
 }
 
-// Init
-window.addEventListener('resize', () => {
-    // Just re-render, don't reset
+function handleMouseUp() {
+    if (isDragging || isResizing) saveState();
+    isDragging = false;
+    isResizing = false;
+    activeHandle = null;
+}
+
+function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
-    // Maybe adjust CSS width? Already 100%
-});
-window.addEventListener('load', initBeast);
+    const scale = canvas.width / rect.width;
+    return {
+        x: (e.clientX - rect.left) * scale,
+        y: (e.clientY - rect.top) * scale
+    };
+}
+
+function isPointInLayer(px, py, l) {
+    // Basic rect hit detection (Can be expanded with rotation support)
+    const halfW = l.width / 2;
+    const halfH = l.height / 2;
+    return px >= l.x - halfW && px <= l.x + halfW &&
+        py >= l.y - halfH && py <= l.y + halfH;
+}
+
+function resizeLayer(l, mx, my) {
+    const dx = mx - l.x;
+    const dy = my - l.y;
+
+    if (activeHandle === 'se') {
+        l.width = Math.abs(dx) * 2;
+        l.height = Math.abs(dy) * 2;
+    } else if (activeHandle === 'ne') {
+        l.width = Math.abs(dx) * 2;
+        l.height = Math.abs(dy) * 2;
+    }
+    // Simplistic scaling for demo, can be mapped per handle
+}
+
+// --- SNAPPING ENGINE ---
+
+function applySnapping(layer) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    if (Math.abs(layer.x - centerX) < SNAP_THRESHOLD) layer.x = centerX;
+    if (Math.abs(layer.y - centerY) < SNAP_THRESHOLD) layer.y = centerY;
+}
+
+// --- RENDERING ENGINE ---
+
+function render() {
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+
+    layers.forEach(layer => {
+        if (layer.hidden) return; // SKIP HIDDEN
+
+        ctx.save();
+        ctx.globalAlpha = layer.opacity;
+        ctx.translate(layer.x, layer.y);
+        ctx.rotate(layer.rotation * Math.PI / 180);
+
+        if (layer.type === 'text') {
+            ctx.font = `${layer.fontWeight} ${layer.fontSize}px ${layer.fontFamily}`;
+            ctx.fillStyle = layer.color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(layer.text, 0, 0);
+
+            const metrics = ctx.measureText(layer.text);
+            layer.width = metrics.width + 20;
+            layer.height = layer.fontSize * 1.2;
+        } else if (layer.type === 'image') {
+            ctx.drawImage(layer.img, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
+        } else if (layer.type === 'shape') {
+            ctx.fillStyle = layer.color;
+            if (layer.shapeType === 'rect') {
+                ctx.fillRect(-layer.width / 2, -layer.height / 2, layer.width, layer.height);
+            } else if (layer.shapeType === 'circle') {
+                ctx.beginPath();
+                ctx.ellipse(0, 0, layer.width / 2, layer.height / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (layer.shapeType === 'triangle') {
+                ctx.beginPath();
+                ctx.moveTo(0, -layer.height / 2);
+                ctx.lineTo(layer.width / 2, layer.height / 2);
+                ctx.lineTo(-layer.width / 2, layer.height / 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        ctx.restore();
+    });
+
+    if (selectedId) {
+        const selLayer = layers.find(l => l.id === selectedId);
+        if (selLayer && !selLayer.hidden) drawSelectionBox(selLayer);
+    }
+
+    if (showGrid) drawGrid();
+    updateLayerPanel();
+}
+
+function drawBackground() {
+    ctx.fillStyle = '#1e293b'; // App default BG sync
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawSelectionBox(l) {
+    ctx.save();
+    ctx.translate(l.x, l.y);
+    ctx.rotate(l.rotation * Math.PI / 180);
+
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2;
+    const hw = l.width / 2;
+    const hh = l.height / 2;
+
+    ctx.strokeRect(-hw - 4, -hh - 4, l.width + 8, l.height + 8);
+
+    // Draw Resize Handles
+    ctx.fillStyle = '#ffffff';
+    const handles = [
+        [-hw - 4, -hh - 4], [hw + 4, -hh - 4], [-hw - 4, hh + 4], [hw + 4, hh + 4]
+    ];
+    handles.forEach(([hx, hy]) => {
+        ctx.fillRect(hx - 4, hy - 4, 8, 8);
+        ctx.strokeRect(hx - 4, hy - 4, 8, 8);
+    });
+
+    ctx.restore();
+}
+
+// --- UTILITIES ---
+
+function selectLayer(id) {
+    selectedId = id;
+    render();
+}
+
+let clipboardLayer = null;
+
+function setBeastPreset(ratio) {
+    let w, h;
+    if (ratio === '16:9') { w = 1280; h = 720; }
+    else if (ratio === '1:1') { w = 1080; h = 1080; }
+    else if (ratio === '9:16') { w = 720; h = 1280; }
+
+    resizeCanvas(w, h);
+    showToast(`Canvas resized to ${ratio}`);
+}
+
+function handleKeyDown(e) {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedId) {
+            layers = layers.filter(l => l.id !== selectedId);
+            selectedId = null;
+            saveState();
+            render();
+        }
+    }
+
+    if (e.ctrlKey) {
+        if (e.key === 'z') { historyUndo(); e.preventDefault(); }
+        if (e.key === 'd') { duplicateLayer(); e.preventDefault(); }
+        if (e.key === 'c') { copyLayer(); e.preventDefault(); }
+        if (e.key === 'v') { pasteLayer(); e.preventDefault(); }
+    }
+}
+
+function copyLayer() {
+    if (!selectedId) return;
+    const l = layers.find(l => l.id === selectedId);
+    clipboardLayer = JSON.stringify(l);
+    showToast("Layer Copied");
+}
+
+function pasteLayer() {
+    if (!clipboardLayer) return;
+    const data = JSON.parse(clipboardLayer);
+    data.id = Date.now() + Math.random();
+    data.x += 20;
+    data.y += 20;
+    layers.push(data);
+    selectLayer(data.id);
+    saveState();
+    showToast("Layer Pasted");
+}
+
+function duplicateLayer() {
+    if (!selectedId) return;
+    const original = layers.find(l => l.id === selectedId);
+    const copy = { ...original, id: Date.now() + Math.random(), x: original.x + 20, y: original.y + 20 };
+    layers.push(copy);
+    selectLayer(copy.id);
+    saveState();
+}
+
+function saveState() {
+    const state = JSON.stringify(layers);
+    if (history[historyIndex] === state) return;
+    history = history.slice(0, historyIndex + 1);
+    history.push(state);
+    historyIndex++;
+}
+
+function historyUndo() {
+    if (historyIndex > 0) {
+        historyIndex--;
+        layers = JSON.parse(history[historyIndex]);
+        // Re-hydrate images because JSON stringify loses them
+        layers.forEach(l => {
+            if (l.type === 'image') {
+                l.img = new Image();
+                l.img.src = l.src;
+            }
+        });
+        render();
+    }
+}
+
+function showToast(msg) {
+    console.log("Toast:", msg);
+    // You can keep your existing toast logic here
+}
+
+// Ensure init runs
+window.onload = initBeast;

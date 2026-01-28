@@ -2,6 +2,8 @@ import sqlite3
 import requests
 import os
 import base64
+import json
+import google.generativeai as genai
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
@@ -13,6 +15,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'beast_studio.db')
 DESIGNS_PATH = os.path.join(BASE_DIR, 'designs')
 BEAST_SERVER_API_KEY = os.environ.get("BEAST_API_KEY", "sk-or-v1-xxxxxxxx") # Security: Use Env Var
+
+# Initialize Gemini
+genai.configure(api_key=BEAST_SERVER_API_KEY)
+# We handle both OpenRouter (legacy) and Gemini (new tools) locally
+gemini_model = genai.GenerativeModel('gemini-pro')
 
 @app.after_request
 def add_security_headers(response):
@@ -34,8 +41,9 @@ def init_db():
                       email TEXT,
                       password TEXT, 
                       plan TEXT DEFAULT 'FREE', 
-                      credits INTEGER DEFAULT 999999,
-                      last_login DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+                      credits INTEGER DEFAULT 100,
+                      last_login DATETIME DEFAULT CURRENT_TIMESTAMP,
+                      last_reset DATE DEFAULT CURRENT_DATE)''')
         c.execute('''CREATE TABLE IF NOT EXISTS designs 
                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                       username TEXT, 
@@ -306,13 +314,28 @@ def login():
         c.execute("UPDATE users SET last_login=CURRENT_TIMESTAMP, email=? WHERE username=?", (username, username))
         conn.commit()
     
+    # Daily Credit Reset Logic
+    c.execute("SELECT credits, last_reset FROM users WHERE username=?", (username,))
+    row = c.fetchone()
+    if row:
+        curr_credits, last_reset = row[0], row[1]
+        from datetime import date
+        today = str(date.today())
+        
+        if last_reset != today:
+            # Top up to 100 if they are below (Free users)
+            new_credits = max(curr_credits, 100)
+            c.execute("UPDATE users SET credits=?, last_reset=? WHERE username=?", (new_credits, today, username))
+            conn.commit()
+            credits = new_credits
+
     conn.close()
     return jsonify({
         "status": "success", 
         "user": username, 
         "plan": plan, 
         "credits": credits,
-        "message": f"Welcome {username}! Plan: {plan}"
+        "message": f"Welcome back! Daily credits refilled." if row and row[1] != str(date.today()) else f"Welcome {username}!"
     })
 
 @app.route('/api/save-design', methods=['POST'])
@@ -408,6 +431,116 @@ def update_credits():
 @app.route('/health')
 def health_check():
     return "OK", 200
+
+@app.route('/api/ai/creator-studio', methods=['POST'])
+def creator_studio_api():
+    """Gemini-powered Creator Studio with Credit Management"""
+    data = request.json
+    username = data.get('username')
+    tool_type = data.get('tool_type') # 'title', 'script', 'hook', 'thumbnail', 'hashtag'
+    topic = data.get('topic')
+    
+    if not username or not tool_type or not topic:
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    # 1. Credit Check Logic
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT credits FROM users WHERE username = ?", (username,))
+        user_row = cursor.fetchone()
+        
+        # Default to 100 if user doesn't exist (simulated for guest)
+        credits = user_row[0] if user_row else 100
+        cost = 5 
+
+        if credits < cost:
+            conn.close()
+            return jsonify({"status": "error", "message": "Insufficient credits! Refill to continue."}), 403
+
+        # 2. Tool Prompt Engineering
+        prompts = {
+            "title": f"Generate 10 viral YouTube titles for: {topic}. Return ONLY as a JSON list of strings.",
+            "script": f"Write a 30s Reel script for: {topic}. Return ONLY JSON with keys 'hook', 'body', 'onscreen_text' (list).",
+            "hook": f"Generate 5 scroll-stopping hooks for: {topic}. Return ONLY as a JSON list.",
+            "thumbnail": f"Generate 5 thumbnail text ideas for: {topic}. Return ONLY as a JSON list.",
+            "hashtag": f"Generate 15 hashtags for: {topic}. Return ONLY as a JSON list.",
+            "viral_pack": f"Generate a FULL content pack for: {topic}. Return ONLY JSON with keys: 'titles' (list of 5), 'hooks' (list of 3), 'script' (object with hook, body keys), 'thumbnail_text' (list of 3), 'hashtags' (list of 10).",
+            "style_analyzer": f"Analyze this YouTube title: '{topic}'. Return ONLY JSON with keys: 'curiosity_score' (1-10), 'emotion' (name), 'improvement' (string suggestion)."
+        }
+
+        # Premium Cost Adjustment
+        if tool_type == "viral_pack": cost = 15
+        elif tool_type == "style_analyzer": cost = 8
+
+        prompt = prompts.get(tool_type)
+        if not prompt:
+            conn.close()
+            return jsonify({"status": "error", "message": "Invalid tool"}), 400
+
+        # Call Gemini
+        response = gemini_model.generate_content(prompt)
+        text = response.text
+        # Safety cleaning for JSON
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text:
+            text = text.split("```")[1].split("```")[0].strip()
+        
+        # Remove any leading/trailing garbage
+        text = text.strip()
+        if not text.startswith('[') and not text.startswith('{'):
+             # Attempt to find the first bracket/brace
+             start_idx = min(text.find('['), text.find('{')) if '[' in text and '{' in text else (text.find('[') if '[' in text else text.find('{'))
+             end_idx = max(text.rfind(']'), text.rfind('}')) if ']' in text and '}' in text else (text.rfind(']') if ']' in text else text.rfind('}'))
+             if start_idx != -1 and end_idx != -1:
+                 text = text[start_idx:end_idx+1]
+
+        result_data = json.loads(text)
+
+        # 3. Deduct Credits
+        if user_row:
+            cursor.execute("UPDATE users SET credits = credits - ? WHERE username = ?", (cost, username))
+            conn.commit()
+
+        conn.close()
+        return jsonify({
+            "status": "success", 
+            "result": result_data,
+            "remaining_credits": credits - cost
+        })
+
+    except Exception as e:
+        print(f"DEBUG AI: {str(e)}")
+        return jsonify({"status": "error", "message": "AI Generation Failed. Please try later."}), 500
+
+@app.route('/api/survey/submit', methods=['POST'])
+def submit_survey():
+    """Submit feedback and get 50 credits reward"""
+    data = request.json
+    username = data.get('username')
+    feedback = data.get('feedback') # Could be a dict or string
+    
+    if not username:
+        return jsonify({"status": "error", "message": "Login required"}), 401
+        
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # 1. Update credits
+        bonus = 50
+        c.execute("UPDATE users SET credits = credits + ? WHERE username = ?", (bonus, username))
+        
+        # 2. Log feedback (Simple table for now)
+        c.execute("CREATE TABLE IF NOT EXISTS surveys (id INTEGER PRIMARY KEY, username TEXT, data TEXT, date TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+        c.execute("INSERT INTO surveys (username, data) VALUES (?, ?)", (username, str(feedback)))
+        
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success", "message": "50 Credits added to your account! Thanks for helping us grow.", "new_credits_bonus": bonus})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
     # Running on 0.0.0.0 to allow mobile access on same WiFi
