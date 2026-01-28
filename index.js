@@ -360,6 +360,87 @@ function showToast(msg) {
 }
 
 // ==========================================
+// LAYER MANAGEMENT SYSTEM (CANVA PRO)
+// ==========================================
+
+function updateOpacity(val) {
+    if (!selectedId) return;
+    const layer = layers.find(l => l.id === selectedId);
+    if (layer) {
+        layer.opacity = parseFloat(val);
+        render();
+    }
+}
+
+function deleteLayer() {
+    if (!selectedId) return;
+    layers = layers.filter(l => l.id !== selectedId);
+    selectedId = null;
+    render();
+    showToast("Layer Deleted");
+}
+
+function duplicateLayer() {
+    if (!selectedId) return;
+    const original = layers.find(l => l.id === selectedId);
+    if (original) {
+        // Deep copy the object
+        const copy = JSON.parse(JSON.stringify(original));
+        copy.id = Date.now();
+        copy.x += 20; // Offset slightly
+        copy.y += 20;
+        layers.push(copy);
+        selectLayer(copy.id);
+        render();
+        showToast("Layer Duplicated");
+    }
+}
+
+function moveLayer(direction) {
+    if (!selectedId) return;
+    const index = layers.findIndex(l => l.id === selectedId);
+    if (index === -1) return;
+
+    if (direction === 'up' && index < layers.length - 1) {
+        // Swap with next
+        [layers[index], layers[index + 1]] = [layers[index + 1], layers[index]];
+    } else if (direction === 'down' && index > 0) {
+        // Swap with prev
+        [layers[index], layers[index - 1]] = [layers[index - 1], layers[index]];
+    }
+    render();
+}
+
+// Update Render for Opacity
+function render() {
+    if (!ctx) return;
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+    drawBackground(w, h);
+
+    layers.forEach(layer => {
+        ctx.save();
+        ctx.globalAlpha = layer.opacity !== undefined ? layer.opacity : 1.0; // Opacity Support
+
+        if (layer.type === 'text') {
+            drawTextLayer(layer);
+        } else if (layer.type === 'image') {
+            ctx.drawImage(layer.img, layer.x - layer.width / 2, layer.y - layer.height / 2, layer.width, layer.height);
+        }
+        ctx.restore();
+    });
+
+    if (selectedId) {
+        const layer = layers.find(l => l.id === selectedId);
+        if (layer) drawSelectionBox(layer);
+    }
+
+    if (showGrid) drawGridOverlay(w, h);
+}
+
+// ==========================================
 // FILE UPLOADS SYSTEM
 // ==========================================
 

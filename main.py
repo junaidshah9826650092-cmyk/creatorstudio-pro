@@ -405,8 +405,28 @@ def update_credits():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/health')
+def health_check():
+    return "OK", 200
+
 if __name__ == '__main__':
     # Running on 0.0.0.0 to allow mobile access on same WiFi
     port = int(os.environ.get("PORT", 5000))
-    print(f"🚀 Beast Backend is running on port {port}")
+    
+    # Auto-detect Local IP
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+    except:
+        local_ip = "127.0.0.1"
+
+    print("\n" + "="*50)
+    print(f"🚀 BEAST STUDIO IS ONLINE!")
+    print(f"💻 PC Access:     http://localhost:{port}")
+    print(f"📱 Mobile Access: http://{local_ip}:{port}")
+    print("="*50 + "\n")
+    
     app.run(host='0.0.0.0', port=port, debug=True)

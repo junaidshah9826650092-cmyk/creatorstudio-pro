@@ -185,6 +185,25 @@
                             a little bit of body text</button>
 
                         <div style="border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                            <span class="section-label">Layer Actions</span>
+                            <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                                <button class="btn-premium" onclick="duplicateLayer()" title="Duplicate"
+                                    style="flex:1; padding:10px;"><i data-lucide="copy" size="16"></i></button>
+                                <button class="btn-premium" onclick="deleteLayer()" title="Delete"
+                                    style="flex:1; padding:10px; background:rgba(239,68,68,0.2); color:#ef4444;"><i
+                                        data-lucide="trash-2" size="16"></i></button>
+                                <button class="btn-premium" onclick="moveLayer('up')" title="Bring Forward"
+                                    style="flex:1; padding:10px;"><i data-lucide="arrow-up-circle"
+                                        size="16"></i></button>
+                                <button class="btn-premium" onclick="moveLayer('down')" title="Send Backward"
+                                    style="flex:1; padding:10px;"><i data-lucide="arrow-down-circle"
+                                        size="16"></i></button>
+                            </div>
+
+                            <span class="section-label">Opacity</span>
+                            <input type="range" class="input-box" min="0" max="1" step="0.1" value="1"
+                                oninput="updateOpacity(this.value)" style="margin-bottom: 15px;">
+
                             <span class="section-label">Edit Selection</span>
                             <input type="text" id="editor-text" class="input-box" placeholder="Select text..."
                                 style="margin-bottom: 10px;">
@@ -275,9 +294,21 @@
                         <i data-lucide="image-plus"></i>
                         <span>Upload</span>
                     </div>
-                    <div class="tool-item" onclick="resetBeast()">
-                        <i data-lucide="rotate-ccw"></i>
-                        <span>Reset</span>
+                    <div class="tool-item" onclick="toggleGrid()">
+                        <i data-lucide="grid-3x3"></i>
+                        <span>Grid</span>
+                    </div>
+
+                    <!-- Zoom Controls -->
+                    <div style="height: 30px; border-left: 1px solid rgba(255,255,255,0.1); margin: 0 10px;"></div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="zoom-in" size="16"></i>
+                        <input type="range" min="0.1" max="2" step="0.1" value="1" oninput="setZoom(this.value)"
+                            style="width: 100px; accent-color: var(--primary-bright);">
+                        <span id="zoom-val" style="font-size: 12px; min-width: 40px;">100%</span>
+                        <button class="btn-premium" onclick="setZoom(1)"
+                            style="padding: 2px 8px; font-size: 10px; height: auto;">Reset</button>
                     </div>
                 </div>
                 <input type="file" id="upload-input" hidden accept="image/*">
