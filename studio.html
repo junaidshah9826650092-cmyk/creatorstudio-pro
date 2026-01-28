@@ -7,7 +7,7 @@
     <title>Beast Studio Editor | Professional Creator Tools</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css?v=3.2">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -20,6 +20,7 @@
             google_ad_client: "ca-pub-6894674624448360",
         });
     </script>
+    <script src="index.js?v=3.2" defer></script>
     <style>
         .toast-container {
             position: fixed;
@@ -593,7 +594,25 @@
     </a>
 
     <div id="toast-container" class="toast-container"></div>
-    <script src="index.js"></script>
+    <script>
+        // Global error catcher for user debugging
+        window.onerror = function (msg, url, line) {
+            const container = document.getElementById('toast-container');
+            if (container) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.style.border = '1px solid #ef4444';
+                toast.textContent = "Error: " + msg.split('\n')[0];
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 5000);
+            }
+            return false;
+        };
+        // Initial Lucide icons if script loads late
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 
 </html>

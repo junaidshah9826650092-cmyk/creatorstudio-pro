@@ -59,18 +59,8 @@ function initBeast() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', () => { render(); });
 
-    // Image Upload Handling
-    const upload = document.getElementById('upload-input');
-    if (upload) {
-        upload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (f) => addImageLayer(f.target.result);
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+    // Initial Lucide check
+    if (window.lucide) lucide.createIcons();
 
     // Default Starting Layer
     if (layers.length === 0) {
@@ -78,7 +68,45 @@ function initBeast() {
     }
 
     saveState();
+    syncUserStatus();
     render();
+}
+
+function switchTab(tabId, el) {
+    // Hide all panels
+    document.querySelectorAll('.panel-content').forEach(p => p.style.display = 'none');
+    // Deactivate all nav items
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.remove('active');
+        n.style.color = '#94a3b8';
+    });
+
+    // Show selected
+    const target = document.getElementById('tab-' + tabId);
+    if (target) target.style.display = 'block';
+    el.classList.add('active');
+    el.style.color = tabId === 'magic' ? '#fbbf24' : '#fff';
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function updateCursor(e) {
+    if (isDragging || isResizing) return;
+    const { x, y } = getMousePos(e);
+
+    if (selectedId) {
+        const layer = layers.find(l => l.id === selectedId);
+        if (layer && !layer.locked) {
+            const handle = getHandleAt(x, y, layer);
+            if (handle) {
+                canvas.style.cursor = (handle === 'nw' || handle === 'se') ? 'nwse-resize' : 'nesw-resize';
+                return;
+            }
+        }
+    }
+
+    const hit = [...layers].reverse().find(l => !l.hidden && isPointInLayer(x, y, l));
+    canvas.style.cursor = hit ? 'move' : 'default';
 }
 
 function loadBeastTemplate(key) {
@@ -399,6 +427,32 @@ function render() {
     if (showGrid) drawGrid();
     updateLayerPanel();
     syncPropertyPanel();
+    if (window.lucide) lucide.createIcons();
+}
+
+function updateLayerPanel() {
+    const list = document.getElementById('layer-list');
+    if (!list) return;
+
+    if (layers.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: #64748b; font-size: 12px; margin-top: 40px;">No layers yet.</div>';
+        return;
+    }
+
+    list.innerHTML = [...layers].reverse().map(l => `
+        <div class="layer-item ${l.id === selectedId ? 'active' : ''}" onclick="selectLayer(${l.id})" 
+             style="background: ${l.id === selectedId ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)'}; 
+                    padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid ${l.id === selectedId ? 'var(--primary)' : 'transparent'}">
+            <i data-lucide="${l.type === 'text' ? 'type' : (l.type === 'image' ? 'image' : 'shapes')}" size="14"></i>
+            <span style="font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${l.type === 'text' ? l.text : l.type}
+            </span>
+            <div style="display: flex; gap: 5px;">
+                <i data-lucide="${l.locked ? 'lock' : 'unlock'}" size="12" style="opacity: 0.5"></i>
+                <i data-lucide="${l.hidden ? 'eye-off' : 'eye'}" size="12" style="opacity: 0.5"></i>
+            </div>
+        </div>
+    `).join('');
 }
 
 function toggleGrid() {
@@ -603,11 +657,129 @@ function showToast(msg) {
     }, 3000);
 }
 
+// --- UI MODALS ---
+
+function openAIModal() {
+    document.getElementById('ai-modal').style.display = 'flex';
+}
+
+function closeAIModal() {
+    document.getElementById('ai-modal').style.display = 'none';
+}
+
+function openPricingModal() {
+    document.getElementById('pricing-modal').style.display = 'flex';
+}
+
+function closePricingModal() {
+    document.getElementById('pricing-modal').style.display = 'none';
+}
+
+// --- AI SYNC & LOGIC ---
+
+async function syncUserStatus() {
+    const username = localStorage.getItem('beast_user');
+    if (!username) return;
+
+    try {
+        const res = await fetch(`/api/user-status?username=${username}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+            localStorage.setItem('beast_credits', data.credits);
+            localStorage.setItem('beast_plan', data.plan);
+            updateUserUI();
+        }
+    } catch (e) { console.error("Sync failed"); }
+}
+
+function updateUserUI() {
+    const credits = localStorage.getItem('beast_credits') || '0';
+    const plan = localStorage.getItem('beast_plan') || 'FREE';
+
+    const creditEl = document.getElementById('user-credits');
+    const upgradeBtn = document.getElementById('upgrade-btn');
+
+    if (creditEl) creditEl.textContent = credits;
+    if (upgradeBtn) {
+        upgradeBtn.textContent = plan === 'PRO' ? 'PRO PLAN' : (plan === 'BEAST' ? 'BEAST PLAN' : 'UPGRADE');
+        if (plan !== 'FREE') upgradeBtn.style.background = 'linear-gradient(45deg, #f59e0b, #ef4444)';
+    }
+}
+
+async function buyPlan(plan) {
+    const username = localStorage.getItem('beast_user');
+    showToast(`Initializing ${plan} Upgrade...`);
+
+    try {
+        const res = await fetch('/api/buy-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, plan })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            showToast(`Welcome to ${plan}!`);
+            syncUserStatus();
+            closePricingModal();
+        }
+    } catch (e) { showToast("Payment simulation failed"); }
+}
+
+async function generateWithAI() {
+    const prompt = document.getElementById('ai-prompt').value;
+    const apiKey = document.getElementById('ai-api-key').value;
+    const model = document.getElementById('ai-model').value;
+    const username = localStorage.getItem('beast_user');
+
+    if (!prompt) return showToast("Enter a prompt!");
+
+    const btn = document.getElementById('ai-btn-text');
+    btn.textContent = "GENERATING...";
+
+    try {
+        const response = await fetch('/api/generate-logo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, apiKey, model, username })
+        });
+        const data = await response.json();
+
+        if (data.image) {
+            addImageLayer(data.image);
+            closeAIModal();
+            syncUserStatus();
+            showToast("AI Masterpiece Created!");
+        } else {
+            showToast(data.message || "Generation Failed");
+        }
+    } catch (err) {
+        showToast("AI Connection Error");
+    } finally {
+        btn.textContent = "INITIALIZE GENERATION";
+    }
+}
+
+// Magic Placeholders
+function openMagicMedia() { switchTab('magic', document.querySelector('[onclick*="magic"]')); showToast("Magic Media Ready"); }
+function triggerMagicWrite() { showToast("Magic Write activated (Beta)"); }
+function triggerMagicSwitch() { showToast("Magic Switch enabled"); }
+function triggerMagicMorph() { showToast("Magic Morph starting..."); }
+function triggerMagicEraser() { showToast("Select object to erase"); }
+function triggerMagicExpand() { showToast("Expanding canvas..."); }
+
+function handleFileUpload(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (f) => addImageLayer(f.target.result);
+        reader.readAsDataURL(file);
+    }
+}
+
 // --- AUTH & SESSION ---
 function checkAuth() {
     const user = localStorage.getItem('beast_user');
     const display = document.getElementById('user-display');
-    const credits = document.getElementById('user-credits');
 
     if (!user) {
         window.location.href = 'login.html';
@@ -615,7 +787,7 @@ function checkAuth() {
     }
 
     if (display) display.textContent = user;
-    if (credits) credits.textContent = localStorage.getItem('beast_credits') || '100';
+    updateUserUI();
 }
 
 function handleLogout() {
