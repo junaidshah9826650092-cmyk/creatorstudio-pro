@@ -46,42 +46,23 @@ const HANDLE_SIZE = 8;
 
 function initBeast() {
     canvas = document.getElementById('beast-canvas');
-    if (!canvas) {
-        console.warn("Editor canvas not found. Skipping initialization.");
-        return;
-    }
+    if (!canvas) return;
     ctx = canvas.getContext('2d');
 
     // Set default size (16:9)
     resizeCanvas(1280, 720);
 
-    // Event Listeners (Canvas and Global)
+    // Event Listeners
     canvas.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('resize', debouncedResize);
+    window.addEventListener('resize', () => { render(); });
 
     // Initial Lucide check
-    requestAnimationFrame(() => {
-        if (window.lucide) lucide.createIcons();
-    });
+    if (window.lucide) lucide.createIcons();
 
-    // Load existing layers or default
-    const saved = localStorage.getItem('beast_last_design');
-    if (saved) {
-        try {
-            layers = JSON.parse(saved);
-            // Re-hydrate images
-            layers.forEach(l => {
-                if (l.type === 'image') {
-                    l.img = new Image();
-                    l.img.src = l.src;
-                }
-            });
-        } catch (e) { layers = []; }
-    }
-
+    // Default Starting Layer
     if (layers.length === 0) {
         addTextLayer("BEAST STUDIO", canvas.width / 2, canvas.height / 2);
     }
@@ -89,15 +70,6 @@ function initBeast() {
     saveState();
     syncUserStatus();
     render();
-    console.log("🚀 Beast Engine Ready. Layers:", layers.length);
-}
-
-let resizeTimeout;
-function debouncedResize() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        if (canvas) resizeCanvas(canvas.width, canvas.height);
-    }, 200);
 }
 
 function switchTab(tabId, el) {
@@ -123,7 +95,7 @@ function updateCursor(e) {
     const { x, y } = getMousePos(e);
 
     if (selectedId) {
-        const layer = layers.find(l => String(l.id) === String(selectedId));
+        const layer = layers.find(l => l.id === selectedId);
         if (layer && !layer.locked) {
             const handle = getHandleAt(x, y, layer);
             if (handle) {
@@ -151,11 +123,7 @@ function resizeCanvas(w, h) {
     canvas.width = w;
     canvas.height = h;
     const wrapper = canvas.parentElement;
-    if (!wrapper || wrapper.clientWidth < 100) {
-        canvas.style.transform = `scale(0.5)`; // Fallback
-        render();
-        return;
-    }
+    // Scale canvas to fit viewport while maintaining quality
     const scale = Math.min((wrapper.clientWidth - 40) / w, (wrapper.clientHeight - 40) / h);
     canvas.style.transform = `scale(${scale})`;
     render();
@@ -165,7 +133,7 @@ function resizeCanvas(w, h) {
 
 function addTextLayer(text = "New Text", x = 100, y = 100) {
     const layer = {
-        id: String(Date.now() + Math.random()),
+        id: Date.now() + Math.random(),
         type: 'text',
         text: text,
         x: x,
@@ -193,7 +161,7 @@ function addImageLayer(src) {
         if (w > 600) { h *= 600 / w; w = 600; }
 
         const layer = {
-            id: String(Date.now() + Math.random()),
+            id: Date.now() + Math.random(),
             type: 'image',
             img: img,
             src: src,
@@ -214,7 +182,7 @@ function addImageLayer(src) {
 
 function addShapeLayer(type) {
     const layer = {
-        id: String(Date.now() + Math.random()),
+        id: Date.now() + Math.random(),
         type: 'shape',
         shapeType: type,
         x: canvas.width / 2,
@@ -240,7 +208,7 @@ function deleteLayer() {
 }
 
 function moveLayer(dir) {
-    const idx = layers.findIndex(l => String(l.id) === String(selectedId));
+    const idx = layers.findIndex(l => l.id === selectedId);
     if (idx === -1) return;
 
     if (dir === 'up' && idx < layers.length - 1) {
@@ -289,7 +257,7 @@ function handleMouseDown(e) {
 
     // 1. Check if clicking handles of selected object
     if (selectedId) {
-        const layer = layers.find(l => String(l.id) === String(selectedId));
+        const layer = layers.find(l => l.id === selectedId);
         if (layer && !layer.locked) {
             const handle = getHandleAt(x, y, layer);
             if (handle) {
@@ -340,7 +308,7 @@ function handleMouseMove(e) {
     }
 
     const { x, y } = getMousePos(e);
-    const layer = layers.find(l => String(l.id) === String(selectedId));
+    const layer = layers.find(l => l.id === selectedId);
     if (!layer) return;
 
     if (isDragging) {
@@ -452,7 +420,7 @@ function render() {
     });
 
     if (selectedId) {
-        const selLayer = layers.find(l => String(l.id) === String(selectedId));
+        const selLayer = layers.find(l => l.id === selectedId);
         if (selLayer && !selLayer.hidden) drawSelectionBox(selLayer);
     }
 
@@ -472,9 +440,9 @@ function updateLayerPanel() {
     }
 
     list.innerHTML = [...layers].reverse().map(l => `
-        <div class="layer-item ${String(l.id) === String(selectedId) ? 'active' : ''}" onclick="selectLayer('${l.id}')" 
-             style="background: ${String(l.id) === String(selectedId) ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)'}; 
-                    padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid ${String(l.id) === String(selectedId) ? 'var(--primary)' : 'transparent'}">
+        <div class="layer-item ${l.id === selectedId ? 'active' : ''}" onclick="selectLayer(${l.id})" 
+             style="background: ${l.id === selectedId ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)'}; 
+                    padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid ${l.id === selectedId ? 'var(--primary)' : 'transparent'}">
             <i data-lucide="${l.type === 'text' ? 'type' : (l.type === 'image' ? 'image' : 'shapes')}" size="14"></i>
             <span style="font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 ${l.type === 'text' ? l.text : l.type}
@@ -546,13 +514,13 @@ function drawSelectionBox(l) {
 // --- UTILITIES ---
 
 function selectLayer(id) {
-    selectedId = String(id);
+    selectedId = id;
     render();
 }
 
 function syncPropertyPanel() {
     const propsPanel = document.getElementById('properties-panel');
-    const sel = layers.find(l => String(l.id) === String(selectedId));
+    const sel = layers.find(l => l.id === selectedId);
 
     if (!sel || !propsPanel) {
         if (propsPanel) propsPanel.style.display = 'none';
@@ -582,17 +550,13 @@ function syncPropertyPanel() {
 }
 
 function updateObject(key, value) {
-    const sel = layers.find(l => String(l.id) === String(selectedId));
+    const sel = layers.find(l => l.id === selectedId);
     if (!sel) return;
 
-    if (key === 'fontSize' || key === 'opacity') value = parseFloat(value);
+    if (key === 'fontSize') value = parseInt(value);
     sel[key] = value;
 
     render();
-}
-
-function updateOpacity(val) {
-    updateObject('opacity', val);
 }
 
 let clipboardLayer = null;
@@ -627,7 +591,7 @@ function handleKeyDown(e) {
 
 function copyLayer() {
     if (!selectedId) return;
-    const l = layers.find(l => String(l.id) === String(selectedId));
+    const l = layers.find(l => l.id === selectedId);
     clipboardLayer = JSON.stringify(l);
     showToast("Layer Copied");
 }
@@ -646,7 +610,7 @@ function pasteLayer() {
 
 function duplicateLayer() {
     if (!selectedId) return;
-    const original = layers.find(l => String(l.id) === String(selectedId));
+    const original = layers.find(l => l.id === selectedId);
     const copy = { ...original, id: Date.now() + Math.random(), x: original.x + 20, y: original.y + 20 };
     layers.push(copy);
     selectLayer(copy.id);
@@ -715,21 +679,17 @@ function closePricingModal() {
 
 async function syncUserStatus() {
     const username = localStorage.getItem('beast_user');
-    if (!username || username === 'Guest') return;
+    if (!username) return;
 
     try {
-        const res = await fetch(`/api/user-status?username=${encodeURIComponent(username)}`);
-        if (!res.ok) throw new Error("Sync failure");
+        const res = await fetch(`/api/user-status?username=${username}`);
         const data = await res.json();
-
         if (data.status === 'success') {
             localStorage.setItem('beast_credits', data.credits);
             localStorage.setItem('beast_plan', data.plan);
             updateUserUI();
         }
-    } catch (e) {
-        console.error("User sync failed, using local offline data.");
-    }
+    } catch (e) { console.error("Sync failed"); }
 }
 
 function updateUserUI() {
@@ -835,53 +795,8 @@ function handleLogout() {
     window.location.href = 'login.html';
 }
 
-// --- AI STUDIO (GEMINI POWERED) ---
-
-async function generateAIStudioContent() {
-    const topic = document.getElementById('ai-topic').value;
-    const tool = document.getElementById('ai-tool-type').value;
-    const btn = document.getElementById('ai-gen-btn');
-    const loading = document.getElementById('ai-loading');
-    const results = document.getElementById('ai-results-container');
-    const list = document.getElementById('ai-output-list');
-
-    if (!topic) return showToast("Bhai, topic toh batao!");
-
-    btn.disabled = true;
-    loading.style.display = 'block';
-    results.style.display = 'none';
-
-    try {
-        const res = await fetch('/api/ai/magic-text', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ topic, mode: tool.includes('logo') ? 'logo' : 'thumbnail' })
-        });
-        const data = await res.json();
-
-        if (data.status === 'success') {
-            list.innerHTML = data.ideas.map(idea => `
-                <div class="tool-card" style="padding: 15px; background: rgba(255,255,255,0.05); margin-bottom: 10px; cursor: pointer;" 
-                     onclick="addTextLayer('${idea.replace(/'/g, "\\'")}')">
-                    <p style="font-size: 13px; margin: 0;">${idea}</p>
-                    <small style="color: var(--primary); font-size: 10px;">Click to Add to Canvas</small>
-                </div>
-            `).join('');
-            results.style.display = 'flex';
-        }
-    } catch (e) {
-        showToast("AI is resting. Try again!");
-    } finally {
-        btn.disabled = false;
-        loading.style.display = 'none';
-        if (window.lucide) lucide.createIcons();
-    }
-}
-
-function submitFounderSurvey() {
-    const input = document.getElementById('survey-input').value;
-    if (!input) return showToast("Share an idea first!");
-    showToast("Reward Claimed! 50 Credits Added.");
-    document.getElementById('survey-card').style.display = 'none';
-    // Ideally call API here
-}
+// Ensure init runs
+window.onload = () => {
+    checkAuth();
+    initBeast();
+};
