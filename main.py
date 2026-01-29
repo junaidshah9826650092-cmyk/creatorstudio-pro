@@ -58,6 +58,26 @@ def init_db():
                       thumbnail_url TEXT,
                       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        # NEW: Creator Hub Resources Table
+        c.execute('''CREATE TABLE IF NOT EXISTS resources 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      title TEXT, 
+                      type TEXT, 
+                      category TEXT, 
+                      file_url TEXT, 
+                      thumb_url TEXT,
+                      is_trending BOOLEAN DEFAULT 0,
+                      is_premium BOOLEAN DEFAULT 0,
+                      downloads INTEGER DEFAULT 0,
+                      created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        # NEW: Use Case Packs Table
+        c.execute('''CREATE TABLE IF NOT EXISTS packs 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      name TEXT, 
+                      description TEXT, 
+                      thumb_url TEXT,
+                      resource_ids TEXT, 
+                      is_premium BOOLEAN DEFAULT 0)''')
         conn.commit()
         conn.close()
         print(f"✅ Database initialized at: {DB_PATH}")
@@ -68,8 +88,6 @@ def init_db():
 init_db()
 if not os.path.exists(DESIGNS_PATH):
     os.makedirs(DESIGNS_PATH)
-if not os.path.exists(os.path.join(BASE_DIR, 'project_thumbs')):
-    os.makedirs(os.path.join(BASE_DIR, 'project_thumbs'))
 
 # --- AI ADVANCED ENDPOINTS ---
 
@@ -100,61 +118,7 @@ def ai_magic_text():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# --- PROJECT MANAGEMENT (CANVA-LIKE FEATURES) ---
-
-@app.route('/api/projects/save', methods=['POST'])
-def save_project():
-    """Saves the editable state of the project"""
-    data = request.json
-    username = data.get('username')
-    name = data.get('name', 'Untitled Project')
-    json_state = data.get('json_data') # The fabric.js/canvas JSON
-    thumb_data = data.get('thumbnail') # Base64 preview
-    
-    if not username or not json_state:
-        return jsonify({"status": "error", "message": "Invalid data"}), 400
-        
-    try:
-        # Save Thumbnail
-        thumb_url = ""
-        if thumb_data:
-            header, encoded = thumb_data.split(",", 1)
-            decoded = base64.b64decode(encoded)
-            fname = f"project_thumbs/{username}_{os.urandom(4).hex()}.png"
-            with open(os.path.join(BASE_DIR, fname), "wb") as f:
-                f.write(decoded)
-            thumb_url = fname
-
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        
-        # Check if project exists (update) or new (insert)
-        c.execute("INSERT INTO projects (username, name, json_data, thumbnail_url) VALUES (?, ?, ?, ?)",
-                  (username, name, str(json_data), thumb_url))
-        conn.commit()
-        project_id = c.lastrowid
-        conn.close()
-        
-        return jsonify({"status": "success", "message": "Project saved successfully!", "id": project_id})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-@app.route('/api/projects/list', methods=['GET'])
-def list_projects():
-    username = request.args.get('username')
-    if not username:
-        return jsonify({"status": "error", "message": "Login required"}), 401
-        
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT id, name, thumbnail_url, updated_at FROM projects WHERE username=? ORDER BY updated_at DESC", (username,))
-    projects = [{"id": r[0], "name": r[1], "thumbnail": r[2], "date": r[3]} for r in c.fetchall()]
-    conn.close()
-    
-    return jsonify({"status": "success", "projects": projects})
-
-# --- EXISTING ENDPOINTS (KEPT & ENHANCED) ---
-
+# --- RESOURCE HUB ENDPOINTS ---
 @app.route('/api/generate-logo', methods=['POST'])
 def generate_logo():
     data = request.json
@@ -261,10 +225,6 @@ def index():
 def login_page():
     return send_from_directory(BASE_DIR, 'login.html')
 
-@app.route('/studio')
-def studio():
-    return send_from_directory(BASE_DIR, 'studio.html')
-
 @app.route('/privacy')
 def privacy():
     return send_from_directory(BASE_DIR, 'privacy-policy.html')
@@ -276,6 +236,18 @@ def terms():
 @app.route('/admin')
 def admin_panel():
     return send_from_directory(BASE_DIR, 'admin.html')
+
+@app.route('/library')
+def library():
+    return send_from_directory(BASE_DIR, 'library.html')
+
+@app.route('/ai-tools')
+def ai_tools():
+    return send_from_directory(BASE_DIR, 'ai-tools.html')
+
+@app.route('/meme-maker')
+def meme_maker():
+    return send_from_directory(BASE_DIR, 'meme-maker.html')
 
 # FINAL SYNC VERSION 2.1
 @app.route('/ads.txt')
@@ -466,15 +438,14 @@ def creator_studio_api():
             conn.close()
             return jsonify({"status": "error", "message": "Insufficient credits! Refill to continue."}), 403
 
-        # 2. Tool Prompt Engineering
+        # 2. Tool Prompt Engineering (POWERED BY BEAST AI)
         prompts = {
-            "title": f"Generate 10 viral YouTube titles for: {topic}. Return ONLY as a JSON list of strings.",
-            "script": f"Write a 30s Reel script for: {topic}. Return ONLY JSON with keys 'hook', 'body', 'onscreen_text' (list).",
-            "hook": f"Generate 5 scroll-stopping hooks for: {topic}. Return ONLY as a JSON list.",
-            "thumbnail": f"Generate 5 thumbnail text ideas for: {topic}. Return ONLY as a JSON list.",
-            "hashtag": f"Generate 15 hashtags for: {topic}. Return ONLY as a JSON list.",
-            "viral_pack": f"Generate a FULL content pack for: {topic}. Return ONLY JSON with keys: 'titles' (list of 5), 'hooks' (list of 3), 'script' (object with hook, body keys), 'thumbnail_text' (list of 3), 'hashtags' (list of 10).",
-            "style_analyzer": f"Analyze this YouTube title: '{topic}'. Return ONLY JSON with keys: 'curiosity_score' (1-10), 'emotion' (name), 'improvement' (string suggestion)."
+            "title": f"You are a viral YouTube expert. Topic: {topic}. Give me 10 HIGH CTR, CLICKBAIT titles that focus on curiosity or fear of missing out. Return ONLY a JSON list of strings.",
+            "script": f"Write a 60-second viral Short/Reel script for: {topic}. Structure: [0-5s] Aggressive Hook, [5-50s] Fast-paced Value/Story, [50-60s] Viral Loop/CTA. Return ONLY JSON with keys 'hook', 'body', 'onscreen_text' (list).",
+            "hook": f"Generate 5 scroll-stopping hooks for a Reel about: {topic}. Use the 'Negativity Bias' or 'Open Loop' strategies. Return ONLY as a JSON list.",
+            "hashtag": f"Generate 15 trending hashtags for: {topic}. Include high-reach and niche hashtags. Return ONLY as a JSON list.",
+            "viral_pack": f"Generate a FULL viral content pack for: {topic}. Include: 5 Titles, 3 Hooks, 1 Script, 3 Thumbnail Text ideas. Return ONLY JSON.",
+            "style_analyzer": f"Analyze this YouTube video concept: '{topic}'. Give a 1-10 Viral Potential Score and 3 tips to increase CTR. Return ONLY JSON."
         }
 
         # Premium Cost Adjustment
@@ -521,6 +492,73 @@ def creator_studio_api():
     except Exception as e:
         print(f"DEBUG AI: {str(e)}")
         return jsonify({"status": "error", "message": "AI Generation Failed. Please try later."}), 500
+
+# --- RESOURCE HUB ENDPOINTS ---
+
+@app.route('/api/resources', methods=['GET'])
+def get_resources():
+    rtype = request.args.get('type') # meme, sound, overlay
+    category = request.args.get('category')
+    trending = request.args.get('trending')
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    query = "SELECT * FROM resources WHERE 1=1"
+    params = []
+    
+    if rtype:
+        query += " AND type = ?"
+        params.append(rtype)
+    if category:
+        query += " AND category = ?"
+        params.append(category)
+    if trending:
+        query += " AND is_trending = 1"
+        
+    query += " ORDER BY downloads DESC"
+    
+    c.execute(query, params)
+    rows = c.fetchall()
+    conn.close()
+    
+    resources = []
+    for r in rows:
+        resources.append({
+            "id": r[0], "title": r[1], "type": r[2], "category": r[3],
+            "file_url": r[4], "thumb_url": r[5], "trending": r[6],
+            "premium": r[7], "downloads": r[8]
+        })
+    return jsonify({"status": "success", "resources": resources})
+
+@app.route('/api/packs', methods=['GET'])
+def get_packs():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM packs")
+    rows = c.fetchall()
+    conn.close()
+    
+    packs = []
+    for r in rows:
+        packs.append({
+            "id": r[0], "name": r[1], "description": r[2],
+            "thumb_url": r[3], "resource_ids": r[4], "premium": r[5]
+        })
+    return jsonify({"status": "success", "packs": packs})
+
+@app.route('/api/resource/download', methods=['POST'])
+def track_download():
+    data = request.json
+    rid = data.get('id')
+    if not rid: return jsonify({"status": "error"}), 400
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE resources SET downloads = downloads + 1 WHERE id = ?", (rid,))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success"})
 
 @app.route('/api/survey/submit', methods=['POST'])
 def submit_survey():

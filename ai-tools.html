@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Creator Tools | Beast Creator Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .tools-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            height: calc(100vh - 120px);
+        }
+
+        .tool-sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tool-select-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .tool-select-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .tool-select-btn.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        .main-tool-area {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .output-box {
+            flex: 1;
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Outfit', sans-serif;
+            line-height: 1.6;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            align-self: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <nav>
+            <div class="brand" onclick="window.location.href='/'" style="cursor:pointer">
+                <div class="brand-icon"><i data-lucide="zap" color="#fff" size="24"></i></div>
+                <span>BEAST<span style="color:var(--primary)">HUB</span></span>
+            </div>
+            <div class="auth-stack">
+                <div id="credit-badge"
+                    style="background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; padding: 4px 12px; border-radius: 8px; font-size: 14px; color: #fbbf24; font-weight: 700;">
+                    <i data-lucide="coins" size="16" style="vertical-align: middle;"></i> <span
+                        id="user-credits">100</span>
+                </div>
+            </div>
+        </nav>
+
+        <main style="padding: 20px; max-width: 1400px; margin: 0 auto;">
+            <div class="tools-container">
+                <aside class="tool-sidebar">
+                    <h3 style="margin-bottom: 10px;">AI Tools</h3>
+                    <button class="tool-select-btn active" onclick="activateTool('hook')">
+                        <i data-lucide="anchor" size="18"></i> Viral Hook Generator
+                    </button>
+                    <button class="tool-select-btn" onclick="activateTool('caption')">
+                        <i data-lucide="message-square" size="18"></i> Reel Caption Generator
+                    </button>
+                    <button class="tool-select-btn" onclick="activateTool('script')">
+                        <i data-lucide="scroll" size="18"></i> Short Script Builder
+                    </button>
+                    <button class="tool-select-btn" onclick="activateTool('meme')">
+                        <i data-lucide="laugh" size="18"></i> AI Meme Text Helper
+                    </button>
+                </aside>
+
+                <section class="main-tool-area">
+                    <h2 id="tool-title">Viral Hook Generator</h2>
+                    <p id="tool-desc" style="color: var(--text-secondary); margin-bottom: 25px;">Enter your video topic
+                        to generate scroll-stopping opening lines.</p>
+
+                    <div style="display: flex; gap: 15px;">
+                        <input type="text" id="tool-input" class="input-box" placeholder="What is your video about?"
+                            style="flex: 1;">
+                        <button class="btn-premium" onclick="generateAIContent()" id="gen-btn"
+                            style="padding: 0 30px;">GENERATE</button>
+                    </div>
+
+                    <div class="output-box" id="output-display">
+                        <div style="text-align: center; color: #64748b; margin-top: 50px;">
+                            <i data-lucide="sparkles" size="40" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                            <p>Your AI generation will appear here.</p>
+                        </div>
+                    </div>
+                    <button class="copy-btn" id="copy-btn" style="display: none;" onclick="copyOutput()">COPY
+                        TEXT</button>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let currentTool = 'hook';
+
+        function activateTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-select-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const config = {
+                hook: { title: "Viral Hook Generator", desc: "Enter your video topic to generate scroll-stopping opening lines.", placeholder: "e.g. Making money online, Morning routine..." },
+                caption: { title: "Reel Caption Generator", desc: "Get highly engaging captions with hashtags.", placeholder: "e.g. Travel vlog in Bali, Gym motivation..." },
+                script: { title: "Short Script Builder", desc: "Generate a full 30-60s script for YouTube Shorts/Reels.", placeholder: "e.g. Facts about space, How to code in Python..." },
+                meme: { title: "AI Meme Text Helper", desc: "Turn any situation into a funny meme caption.", placeholder: "e.g. When code works first try, Monday mornings..." }
+            };
+
+            document.getElementById('tool-title').textContent = config[tool].title;
+            document.getElementById('tool-desc').textContent = config[tool].desc;
+            document.getElementById('tool-input').placeholder = config[tool].placeholder;
+            document.getElementById('output-display').innerHTML = '<div style="text-align: center; color: #64748b; margin-top: 50px;"><i data-lucide="sparkles" size="40" style="margin-bottom: 15px; opacity: 0.3;"></i><p>Your AI generation will appear here.</p></div>';
+            document.getElementById('copy-btn').style.display = 'none';
+            lucide.createIcons();
+        }
+
+        async function generateAIContent() {
+            const topic = document.getElementById('tool-input').value;
+            if (!topic) return alert("Please enter a topic!");
+
+            const btn = document.getElementById('gen-btn');
+            btn.textContent = "THINKING...";
+            btn.disabled = true;
+
+            const username = localStorage.getItem('beast_user') || 'Guest';
+
+            try {
+                const res = await fetch('/api/ai/creator-studio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, tool_type: currentTool === 'hook' ? 'hook' : currentTool === 'caption' ? 'title' : currentTool === 'script' ? 'script' : 'hashtag', topic })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    displayResult(data.result);
+                } else {
+                    alert(data.message);
+                }
+            } catch (e) {
+                alert("AI Connection Failed!");
+            } finally {
+                btn.textContent = "GENERATE";
+                btn.disabled = false;
+            }
+        }
+
+        function displayResult(result) {
+            const display = document.getElementById('output-display');
+            let html = '';
+
+            if (Array.isArray(result)) {
+                html = result.map(text => `<div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);">${text}</div>`).join('');
+            } else if (typeof result === 'object') {
+                html = `<div style="padding: 15px;">
+                    <p><strong>Hook:</strong> ${result.hook || ''}</p><br>
+                    <p><strong>Body:</strong> ${result.body || ''}</p><br>
+                    <p><strong>Screen Text:</strong> ${result.onscreen_text ? result.onscreen_text.join(', ') : ''}</p>
+                </div>`;
+            }
+
+            display.innerHTML = html;
+            document.getElementById('copy-btn').style.display = 'block';
+        }
+
+        function copyOutput() {
+            const text = document.getElementById('output-display').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Copied to clipboard!");
+        }
+    </script>
+</body>
+
+</html>
