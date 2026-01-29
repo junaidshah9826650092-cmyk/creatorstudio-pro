@@ -16,8 +16,9 @@ DB_PATH = os.path.join(BASE_DIR, 'beast_studio.db')
 DESIGNS_PATH = os.path.join(BASE_DIR, 'designs')
 BEAST_SERVER_API_KEY = os.environ.get("BEAST_API_KEY", "sk-or-v1-xxxxxxxx") # Security: Use Env Var
 
-# Initialize Gemini
-genai.configure(api_key=BEAST_SERVER_API_KEY)
+# Initialize Gemini with proper API key
+GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY", "AIzaSyCK7pFHNwGNwswZulHVIxHCINusZIGSgY4")
+genai.configure(api_key=GEMINI_API_KEY)
 # We handle both OpenRouter (legacy) and Gemini (new tools) locally
 gemini_model = genai.GenerativeModel('gemini-pro')
 
