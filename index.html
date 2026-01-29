@@ -58,14 +58,14 @@
             </div>
             <h1
                 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -2px;">
-                Everything a Creator Needs <br><span
-                    style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">In
-                    One Place</span>
+                Everything a Creator Needs<br><span
+                    style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Ideas,
+                    Memes, Sounds, Hooks, AI Help</span>
             </h1>
             <p
                 style="color: var(--text-secondary); font-size: 1.3rem; max-width: 700px; margin-bottom: 3rem; line-height: 1.6;">
-                Memes • Sound Effects • Overlays • Backgrounds • AI Tools <br>
-                Built for YouTubers, Reel Creators, and Memers.
+                The Creator Toolkit that helps you go viral faster.<br>
+                No confusion. Just resources.
             </p>
             <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
                 <button class="btn-premium"
@@ -79,9 +79,11 @@
             </div>
         </header>
 
-        <!-- CATEGORY GRID -->
-        <section style="padding: 80px 20px; max-width: 1200px; margin: 0 auto;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px;">
+        <!-- 4 MAIN SECTIONS (CLARITY FOCUSED) -->
+        <section style="padding: 80px 20px; max-width: 1000px; margin: 0 auto;">
+            <h2 style="text-align: center; margin-bottom: 50px; font-size: 2rem;">Your <span
+                    style="color: var(--primary);">4-Step</span> Creator Arsenal</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px;">
                 <!-- Category Card: Memes -->
                 <div class="tool-card" style="text-align: center; padding: 40px 20px;"
                     onclick="window.location.href='/library?tab=memes'">
@@ -136,7 +138,6 @@
         <div style="max-width: 970px; margin: 40px auto; padding: 20px;">
             <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6894674624448360"
                 data-ad-format="auto" data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
         <!-- TOOLS SECTION -->
@@ -331,6 +332,12 @@
             </div>
         </footer>
     </div>
+    <script>
+        // Initialize AdSense ads after DOM load
+        if (typeof adsbygoogle !== 'undefined') {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        }
+    </script>
     <script>lucide.createIcons();</script>
 </body>
 

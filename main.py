@@ -78,6 +78,70 @@ def init_db():
                       thumb_url TEXT,
                       resource_ids TEXT, 
                       is_premium BOOLEAN DEFAULT 0)''')
+        
+        # CREATOR POINTS SYSTEM
+        c.execute('''CREATE TABLE IF NOT EXISTS user_points 
+                     (user_id INTEGER PRIMARY KEY, 
+                      username TEXT UNIQUE, 
+                      total_points INTEGER DEFAULT 0,
+                      role TEXT DEFAULT 'new_creator',
+                      approved_uploads INTEGER DEFAULT 0,
+                      violations INTEGER DEFAULT 0,
+                      is_banned BOOLEAN DEFAULT 0,
+                      created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        
+        c.execute('''CREATE TABLE IF NOT EXISTS point_transactions 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      username TEXT, 
+                      action TEXT,
+                      points INTEGER,
+                      asset_id INTEGER,
+                      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        
+        c.execute('''CREATE TABLE IF NOT EXISTS uploaded_assets 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      username TEXT, 
+                      title TEXT,
+                      type TEXT,
+                      category TEXT,
+                      file_url TEXT,
+                      thumb_url TEXT,
+                      tags TEXT,
+                      description TEXT,
+                      content_type TEXT,
+                      status TEXT DEFAULT 'pending',
+                      downloads INTEGER DEFAULT 0,
+                      likes INTEGER DEFAULT 0,
+                      points_earned INTEGER DEFAULT 0,
+                      rejection_reason TEXT,
+                      uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                      approved_at DATETIME)''')
+        
+        # Download Tracking (Anti-spam)
+        c.execute('''CREATE TABLE IF NOT EXISTS asset_downloads 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      asset_id INTEGER, 
+                      user_id TEXT,
+                      ip_address TEXT,
+                      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        
+        # Likes System
+        c.execute('''CREATE TABLE IF NOT EXISTS asset_likes 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      asset_id INTEGER, 
+                      username TEXT,
+                      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                      UNIQUE(asset_id, username))''')
+        
+        # Reports/Flags
+        c.execute('''CREATE TABLE IF NOT EXISTS asset_reports 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      asset_id INTEGER, 
+                      reported_by TEXT,
+                      reason TEXT,
+                      status TEXT DEFAULT 'pending',
+                      created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+
         conn.commit()
         conn.close()
         print(f"✅ Database initialized at: {DB_PATH}")
@@ -248,6 +312,14 @@ def ai_tools():
 @app.route('/meme-maker')
 def meme_maker():
     return send_from_directory(BASE_DIR, 'meme-maker.html')
+
+@app.route('/upload')
+def upload_page():
+    return send_from_directory(BASE_DIR, 'upload.html')
+
+@app.route('/approval-dashboard')
+def approval_dashboard():
+    return send_from_directory(BASE_DIR, 'approval-dashboard.html')
 
 # FINAL SYNC VERSION 2.1
 @app.route('/ads.txt')
@@ -559,6 +631,167 @@ def track_download():
     conn.commit()
     conn.close()
     return jsonify({"status": "success"})
+
+# --- CREATOR CONTRIBUTION SYSTEM ---
+
+@app.route('/api/upload-asset', methods=['POST'])
+def upload_asset():
+    """Creator uploads asset for review"""
+    data = request.json
+    username = data.get('username')
+    title = data.get('title')
+    asset_type = data.get('type')
+    category = data.get('category')
+    tags = data.get('tags', '')
+    description = data.get('description', '')
+    content_type = data.get('content_type', 'original')
+    file_data = data.get('file_data')  # Base64
+    
+    if not username or not title or not asset_type:
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+    
+    try:
+        # Check if user is banned
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT is_banned FROM user_points WHERE username = ?", (username,))
+        user = c.fetchone()
+        if user and user[0] == 1:
+            conn.close()
+            return jsonify({"status": "error", "message": "Upload privileges suspended"}), 403
+        
+        # Save file (simplified - in production use cloud storage)
+        file_url = f"assets/uploads/{username}_{os.urandom(4).hex()}.{'png' if asset_type == 'meme' else 'mp3'}"
+        
+        # Insert to uploaded_assets
+        c.execute("""INSERT INTO uploaded_assets 
+                     (username, title, type, category, tags, description, content_type, file_url, status) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')""",
+                  (username, title, asset_type, category, tags, description, content_type, file_url))
+        conn.commit()
+        asset_id = c.lastrowid
+        
+        # Initialize user in points system if not exists
+        c.execute("INSERT OR IGNORE INTO user_points (username) VALUES (?)", (username,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"status": "success", "message": "Upload submitted for review!", "asset_id": asset_id})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/admin/pending-uploads', methods=['GET'])
+def get_pending_uploads():
+    """Admin dashboard - get pending uploads"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""SELECT id, username, title, type, category, tags, uploaded_at, file_url 
+                 FROM uploaded_assets WHERE status = 'pending' ORDER BY uploaded_at DESC""")
+    uploads = [{"id": r[0], "username": r[1], "title": r[2], "type": r[3], 
+                "category": r[4], "tags": r[5], "uploaded_at": r[6], "file_url": r[7]} 
+               for r in c.fetchall()]
+    conn.close()
+    return jsonify({"status": "success", "uploads": uploads})
+
+@app.route('/api/admin/approve-asset', methods=['POST'])
+def approve_asset():
+    """Admin approves uploaded asset"""
+    data = request.json
+    asset_id = data.get('asset_id')
+    featured = data.get('featured', False)
+    
+    if not asset_id:
+        return jsonify({"status": "error"}), 400
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # Get asset details
+        c.execute("SELECT username, title, type FROM uploaded_assets WHERE id = ?", (asset_id,))
+        asset = c.fetchone()
+        if not asset:
+            conn.close()
+            return jsonify({"status": "error", "message": "Asset not found"}), 404
+        
+        username = asset[0]
+        
+        # Update asset status
+        c.execute("UPDATE uploaded_assets SET status = 'approved', approved_at = CURRENT_TIMESTAMP WHERE id = ?", (asset_id,))
+        
+        # Award points
+        base_points = 10
+        if featured:
+            base_points = 40  # Featured = bonus points
+            
+        c.execute("UPDATE user_points SET total_points = total_points + ?, approved_uploads = approved_uploads + 1 WHERE username = ?",
+                  (base_points, username))
+        
+        # Log transaction
+        c.execute("INSERT INTO point_transactions (username, action, points, asset_id) VALUES (?, ?, ?, ?)",
+                  (username, 'asset_approved', base_points, asset_id))
+        
+        # Update role if needed
+        c.execute("SELECT approved_uploads FROM user_points WHERE username = ?", (username,))
+        approved_count = c.fetchone()[0]
+        if approved_count >= 3:
+            c.execute("UPDATE user_points SET role = 'verified_creator' WHERE username = ?", (username,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"status": "success", "message": f"Asset approved! {username} earned +{base_points} points"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/admin/reject-asset', methods=['POST'])
+def reject_asset():
+    """Admin rejects uploaded asset"""
+    data = request.json
+    asset_id = data.get('asset_id')
+    reason = data.get('reason', 'Quality standards not met')
+    
+    if not asset_id:
+        return jsonify({"status": "error"}), 400
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE uploaded_assets SET status = 'rejected', rejection_reason = ? WHERE id = ?", (reason, asset_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"status": "success", "message": "Asset rejected"})
+
+@app.route('/api/user/points', methods=['GET'])
+def get_user_points():
+    """Get user's points and stats"""
+    username = request.args.get('username')
+    if not username:
+        return jsonify({"status": "error"}), 400
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT total_points, role, approved_uploads FROM user_points WHERE username = ?", (username,))
+    user = c.fetchone()
+    
+    if not user:
+        conn.close()
+        return jsonify({"status": "success", "points": 0, "role": "new_creator", "uploads": 0})
+    
+    conn.close()
+    return jsonify({"status": "success", "points": user[0], "role": user[1], "uploads": user[2]})
+
+@app.route('/api/leaderboard', methods=['GET'])
+def get_leaderboard():
+    """Get top creators by points"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""SELECT username, total_points, role, approved_uploads 
+                 FROM user_points WHERE total_points > 0 
+                 ORDER BY total_points DESC LIMIT 20""")
+    leaders = [{"username": r[0], "points": r[1], "role": r[2], "uploads": r[3]} for r in c.fetchall()]
+    conn.close()
+    return jsonify({"status": "success", "leaderboard": leaders})
 
 @app.route('/api/survey/submit', methods=['POST'])
 def submit_survey():
