@@ -1,9 +1,9 @@
 import sqlite3
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 DB_FILE = 'swiftcash.db'
@@ -15,7 +15,6 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-    # Users table: stores basic profile and total points
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
             email TEXT PRIMARY KEY,
@@ -24,13 +23,12 @@ def init_db():
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    # Transactions table: history of points earned/withdrawn
     conn.execute('''
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_email TEXT,
             amount INTEGER,
-            type TEXT, -- 'earn' or 'withdraw'
+            type TEXT,
             description TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_email) REFERENCES users (email)
@@ -39,6 +37,16 @@ def init_db():
     conn.commit()
     conn.close()
 
+# --- Serve Static Files ---
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('.', path)
+
+# --- API Routes ---
 @app.route('/api/user', methods=['POST'])
 def sync_user():
     data = request.json
@@ -102,4 +110,5 @@ def withdraw():
 
 if __name__ == '__main__':
     init_db()
-    app.run(port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
