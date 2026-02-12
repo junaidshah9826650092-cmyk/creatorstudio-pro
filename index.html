@@ -189,14 +189,23 @@
 
         function updateLoginUI(user) {
             if (user) {
-                // Hide login button
-                document.getElementById('login-container').style.display = 'none';
-                // Update avatar
+                console.log("Updating UI for:", user.name);
+                const loginContainer = document.getElementById('login-container');
                 const avatar = document.getElementById('user-avatar');
-                avatar.textContent = user.name.charAt(0).toUpperCase();
-                if (user.picture) {
-                    avatar.style.backgroundImage = `url(${user.picture})`;
-                    avatar.style.backgroundSize = 'cover';
+
+                if (loginContainer) loginContainer.style.display = 'none';
+
+                if (avatar) {
+                    avatar.textContent = user.name.charAt(0).toUpperCase();
+                    // Remove Mavo property temporarily to prevent overwrite
+                    avatar.removeAttribute('property');
+
+                    if (user.picture) {
+                        avatar.style.backgroundImage = `url(${user.picture})`;
+                        avatar.style.backgroundSize = 'cover';
+                        avatar.style.backgroundPosition = 'center';
+                        avatar.style.color = 'transparent';
+                    }
                 }
             }
         }
