@@ -51,7 +51,17 @@
             </div>
             <button class="icon-btn" mv-action="add(video)" title="Upload Video"><i class="fas fa-plus"></i></button>
             <button class="icon-btn"><i class="fas fa-bell"></i></button>
-            <div class="user-avatar" id="user-avatar" property="currentUserAvatar">?</div>
+            <div class="user-avatar" id="user-avatar" property="currentUserAvatar" onclick="toggleUserMenu()"
+                title="Account Options">?</div>
+
+            <!-- Hidden User Menu -->
+            <div id="user-menu"
+                style="display: none; position: absolute; top: 56px; right: 16px; background: #282828; border: 1px solid #3f3f3f; border-radius: 8px; padding: 8px; z-index: 3000;">
+                <button class="nav-item" onclick="logout()"
+                    style="width: 100%; justify-content: start; background: transparent; border: none; padding: 8px 16px;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
         </div>
     </header>
 
@@ -267,10 +277,31 @@
 
             // Hide Shimmer and Show Content after 1 second (Simulates real loading)
             setTimeout(() => {
-                document.getElementById('loading-shimmer').style.display = 'none';
-                document.querySelector('.video-grid').style.display = 'grid';
+                const shimmer = document.getElementById('loading-shimmer');
+                const grid = document.querySelector('.video-grid');
+                if (shimmer) shimmer.style.display = 'none';
+                if (grid) grid.style.display = 'grid';
             }, 1200);
+
+            // Category Chip Interaction
+            const chips = document.querySelectorAll('.chip');
+            chips.forEach(chip => {
+                chip.onclick = () => {
+                    chips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                };
+            });
         });
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function logout() {
+            localStorage.removeItem('vitox_user');
+            location.reload();
+        }
     </script>
 </body>
 

@@ -164,8 +164,15 @@
 
         <script>
             function handleCredentialResponse(response) {
-                console.log("Encoded JWT ID token: " + response.credential);
-                window.location.href = "index.html"; // Redirect after login
+                const base64Url = response.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(window.atob(base64));
+
+                // Save to LocalStorage for Vitox AI
+                localStorage.setItem('vitox_user', JSON.stringify(payload));
+
+                // Redirect back to home
+                window.location.href = "index.html";
             }
         </script>
 

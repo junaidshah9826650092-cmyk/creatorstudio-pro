@@ -139,14 +139,14 @@
 <body>
     <div class="studio-layout">
         <aside class="studio-sidebar">
-            <div class="channel-info">
-                <div class="studio-avatar">J</div>
+            <div class="channel-info" onclick="location.href='index.html'" style="cursor: pointer;">
+                <div class="studio-avatar" id="studio-avatar">J</div>
                 <div style="font-weight: 500; margin-top: 12px;">Your channel</div>
-                <div style="font-size: 0.75rem; color: #888;">Junaid Shah</div>
+                <div style="font-size: 0.75rem; color: #888;" id="studio-name">Creator</div>
             </div>
             <nav class="sidebar-menu">
-                <a href="#" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="#"><i class="fas fa-video"></i> Content</a>
+                <a href="index.html" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="index.html"><i class="fas fa-video"></i> Content</a>
                 <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
                 <a href="#"><i class="fas fa-comment-alt"></i> Comments</a>
                 <a href="#"><i class="fas fa-copyright"></i> Copyright</a>
@@ -202,13 +202,30 @@
                     <div class="upload-section">
                         <div class="upload-icon"><i class="fas fa-upload"></i></div>
                         <p style="color: #aaa; margin-bottom: 16px;">Ready to share your next masterpiece?</p>
-                        <button class="btn-login" style="width: auto; padding: 10px 24px; background: #3ea6ff;">Upload
-                            Video</button>
+                        <button class="btn-login" onclick="location.href='index.html'"
+                            style="width: auto; padding: 10px 24px; background: #3ea6ff;">Go to Upload</button>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+    <script>
+        window.addEventListener('load', () => {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (user) {
+                document.getElementById('studio-name').innerText = user.name;
+                const avatar = document.getElementById('studio-avatar');
+                avatar.innerText = user.name.charAt(0).toUpperCase();
+                if (user.picture) {
+                    avatar.style.backgroundImage = `url(${user.picture})`;
+                    avatar.style.backgroundSize = 'cover';
+                    avatar.style.color = 'transparent';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
 </body>
 
 </html>
