@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://get.mavo.io/mavo.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://get.mavo.io/mavo.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -35,11 +36,15 @@
         </div>
 
         <div class="header-right">
-            <button class="icon-btn" onclick="location.href='dashboard.html'" title="Creator Studio"><i
-                    class="fas fa-clapperboard"></i> Studio</button>
-            <button class="icon-btn" onclick="location.href='login.html'" title="Sign In"><i
-                    class="fas fa-user-circle"></i> Login</button>
-            <button class="icon-btn" mv-action="add(video)"><i class="fas fa-video"></i> Create</button>
+            <button class="btn-text" onclick="location.href='dashboard.html'" title="Creator Studio">
+                <i class="fas fa-clapperboard"></i> Studio
+            </button>
+            <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-context="signin" data-ux_mode="popup"
+                data-callback="handleCredentialResponse" data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with"
+                data-size="medium" data-logo_alignment="left">
+            </div>
             <button class="icon-btn"><i class="fas fa-bell"></i></button>
             <div class="user-avatar" property="currentUserAvatar">J</div>
         </div>
@@ -163,6 +168,12 @@
 
 
 
+    <script>
+        function handleCredentialResponse(response) {
+            console.log("Encoded JWT ID token: " + response.credential);
+            // Decode and handle user info here
+        }
+    </script>
 </body>
 
 </html>
