@@ -189,4 +189,15 @@ async function openWithdraw() {
 window.onload = () => {
     initGoogleAuth();
     updateUI();
+
+    // Professional Preloader Removal
+    setTimeout(() => {
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            preloader.style.transition = 'opacity 0.5s ease, visibility 0.5s';
+            preloader.style.opacity = '0';
+            preloader.style.visibility = 'hidden';
+            setTimeout(() => preloader.remove(), 500);
+        }
+    }, 1500);
 };
