@@ -85,8 +85,42 @@
                 <button class="chip">Recent</button>
             </div>
 
-            <!-- Video Grid -->
-            <div class="video-grid">
+            <!-- Skeleton Loader (Visible during initial load) -->
+            <div id="loading-shimmer">
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-thumbnail"></div>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-thumbnail"></div>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-thumbnail"></div>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Grid (Initially hidden) -->
+            <div class="video-grid" style="display: none;">
                 <!-- Video 1 -->
                 <div property="video" mv-multiple class="video-card">
                     <div class="thumbnail-wrapper">
@@ -230,6 +264,12 @@
             if (savedUser) {
                 updateLoginUI(JSON.parse(savedUser));
             }
+
+            // Hide Shimmer and Show Content after 1 second (Simulates real loading)
+            setTimeout(() => {
+                document.getElementById('loading-shimmer').style.display = 'none';
+                document.querySelector('.video-grid').style.display = 'grid';
+            }, 1200);
         });
     </script>
 </body>

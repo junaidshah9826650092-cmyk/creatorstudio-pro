@@ -455,6 +455,46 @@ hr {
     }
 }
 
+/* Skeleton Loading Screen */
+.skeleton {
+    background: #222;
+    background: linear-gradient(110deg, #181818 8%, #252525 18%, #181818 33%);
+    border-radius: 5px;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes shimmer {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+.skeleton-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+}
+
+.skeleton-text {
+    height: 15px;
+    margin-top: 10px;
+    width: 80%;
+}
+
+.skeleton-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+#loading-shimmer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 40px 16px;
+    padding: 20px;
+}
+
 /* Force Hide Mavo Framework UI */
 [mv-app] .mv-bar,
 [mv-app] .mv-status,
