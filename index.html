@@ -47,6 +47,10 @@
                 </div>
             </div>
             <div style="display: flex; gap: 8px;">
+                <button id="admin-btn" onclick="location.href='admin.html'"
+                    style="display: none; background: rgba(255,255,255,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.75rem;">
+                    Admin
+                </button>
                 <button id="login-btn" onclick="loginWithGoogle()"
                     style="background: var(--grad); border: none; color: white; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
                     Sign In
@@ -110,10 +114,24 @@
         </div>
 
         <!-- Withdraw Button -->
-        <div class="fade-in" style="animation-delay: 0.3s; margin-bottom: 100px;">
+        <div class="fade-in" style="animation-delay: 0.3s; margin-bottom: 30px;">
             <button class="btn-main" onclick="openWithdraw()">
                 <i data-lucide="wallet"></i> Redeem Points
             </button>
+        </div>
+
+        <!-- History Section -->
+        <div class="fade-in" style="animation-delay: 0.4s; margin-bottom: 100px;">
+            <h3 style="margin-bottom: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="history" color="var(--primary)" size="20"></i> Recent History
+            </h3>
+            <div id="history-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- History items will be injected here -->
+                <div
+                    style="background: var(--bg-card); padding: 20px; border-radius: 20px; text-align: center; color: var(--text-dim); font-size: 0.9rem;">
+                    Syncing history...
+                </div>
+            </div>
         </div>
 
         <!-- Bottom Nav -->

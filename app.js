@@ -13,6 +13,7 @@ const adOverlay = document.getElementById('ad-overlay');
 const adCountdown = document.getElementById('ad-countdown');
 const userNameDisplay = document.getElementById('user-name');
 const loginBtn = document.getElementById('login-btn');
+const historyList = document.getElementById('history-list');
 
 // Initialize Google Auth
 function initGoogleAuth() {
@@ -52,7 +53,11 @@ async function onGoogleSignIn(resp) {
 }
 
 function loginWithGoogle() {
-    google.accounts.id.prompt();
+    if (user) {
+        signOut();
+    } else {
+        google.accounts.id.prompt();
+    }
 }
 
 function updateUI() {
@@ -63,14 +68,53 @@ function updateUI() {
         userNameDisplay.textContent = user.name;
         document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
         loginBtn.textContent = 'Sign Out';
-        loginBtn.onclick = signOut;
+
+        // Admin Access
+        const adminBtn = document.getElementById('admin-btn');
+        if (user.is_admin) {
+            adminBtn.style.display = 'block';
+        } else {
+            adminBtn.style.display = 'none';
+        }
+
+        fetchHistory();
     } else {
-        pointsDisplay.textContent = '0';
-        rupeeDisplay.textContent = '₹0.00';
         userNameDisplay.textContent = 'Guest User';
         document.getElementById('user-avatar').textContent = '?';
         loginBtn.textContent = 'Sign In';
-        loginBtn.onclick = loginWithGoogle;
+        document.getElementById('admin-btn').style.display = 'none';
+        historyList.innerHTML = '<div style="background: var(--bg-card); padding: 20px; border-radius: 20px; text-align: center; color: var(--text-dim); font-size: 0.9rem;">Sign in to see history</div>';
+    }
+    lucide.createIcons();
+}
+
+async function fetchHistory() {
+    if (!user) return;
+    try {
+        const res = await fetch(`${API_URL}/transactions/${user.email}`);
+        const txs = await res.json();
+
+        if (txs.length === 0) {
+            historyList.innerHTML = '<div style="background: var(--bg-card); padding: 20px; border-radius: 20px; text-align: center; color: var(--text-dim); font-size: 0.9rem;">No transactions yet.</div>';
+            return;
+        }
+
+        historyList.innerHTML = txs.map(tx => `
+            <div style="background: var(--bg-card); border: 1px solid var(--glass-border); padding: 15px 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="text-align: left;">
+                    <div style="font-weight: 600; font-size: 0.95rem;">${tx.description}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-dim);">${new Date(tx.timestamp).toLocaleDateString()}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-weight: 700; color: ${tx.amount > 0 ? 'var(--primary)' : '#ff4d4d'};">
+                        ${tx.amount > 0 ? '+' : ''}${tx.amount} Pts
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${tx.status}</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error(e);
     }
 }
 

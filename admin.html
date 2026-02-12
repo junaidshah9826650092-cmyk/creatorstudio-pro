@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | SwiftCash AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body style="padding-top: 40px;">
+    <div class="bg-mesh"></div>
+
+    <div class="app-container">
+        <header>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button onclick="location.href='index.html'"
+                    style="background: var(--bg-card); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 12px; cursor: pointer;">
+                    <i data-lucide="arrow-left" size="18"></i>
+                </button>
+                <h2 style="font-weight: 800;">Admin Panel</h2>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="earn-grid" id="admin-stats-container">
+            <div class="task-card" style="cursor: default;">
+                <div style="color: var(--primary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                    Total Users</div>
+                <div style="font-size: 1.8rem; font-weight: 800; margin-top: 5px;" id="stat-users">...</div>
+            </div>
+            <div class="task-card" style="cursor: default;">
+                <div style="color: var(--secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                    Total Points</div>
+                <div style="font-size: 1.8rem; font-weight: 800; margin-top: 5px;" id="stat-points">...</div>
+            </div>
+        </div>
+
+        <!-- Pending Withdrawals -->
+        <div class="balance-card">
+            <div style="color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 15px;">
+                Pending Withdrawals</div>
+            <div style="font-size: 2.5rem; font-weight: 800; color: #ff4d4d;" id="stat-pending">0</div>
+            <div style="font-size: 0.9rem; color: var(--text-dim); margin-top: 10px;">Requests waiting for approval
+            </div>
+        </div>
+
+        <div
+            style="background: var(--bg-card); border: 1px solid var(--glass-border); padding: 25px; border-radius: 28px; text-align: center;">
+            <i data-lucide="shield-check" color="var(--primary)" size="40" style="margin-bottom: 15px;"></i>
+            <p style="font-size: 0.9rem; color: var(--text-dim);">You are logged in as <b>Admin</b>. You can monitor the
+                system growth from here. Withdrawal processing dashboard coming soon.</p>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('swift_user'));
+        const API_URL = "/api";
+
+        if (!user || user.email !== 'junaidshah78634@gmail.com') {
+            alert('Unauthorized Access');
+            location.href = 'index.html';
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API_URL}/admin/stats`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email })
+                });
+                const stats = await res.json();
+
+                document.getElementById('stat-users').innerText = stats.total_users;
+                document.getElementById('stat-points').innerText = stats.total_points.toLocaleString();
+                document.getElementById('stat-pending').innerText = stats.pending_withdrawals;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            loadStats();
+        };
+    </script>
+</body>
+
+</html>
