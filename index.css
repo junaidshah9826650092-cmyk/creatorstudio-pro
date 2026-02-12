@@ -23,6 +23,32 @@ body {
     color: var(--text-main);
     min-height: 100vh;
     overflow-x: hidden;
+    position: relative;
+}
+
+/* Luxury Animated Background */
+.bg-mesh {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    background: radial-gradient(circle at 10% 20%, rgba(0, 208, 148, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 82, 255, 0.08) 0%, transparent 40%);
+    overflow: hidden;
+}
+
+.bg-mesh::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
 }
 
 .app-container {
@@ -30,28 +56,64 @@ body {
     margin: 0 auto;
     padding: 20px;
     position: relative;
+    z-index: 10;
 }
 
 /* Background Blurs */
+/* Improved Blobs with continuous animation */
 .blob {
     position: fixed;
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
     background: var(--grad);
-    filter: blur(80px);
-    opacity: 0.15;
+    filter: blur(100px);
+    opacity: 0.12;
     z-index: -1;
     border-radius: 50%;
+    animation: drift 20s infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
 }
 
 .blob-1 {
-    top: -100px;
-    right: -100px;
+    top: -150px;
+    right: -150px;
+    background: var(--primary);
 }
 
 .blob-2 {
-    bottom: -100px;
-    left: -100px;
+    bottom: -150px;
+    left: -150px;
+    background: var(--secondary);
+    animation-duration: 25s;
+}
+
+@keyframes drift {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(100px, 50px) scale(1.2);
+    }
+}
+
+/* Floating Geometric Shapes */
+.shape {
+    position: fixed;
+    background: var(--grad);
+    opacity: 0.05;
+    z-index: -1;
+    border-radius: 12px;
+    animation: rotate 30s infinite linear;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Header */
