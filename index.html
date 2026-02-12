@@ -18,7 +18,8 @@
     <!-- Top Bar -->
     <header class="top-bar">
         <div class="header-left">
-            <button class="icon-btn menu-btn"><i class="fas fa-bars"></i></button>
+            <button class="icon-btn menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('active')"><i
+                    class="fas fa-bars"></i></button>
             <div class="logo">
                 <i class="fas fa-bolt-lightning color-red"></i>
                 <span>Vitox AI</span><span class="country-code">IN</span>
@@ -45,6 +46,7 @@
             <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with"
                 data-size="medium" data-logo_alignment="left">
             </div>
+            <button class="icon-btn" mv-action="add(video)" title="Upload Video"><i class="fas fa-plus"></i></button>
             <button class="icon-btn"><i class="fas fa-bell"></i></button>
             <div class="user-avatar" property="currentUserAvatar">J</div>
         </div>
