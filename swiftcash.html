@@ -1,0 +1,172 @@
+<!-- Version 1.0.2 - AdSense Update -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftCash AI | Earn & Withdraw</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="manifest" href="manifest.json">
+    <!-- Google GSI -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7142476355791158"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Professional Preloader -->
+    <div id="preloader">
+        <div class="loader-logo">SwiftCash AI</div>
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="bg-mesh"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <!-- Floating Decorative Shapes -->
+    <div class="shape" style="width: 50px; height: 50px; top: 20%; left: 10%;"></div>
+    <div class="shape" style="width: 80px; height: 80px; top: 60%; right: 5%; border-radius: 50%;"></div>
+    <div class="shape" style="width: 30px; height: 30px; bottom: 15%; left: 20%;"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="fade-in">
+            <div class="user-profile">
+                <div class="avatar" id="user-avatar">?</div>
+                <div id="user-info">
+                    <div style="font-weight: 700; font-size: 1.1rem;" id="user-name">Guest User</div>
+                    <div style="color: var(--text-dim); font-size: 0.8rem;">Login to save points</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button id="admin-btn" onclick="location.href='admin.html'"
+                    style="display: none; background: rgba(255,255,255,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.75rem;">
+                    Admin
+                </button>
+                <button id="login-btn" onclick="loginWithGoogle()"
+                    style="background: var(--grad); border: none; color: white; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
+                    Sign In
+                </button>
+                <!-- Hidden Official Google Button (for backup) -->
+                <div id="g_id_signin" style="display: none;"></div>
+                <button
+                    style="background: var(--bg-card); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 12px; cursor: pointer;">
+                    <i data-lucide="bell" size="20"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Balance Section -->
+        <div class="balance-card fade-in" style="animation-delay: 0.1s;">
+            <div class="balance-label">Total Earnings</div>
+            <div class="points-amount" id="total-points">0</div>
+            <div class="rupee-value">Equivalent: <span id="rupee-amount">₹0.00</span></div>
+
+            <div
+                style="margin-top: 20px; display: flex; justify-content: space-around; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <div>
+                    <div style="color: var(--text-dim); font-size: 0.7rem; margin-bottom: 5px;">CONVERSION</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">500 Pts = ₹10</div>
+                </div>
+                <div style="width: 1px; background: var(--glass-border);"></div>
+                <div>
+                    <div style="color: var(--text-dim); font-size: 0.7rem; margin-bottom: 5px;">MIN. WITHDRAW</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">₹50.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earn Section -->
+        <div class="fade-in" style="animation-delay: 0.2s; margin-bottom: 20px;">
+            <h3 style="margin-bottom: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="zap" color="var(--primary)" size="20"></i> Quick Tasks
+            </h3>
+            <div class="earn-grid">
+                <div class="task-card" onclick="startAdTask('Video Ad', 30)">
+                    <div class="task-icon"><i data-lucide="play-circle"></i></div>
+                    <div class="task-title">Watch Video</div>
+                    <div class="task-reward">+30 Points</div>
+                </div>
+                <div class="task-card" onclick="simulateTask('Daily Check-in', 10)">
+                    <div class="task-icon"><i data-lucide="calendar"></i></div>
+                    <div class="task-title">Daily Bonus</div>
+                    <div class="task-reward">+10 Points</div>
+                </div>
+                <div class="task-card" onclick="simulateTask('Lucky Spin', 50)">
+                    <div class="task-icon"><i data-lucide="refresh-cw"></i></div>
+                    <div class="task-title">Lucky Spin</div>
+                    <div class="task-reward">+50 Points</div>
+                </div>
+                <div class="task-card" onclick="simulateTask('Scratch Card', 100)">
+                    <div class="task-icon"><i data-lucide="credit-card"></i></div>
+                    <div class="task-title">Scratch & Win</div>
+                    <div class="task-reward">+100 Points</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdraw Button -->
+        <div class="fade-in" style="animation-delay: 0.3s; margin-bottom: 30px;">
+            <button class="btn-main" onclick="openWithdraw()">
+                <i data-lucide="wallet"></i> Redeem Points
+            </button>
+        </div>
+
+        <!-- History Section -->
+        <div class="fade-in" style="animation-delay: 0.4s; margin-bottom: 100px;">
+            <h3 style="margin-bottom: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="history" color="var(--primary)" size="20"></i> Recent History
+            </h3>
+            <div id="history-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- History items will be injected here -->
+                <div
+                    style="background: var(--bg-card); padding: 20px; border-radius: 20px; text-align: center; color: var(--text-dim); font-size: 0.9rem;">
+                    Syncing history...
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <nav class="nav-bar">
+            <a href="#" class="nav-item active">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="layers"></i>
+                <span>Tasks</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="users"></i>
+                <span>Invite</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Ad Overlay -->
+    <div id="ad-overlay" class="overlay">
+        <div style="color: var(--text-dim); margin-bottom: 20px; font-weight: 500;">ADVERTISING</div>
+        <div class="ad-timer" id="ad-countdown">15</div>
+        <div style="margin-top: 20px; text-align: center; max-width: 80%;">
+            <p style="font-size: 1.1rem; font-weight: 700;">Watching Advertisment...</p>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">Points will be added after the timer ends.</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

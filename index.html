@@ -1,172 +1,165 @@
-<!-- Version 1.0.2 - AdSense Update -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftCash AI | Earn & Withdraw</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="index.css">
-    <link rel="manifest" href="manifest.json">
-    <!-- Google GSI -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7142476355791158"
-        crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Vitox AI | India's Fastest Video Platform</title>
+    <link rel="stylesheet" href="https://get.mavo.io/mavo.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://get.mavo.io/mavo.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body>
-    <!-- Professional Preloader -->
-    <div id="preloader">
-        <div class="loader-logo">SwiftCash AI</div>
-        <div class="loader-spinner"></div>
+<body mv-app="youtube" mv-storage="local" class="dark-theme">
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <div class="header-left">
+            <button class="icon-btn menu-btn"><i class="fas fa-bars"></i></button>
+            <div class="logo">
+                <i class="fab fa-youtube color-red"></i>
+                <span>Vitox AI</span><span class="country-code">IN</span>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" placeholder="Search">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <button class="icon-btn mic-btn"><i class="fas fa-microphone"></i></button>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button class="icon-btn" mv-action="add(video)"><i class="fas fa-video"></i> Create</button>
+            <button class="icon-btn"><i class="fas fa-bell"></i></button>
+            <div class="user-avatar" property="currentUserAvatar">J</div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active"><i class="fas fa-home"></i> <span>Home</span></a>
+                <a href="#" class="nav-item"><i class="fas fa-play-circle"></i> <span>Shorts</span></a>
+                <a href="#" class="nav-item"><i class="fas fa-layer-group"></i> <span>Subscriptions</span></a>
+                <hr>
+                <a href="#" class="nav-item"><i class="fas fa-video-slash"></i> <span>Library</span></a>
+                <a href="#" class="nav-item"><i class="fas fa-history"></i> <span>History</span></a>
+                <a href="#" class="nav-item"><i class="fas fa-clock"></i> <span>Watch later</span></a>
+                <a href="#" class="nav-item"><i class="fas fa-thumbs-up"></i> <span>Liked videos</span></a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="content">
+            <!-- Categories -->
+            <div class="categories-bar">
+                <button class="chip active">All</button>
+                <button class="chip">Music</button>
+                <button class="chip">Gaming</button>
+                <button class="chip">Live</button>
+                <button class="chip">Tech</button>
+                <button class="chip">News</button>
+                <button class="chip">Comedy</button>
+                <button class="chip">Education</button>
+                <button class="chip">Recent</button>
+            </div>
+
+            <!-- Video Grid -->
+            <div class="video-grid">
+                <!-- Video 1 -->
+                <div property="video" mv-multiple class="video-card">
+                    <div class="thumbnail-wrapper">
+                        <img property="thumbnail"
+                            src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=1000&auto=format&fit=crop"
+                            alt="Thumbnail">
+                        <span class="duration" property="duration">15:02</span>
+                    </div>
+                    <div class="video-info">
+                        <div class="channel-avatar">
+                            <img property="channelAvatar" src="https://i.pravatar.cc/100?u=tech" alt="">
+                        </div>
+                        <div class="text-info">
+                            <h3 class="video-title" property="title">Building a YouTube Clone with Mavo</h3>
+                            <p class="channel-name" property="channel">Code with Mavo <i
+                                    class="fas fa-check-circle"></i></p>
+                            <div class="meta-data">
+                                <span property="views">45K</span> views • <span property="timestamp">1 day ago</span>
+                            </div>
+                        </div>
+                        <button class="mv-ui mv-delete icon-btn-small" title="Delete video"><i
+                                class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+
+                <!-- Video 2 -->
+                <div property="video" mv-multiple class="video-card">
+                    <div class="thumbnail-wrapper">
+                        <img property="thumbnail"
+                            src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop"
+                            alt="Thumbnail">
+                        <span class="duration" property="duration">08:20</span>
+                    </div>
+                    <div class="video-info">
+                        <div class="channel-avatar">
+                            <img property="channelAvatar" src="https://i.pravatar.cc/100?u=design" alt="">
+                        </div>
+                        <div class="text-info">
+                            <h3 class="video-title" property="title">Modern UI/UX Design Trends 2024</h3>
+                            <p class="channel-name" property="channel">Design Mastery <i
+                                    class="fas fa-check-circle"></i></p>
+                            <div class="meta-data">
+                                <span property="views">120K</span> views • <span property="timestamp">3 hours ago</span>
+                            </div>
+                        </div>
+                        <button class="mv-ui mv-delete icon-btn-small" title="Delete video"><i
+                                class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+
+                <!-- Video 3 -->
+                <div property="video" mv-multiple class="video-card">
+                    <div class="thumbnail-wrapper">
+                        <img property="thumbnail"
+                            src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=1000&auto=format&fit=crop"
+                            alt="Thumbnail">
+                        <span class="duration" property="duration">22:15</span>
+                    </div>
+                    <div class="video-info">
+                        <div class="channel-avatar">
+                            <img property="channelAvatar" src="https://i.pravatar.cc/100?u=gaming" alt="">
+                        </div>
+                        <div class="text-info">
+                            <h3 class="video-title" property="title">The Future of AI in Web Development</h3>
+                            <p class="channel-name" property="channel">Tech Today <i class="fas fa-check-circle"></i>
+                            </p>
+                            <div class="meta-data">
+                                <span property="views">890K</span> views • <span property="timestamp">5 hours ago</span>
+                            </div>
+                        </div>
+                        <button class="mv-ui mv-delete icon-btn-small" title="Delete video"><i
+                                class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State if no videos -->
+            <div mv-if="count(video) == 0" class="empty-state">
+                <i class="fas fa-video-slash"></i>
+                <p>No videos found. Click "Create" to add one!</p>
+            </div>
+        </main>
     </div>
 
-    <div class="bg-mesh"></div>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
+    <!-- Mavo Status Indicator -->
+    <div class="mavo-controls mv-bar mv-ui"></div>
 
-    <!-- Floating Decorative Shapes -->
-    <div class="shape" style="width: 50px; height: 50px; top: 20%; left: 10%;"></div>
-    <div class="shape" style="width: 80px; height: 80px; top: 60%; right: 5%; border-radius: 50%;"></div>
-    <div class="shape" style="width: 30px; height: 30px; bottom: 15%; left: 20%;"></div>
-
-    <div class="app-container">
-        <!-- Header -->
-        <header class="fade-in">
-            <div class="user-profile">
-                <div class="avatar" id="user-avatar">?</div>
-                <div id="user-info">
-                    <div style="font-weight: 700; font-size: 1.1rem;" id="user-name">Guest User</div>
-                    <div style="color: var(--text-dim); font-size: 0.8rem;">Login to save points</div>
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button id="admin-btn" onclick="location.href='admin.html'"
-                    style="display: none; background: rgba(255,255,255,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.75rem;">
-                    Admin
-                </button>
-                <button id="login-btn" onclick="loginWithGoogle()"
-                    style="background: var(--grad); border: none; color: white; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
-                    Sign In
-                </button>
-                <!-- Hidden Official Google Button (for backup) -->
-                <div id="g_id_signin" style="display: none;"></div>
-                <button
-                    style="background: var(--bg-card); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 12px; cursor: pointer;">
-                    <i data-lucide="bell" size="20"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- Balance Section -->
-        <div class="balance-card fade-in" style="animation-delay: 0.1s;">
-            <div class="balance-label">Total Earnings</div>
-            <div class="points-amount" id="total-points">0</div>
-            <div class="rupee-value">Equivalent: <span id="rupee-amount">₹0.00</span></div>
-
-            <div
-                style="margin-top: 20px; display: flex; justify-content: space-around; border-top: 1px solid var(--glass-border); padding-top: 20px;">
-                <div>
-                    <div style="color: var(--text-dim); font-size: 0.7rem; margin-bottom: 5px;">CONVERSION</div>
-                    <div style="font-size: 0.9rem; font-weight: 600;">500 Pts = ₹10</div>
-                </div>
-                <div style="width: 1px; background: var(--glass-border);"></div>
-                <div>
-                    <div style="color: var(--text-dim); font-size: 0.7rem; margin-bottom: 5px;">MIN. WITHDRAW</div>
-                    <div style="font-size: 0.9rem; font-weight: 600;">₹50.00</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Earn Section -->
-        <div class="fade-in" style="animation-delay: 0.2s; margin-bottom: 20px;">
-            <h3 style="margin-bottom: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="zap" color="var(--primary)" size="20"></i> Quick Tasks
-            </h3>
-            <div class="earn-grid">
-                <div class="task-card" onclick="startAdTask('Video Ad', 30)">
-                    <div class="task-icon"><i data-lucide="play-circle"></i></div>
-                    <div class="task-title">Watch Video</div>
-                    <div class="task-reward">+30 Points</div>
-                </div>
-                <div class="task-card" onclick="simulateTask('Daily Check-in', 10)">
-                    <div class="task-icon"><i data-lucide="calendar"></i></div>
-                    <div class="task-title">Daily Bonus</div>
-                    <div class="task-reward">+10 Points</div>
-                </div>
-                <div class="task-card" onclick="simulateTask('Lucky Spin', 50)">
-                    <div class="task-icon"><i data-lucide="refresh-cw"></i></div>
-                    <div class="task-title">Lucky Spin</div>
-                    <div class="task-reward">+50 Points</div>
-                </div>
-                <div class="task-card" onclick="simulateTask('Scratch Card', 100)">
-                    <div class="task-icon"><i data-lucide="credit-card"></i></div>
-                    <div class="task-title">Scratch & Win</div>
-                    <div class="task-reward">+100 Points</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Withdraw Button -->
-        <div class="fade-in" style="animation-delay: 0.3s; margin-bottom: 30px;">
-            <button class="btn-main" onclick="openWithdraw()">
-                <i data-lucide="wallet"></i> Redeem Points
-            </button>
-        </div>
-
-        <!-- History Section -->
-        <div class="fade-in" style="animation-delay: 0.4s; margin-bottom: 100px;">
-            <h3 style="margin-bottom: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="history" color="var(--primary)" size="20"></i> Recent History
-            </h3>
-            <div id="history-list" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- History items will be injected here -->
-                <div
-                    style="background: var(--bg-card); padding: 20px; border-radius: 20px; text-align: center; color: var(--text-dim); font-size: 0.9rem;">
-                    Syncing history...
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom Nav -->
-        <nav class="nav-bar">
-            <a href="#" class="nav-item active">
-                <i data-lucide="layout-dashboard"></i>
-                <span>Home</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i data-lucide="layers"></i>
-                <span>Tasks</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i data-lucide="users"></i>
-                <span>Invite</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i data-lucide="user"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
-    </div>
-
-    <!-- Ad Overlay -->
-    <div id="ad-overlay" class="overlay">
-        <div style="color: var(--text-dim); margin-bottom: 20px; font-weight: 500;">ADVERTISING</div>
-        <div class="ad-timer" id="ad-countdown">15</div>
-        <div style="margin-top: 20px; text-align: center; max-width: 80%;">
-            <p style="font-size: 1.1rem; font-weight: 700;">Watching Advertisment...</p>
-            <p style="color: var(--text-dim); font-size: 0.9rem;">Points will be added after the timer ends.</p>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-    <script>lucide.createIcons();</script>
 </body>
 
 </html>
