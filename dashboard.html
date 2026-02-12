@@ -210,7 +210,7 @@
         </main>
     </div>
     <script>
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             if (user) {
                 document.getElementById('studio-name').innerText = user.name;
@@ -220,6 +220,24 @@
                     avatar.style.backgroundImage = `url(${user.picture})`;
                     avatar.style.backgroundSize = 'cover';
                     avatar.style.color = 'transparent';
+                }
+
+                // Fetch real stats from Full Stack Backend
+                try {
+                    const res = await fetch('/api/creator/stats', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user.email })
+                    });
+                    const stats = await res.json();
+
+                    // Update UI with real database data
+                    document.querySelector('.stat-value').innerText = stats.views.toLocaleString();
+                    document.querySelectorAll('.stat-value')[3].innerText = stats.subscribers.toLocaleString();
+                    document.querySelectorAll('.stat-value')[4].innerText = stats.views.toLocaleString();
+                    document.querySelectorAll('.stat-value')[5].innerText = stats.watch_time.toLocaleString();
+                } catch (e) {
+                    console.error("Dashboard Sync Failed", e);
                 }
             } else {
                 window.location.href = 'login.html';

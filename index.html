@@ -218,17 +218,38 @@
 
 
     <script>
-        function handleCredentialResponse(response) {
+        async function handleCredentialResponse(response) {
             const base64Url = response.credential.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             const payload = JSON.parse(window.atob(base64));
 
-            console.log("Welcome:", payload.name);
+            console.log("Syncing with Full Stack Backend...");
 
-            // Save to LocalStorage
-            localStorage.setItem('vitox_user', JSON.stringify(payload));
+            // Sync with Python Backend
+            try {
+                const res = await fetch('/api/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: payload.email,
+                        name: payload.name,
+                        picture: payload.picture
+                    })
+                });
 
-            updateLoginUI(payload);
+                const dbUser = await res.json();
+
+                // Save complete backend user profile
+                localStorage.setItem('vitox_user', JSON.stringify(dbUser));
+
+                updateLoginUI(dbUser);
+                alert(`Welcome back, ${dbUser.name}!`);
+            } catch (error) {
+                console.error("Backend Sync Failed:", error);
+                // Fallback to local only if server is down
+                localStorage.setItem('vitox_user', JSON.stringify(payload));
+                updateLoginUI(payload);
+            }
         }
 
         function updateLoginUI(user) {

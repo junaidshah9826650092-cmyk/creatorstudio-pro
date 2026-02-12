@@ -7,7 +7,7 @@ from datetime import datetime
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-DB_FILE = 'swiftcash.db'
+DB_FILE = 'vitox.db'
 ADMIN_EMAIL = "junaidshah78634@gmail.com" # Setting you as the default admin
 
 def get_db_connection():
@@ -22,7 +22,9 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             email TEXT PRIMARY KEY,
             name TEXT NOT NULL,
+            picture TEXT,
             points INTEGER DEFAULT 0,
+            role TEXT DEFAULT 'user',
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -64,18 +66,27 @@ def sync_user():
     data = request.json
     email = data.get('email')
     name = data.get('name')
+    picture = data.get('picture', '')
     
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
     
     if not user:
-        conn.execute('INSERT INTO users (email, name, points) VALUES (?, ?, ?)', (email, name, 0))
+        role = 'admin' if email == ADMIN_EMAIL else 'user'
+        conn.execute('INSERT INTO users (email, name, picture, points, role) VALUES (?, ?, ?, ?, ?)', 
+                     (email, name, picture, 0, role))
         conn.commit()
-        user_data = {'email': email, 'name': name, 'points': 0, 'is_admin': (email == ADMIN_EMAIL)}
     else:
-        user_data = dict(user)
-        user_data['is_admin'] = (email == ADMIN_EMAIL)
-        
+        # Update name/picture on login
+        conn.execute('UPDATE users SET name = ?, picture = ?, last_login = CURRENT_TIMESTAMP WHERE email = ?', 
+                     (name, picture, email))
+        conn.commit()
+    
+    # Fetch updated user
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    user_data = dict(user)
+    user_data['is_admin'] = (user['role'] == 'admin')
+    
     conn.close()
     return jsonify(user_data)
 
@@ -147,6 +158,26 @@ def admin_stats():
         'total_users': total_users,
         'total_points': total_points,
         'pending_withdrawals': pending_withdrawals
+    })
+
+@app.route('/api/creator/stats', methods=['POST'])
+def creator_stats():
+    data = request.json
+    email = data.get('email')
+    
+    conn = get_db_connection()
+    # Mocking some creator-specific stats for now, but linked to real user points
+    user = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()
+    
+    # In a real app, you'd have a 'videos' table with views/stats
+    # For now we use real points to show the stack is working
+    points = user['points'] if user else 0
+    
+    conn.close()
+    return jsonify({
+        'subscribers': points // 10, # Mocked ratio
+        'views': points * 25,
+        'watch_time': (points * 3) // 60
     })
 
 @app.route('/api/admin/users', methods=['POST'])
