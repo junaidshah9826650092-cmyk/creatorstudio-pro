@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: swiftcash-ai
+    name: vitox-ai
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn server:app
