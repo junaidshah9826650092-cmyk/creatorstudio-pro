@@ -149,6 +149,46 @@ def admin_stats():
         'pending_withdrawals': pending_withdrawals
     })
 
+@app.route('/api/admin/users', methods=['POST'])
+def admin_users():
+    data = request.json
+    email = data.get('email')
+    if email != ADMIN_EMAIL:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    conn = get_db_connection()
+    users = conn.execute('SELECT * FROM users ORDER BY last_login DESC').fetchall()
+    conn.close()
+    return jsonify([dict(u) for u in users])
+
+@app.route('/api/admin/transactions', methods=['POST'])
+def admin_transactions():
+    data = request.json
+    email = data.get('email')
+    if email != ADMIN_EMAIL:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    conn = get_db_connection()
+    txs = conn.execute('SELECT * FROM transactions ORDER BY timestamp DESC').fetchall()
+    conn.close()
+    return jsonify([dict(tx) for tx in txs])
+
+@app.route('/api/admin/update-tx', methods=['POST'])
+def update_transaction():
+    data = request.json
+    admin_email = data.get('admin_email')
+    tx_id = data.get('tx_id')
+    new_status = data.get('status') # 'completed' or 'rejected'
+
+    if admin_email != ADMIN_EMAIL:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    conn = get_db_connection()
+    conn.execute('UPDATE transactions SET status = ? WHERE id = ?', (new_status, tx_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 5000))

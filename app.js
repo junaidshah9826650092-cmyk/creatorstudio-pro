@@ -1,5 +1,5 @@
 // Google Sign-In Config
-const CLIENT_ID = "792653327676-kn08t8c5vduqbmva15nngmrcfvuv2l60.apps.googleusercontent.com";
+const CLIENT_ID = "109192770054200088033.apps.googleusercontent.com";
 const API_URL = "/api";
 
 // App State

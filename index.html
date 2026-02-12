@@ -206,6 +206,20 @@
                         avatar.style.backgroundPosition = 'center';
                         avatar.style.color = 'transparent';
                     }
+
+                    // Show Admin Button if authorized
+                    if (user.email === 'junaidshah78634@gmail.com') {
+                        const headerRight = document.querySelector('.header-right');
+                        if (!document.getElementById('admin-link-btn')) {
+                            const adminBtn = document.createElement('button');
+                            adminBtn.id = 'admin-link-btn';
+                            adminBtn.className = 'btn-text';
+                            adminBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Admin';
+                            adminBtn.onclick = () => location.href = 'admin.html';
+                            adminBtn.style.color = '#ff4d4d';
+                            headerRight.insertBefore(adminBtn, headerRight.firstChild);
+                        }
+                    }
                 }
             }
         }

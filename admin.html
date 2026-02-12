@@ -4,88 +4,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | SwiftCash AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="index.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Vitox AI | Admin Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --admin-bg: #0f0f0f;
+            --card-bg: #1e1e1e;
+            --accent: #ff0000;
+            --text-main: #ffffff;
+            --text-dim: #aaaaaa;
+            --border: #333333;
+            --success: #2ba640;
+            --pending: #fbc02d;
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            color: var(--text-main);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        .admin-header {
+            background: var(--card-bg);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 10px;
+            color: var(--text-main);
+        }
+
+        .data-section {
+            padding: 0 40px;
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #252525;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background: #252525;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-pending {
+            background: var(--pending);
+            color: black;
+        }
+
+        .status-earn {
+            color: var(--success);
+        }
+
+        .status-withdraw {
+            color: var(--accent);
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .btn-approve {
+            background: var(--success);
+            color: white;
+            margin-right: 5px;
+        }
+
+        .btn-reject {
+            background: var(--accent);
+            color: white;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+    </style>
 </head>
 
-<body style="padding-top: 40px;">
-    <div class="bg-mesh"></div>
+<body>
+    <div id="loading" class="loading-overlay"><i class="fas fa-circle-notch fa-spin fa-3x"></i></div>
 
-    <div class="app-container">
-        <header>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <button onclick="location.href='index.html'"
-                    style="background: var(--bg-card); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 12px; cursor: pointer;">
-                    <i data-lucide="arrow-left" size="18"></i>
-                </button>
-                <h2 style="font-weight: 800;">Admin Panel</h2>
-            </div>
-        </header>
-
-        <!-- Stats Grid -->
-        <div class="earn-grid" id="admin-stats-container">
-            <div class="task-card" style="cursor: default;">
-                <div style="color: var(--primary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                    Total Users</div>
-                <div style="font-size: 1.8rem; font-weight: 800; margin-top: 5px;" id="stat-users">...</div>
-            </div>
-            <div class="task-card" style="cursor: default;">
-                <div style="color: var(--secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                    Total Points</div>
-                <div style="font-size: 1.8rem; font-weight: 800; margin-top: 5px;" id="stat-points">...</div>
-            </div>
+    <header class="admin-header">
+        <div class="logo">
+            <i class="fas fa-bolt-lightning" style="color: red;"></i>
+            <span>Vitox AI Admin</span>
         </div>
-
-        <!-- Pending Withdrawals -->
-        <div class="balance-card">
-            <div style="color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 15px;">
-                Pending Withdrawals</div>
-            <div style="font-size: 2.5rem; font-weight: 800; color: #ff4d4d;" id="stat-pending">0</div>
-            <div style="font-size: 0.9rem; color: var(--text-dim); margin-top: 10px;">Requests waiting for approval
-            </div>
+        <div style="display: flex; gap: 15px;">
+            <button onclick="location.href='index.html'"
+                style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i
+                    class="fas fa-eye"></i> View Site</button>
+            <button onclick="refreshData()"
+                style="background: #ff0000; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i
+                    class="fas fa-sync"></i> Sync Database</button>
         </div>
+    </header>
 
-        <div
-            style="background: var(--bg-card); border: 1px solid var(--glass-border); padding: 25px; border-radius: 28px; text-align: center;">
-            <i data-lucide="shield-check" color="var(--primary)" size="40" style="margin-bottom: 15px;"></i>
-            <p style="font-size: 0.9rem; color: var(--text-dim);">You are logged in as <b>Admin</b>. You can monitor the
-                system growth from here. Withdrawal processing dashboard coming soon.</p>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Registered Users</h3>
+            <div class="value" id="total-users">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Total Points Issued</h3>
+            <div class="value" id="total-points">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Pending Withdrawals</h3>
+            <div class="value" id="pending-withdrawals" style="color: var(--pending);">0</div>
         </div>
     </div>
 
-    <script>
-        const user = JSON.parse(localStorage.getItem('swift_user'));
-        const API_URL = "/api";
+    <!-- User Table -->
+    <div class="data-section">
+        <div class="section-title"><i class="fas fa-users"></i> User Management</div>
+        <table id="user-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Points</th>
+                    <th>Last Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Users injected here -->
+            </tbody>
+        </table>
+    </div>
 
-        if (!user || user.email !== 'junaidshah78634@gmail.com') {
-            alert('Unauthorized Access');
-            location.href = 'index.html';
+    <!-- Transactions Table -->
+    <div class="data-section" style="margin-top: 40px;">
+        <div class="section-title"><i class="fas fa-exchange-alt"></i> All Transactions</div>
+        <table id="tx-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Transactions injected here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = "/api";
+        const ADMIN_EMAIL = "junaidshah78634@gmail.com";
+        const savedUser = JSON.parse(localStorage.getItem('vitox_user') || localStorage.getItem('swift_user'));
+
+        // Auth Check
+        if (!savedUser || savedUser.email !== ADMIN_EMAIL) {
+            alert("Access Denied: Admin Rights Required.");
+            window.location.href = 'index.html';
         }
 
-        async function loadStats() {
+        async function refreshData() {
+            document.getElementById('loading').style.display = 'flex';
             try {
-                const res = await fetch(`${API_URL}/admin/stats`, {
+                // Load Stats
+                const statsRes = await fetch(`${API_URL}/admin/stats`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: user.email })
+                    body: JSON.stringify({ email: savedUser.email })
                 });
-                const stats = await res.json();
+                const stats = await statsRes.json();
+                document.getElementById('total-users').innerText = stats.total_users;
+                document.getElementById('total-points').innerText = stats.total_points.toLocaleString();
+                document.getElementById('pending-withdrawals').innerText = stats.pending_withdrawals;
 
-                document.getElementById('stat-users').innerText = stats.total_users;
-                document.getElementById('stat-points').innerText = stats.total_points.toLocaleString();
-                document.getElementById('stat-pending').innerText = stats.pending_withdrawals;
+                // Load Users
+                const usersRes = await fetch(`${API_URL}/admin/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: savedUser.email })
+                });
+                const users = await usersRes.json();
+                const userTbody = document.querySelector('#user-table tbody');
+                userTbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.name}</td>
+                        <td style="color: var(--text-dim);">${u.email}</td>
+                        <td style="font-weight: 700;">${u.points.toLocaleString()}</td>
+                        <td style="font-size: 0.8rem; color: var(--text-dim);">${new Date(u.last_login).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+
+                // Load Transactions
+                const txRes = await fetch(`${API_URL}/admin/transactions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: savedUser.email })
+                });
+                const txs = await txRes.json();
+                const txTbody = document.querySelector('#tx-table tbody');
+                txTbody.innerHTML = txs.map(tx => `
+                    <tr>
+                        <td style="font-size: 0.85rem;">${tx.user_email}</td>
+                        <td class="${tx.amount > 0 ? 'status-earn' : 'status-withdraw'}" style="font-weight: bold;">
+                            ${tx.amount > 0 ? '+' : ''}${tx.amount}
+                        </td>
+                        <td>${tx.description}</td>
+                        <td><span class="status-badge status-${tx.status}">${tx.status}</span></td>
+                        <td style="font-size: 0.75rem; color: var(--text-dim);">${new Date(tx.timestamp).toLocaleString()}</td>
+                        <td>
+                            ${tx.status === 'pending' ? `
+                                <button class="btn-action btn-approve" onclick="updateTx(${tx.id}, 'completed')">Approve</button>
+                                <button class="btn-action btn-reject" onclick="updateTx(${tx.id}, 'rejected')">Reject</button>
+                            ` : '---'}
+                        </td>
+                    </tr>
+                `).join('');
+
             } catch (e) {
                 console.error(e);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
         }
 
-        window.onload = () => {
-            lucide.createIcons();
-            loadStats();
-        };
+        async function updateTx(id, status) {
+            if (!confirm(`Confirm change to ${status}?`)) return;
+            const res = await fetch(`${API_URL}/admin/update-tx`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    admin_email: savedUser.email,
+                    tx_id: id,
+                    status: status
+                })
+            });
+            const result = await res.json();
+            if (result.status === 'success') {
+                refreshData();
+            }
+        }
+
+        // Auto Refresh every 30 seconds
+        setInterval(refreshData, 30000);
+        window.onload = refreshData;
     </script>
 </body>
 
