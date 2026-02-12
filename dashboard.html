@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitox AI | Creator Studio Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --studio-bg: #1f1f1f;
+            --studio-sidebar: #282828;
+            --studio-card: #282828;
+            --studio-border: #3e3e3e;
+            --blue-accent: #3ea6ff;
+        }
+
+        body {
+            background: var(--studio-bg);
+        }
+
+        .studio-layout {
+            display: grid;
+            grid-template-columns: 256px 1fr;
+            min-height: 100vh;
+        }
+
+        .studio-sidebar {
+            background: var(--studio-sidebar);
+            border-right: 1px solid var(--studio-border);
+            padding: 24px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .channel-info {
+            padding: 0 24px 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--studio-border);
+            margin-bottom: 16px;
+        }
+
+        .studio-avatar {
+            width: 112px;
+            height: 112px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            background: #607d8b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            border: 2px solid var(--studio-border);
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 12px 24px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #333;
+            color: #ff4e4e;
+            border-left: 4px solid #ff4e4e;
+        }
+
+        .studio-main {
+            padding: 24px 40px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .studio-card {
+            background: var(--studio-card);
+            border: 1px solid var(--studio-border);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .stat-value {
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-blue {
+            color: var(--blue-accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .upload-section {
+            border: 2px dashed var(--studio-border);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #555;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="studio-layout">
+        <aside class="studio-sidebar">
+            <div class="channel-info">
+                <div class="studio-avatar">J</div>
+                <div style="font-weight: 500; margin-top: 12px;">Your channel</div>
+                <div style="font-size: 0.75rem; color: #888;">Junaid Shah</div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="#"><i class="fas fa-video"></i> Content</a>
+                <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="#"><i class="fas fa-comment-alt"></i> Comments</a>
+                <a href="#"><i class="fas fa-copyright"></i> Copyright</a>
+                <a href="#"><i class="fas fa-dollar-sign"></i> Earn</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <main class="studio-main">
+            <h1 style="margin-bottom: 32px; font-size: 1.5rem;">Channel dashboard</h1>
+
+            <div class="dashboard-grid">
+                <!-- Latest Video Performance -->
+                <div class="studio-card">
+                    <div class="card-title">Latest video performance</div>
+                    <div
+                        style="background: #121212; height: 150px; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-play-circle" style="font-size: 3rem; color: #333;"></i>
+                    </div>
+                    <div class="stat-row">
+                        <span>Views</span>
+                        <span class="stat-value">1,245</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Impression click-through rate</span>
+                        <span class="stat-value">8.4%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Average view duration</span>
+                        <span class="stat-value">3:12</span>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid var(--studio-border); margin: 16px 0;">
+                    <a href="#" class="btn-blue">Go to video analytics</a>
+                </div>
+
+                <!-- Channel Analytics -->
+                <div class="studio-card">
+                    <div class="card-title">Channel analytics</div>
+                    <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 8px;">Current subscribers</div>
+                    <div style="font-size: 2rem; font-weight: 500; margin-bottom: 24px;">4,812</div>
+
+                    <div style="padding: 12px 0; border-top: 1px solid var(--studio-border);">
+                        <div style="font-weight: 500; margin-bottom: 12px;">Summary (Last 28 days)</div>
+                        <div class="stat-row"><span>Views</span> <span class="stat-value">45.2K</span></div>
+                        <div class="stat-row"><span>Watch time (hours)</span> <span class="stat-value">1.1K</span></div>
+                    </div>
+                    <a href="#" class="btn-blue">Go to channel analytics</a>
+                </div>
+
+                <!-- Upload Card -->
+                <div class="studio-card" style="grid-column: span 1.5;">
+                    <div class="card-title">Quick Actions</div>
+                    <div class="upload-section">
+                        <div class="upload-icon"><i class="fas fa-upload"></i></div>
+                        <p style="color: #aaa; margin-bottom: 16px;">Ready to share your next masterpiece?</p>
+                        <button class="btn-login" style="width: auto; padding: 10px 24px; background: #3ea6ff;">Upload
+                            Video</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

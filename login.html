@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitox AI | Creator Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #0f0f0f;
+            margin: 0;
+        }
+
+        .login-card {
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+        }
+
+        .login-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .login-card h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .login-card p {
+            color: #aaa;
+            margin-bottom: 32px;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #121212;
+            border: 1px solid #3f3f3f;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--yt-red, #ff0000);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #cc0000;
+        }
+
+        .divider {
+            margin: 24px 0;
+            display: flex;
+            align-items: center;
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #333;
+            margin: 0 10px;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 10px;
+            background: white;
+            color: #333;
+            border: none;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="login-logo">
+            <i class="fas fa-bolt-lightning" style="color: #ff0000;"></i>
+            <span style="color: white;">Vitox AI</span>
+        </div>
+        <h1>Sign In</h1>
+        <p>to continue to Creator Studio</p>
+
+        <form action="index.html">
+            <div class="input-group">
+                <label>Email or phone</label>
+                <input type="email" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" required>
+            </div>
+            <button type="submit" class="btn-login">Next</button>
+        </form>
+
+        <div class="divider">or</div>
+
+        <button class="google-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" width="18" alt="">
+            Sign in with Google
+        </button>
+
+        <div style="margin-top: 32px; font-size: 0.85rem;">
+            <a href="#" style="color: #3ea6ff; text-decoration: none;">Create account</a>
+        </div>
+    </div>
+</body>
+
+</html>
