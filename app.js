@@ -61,12 +61,14 @@ function updateUI() {
         const rupees = user.points * conversionRate;
         rupeeDisplay.textContent = `₹${rupees.toFixed(2)}`;
         userNameDisplay.textContent = user.name;
+        document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
         loginBtn.textContent = 'Sign Out';
         loginBtn.onclick = signOut;
     } else {
         pointsDisplay.textContent = '0';
         rupeeDisplay.textContent = '₹0.00';
         userNameDisplay.textContent = 'Guest User';
+        document.getElementById('user-avatar').textContent = '?';
         loginBtn.textContent = 'Sign In';
         loginBtn.onclick = loginWithGoogle;
     }
