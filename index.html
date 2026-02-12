@@ -40,17 +40,18 @@
             <button class="btn-text" onclick="location.href='dashboard.html'" title="Creator Studio">
                 <i class="fas fa-clapperboard"></i> Studio
             </button>
-            <div id="g_id_onload"
-                data-client_id="792653327676-kn08t8c5vduqbmva15nngmrcfvuv2l60.apps.googleusercontent.com"
-                data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
-                data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with"
-                data-size="medium" data-logo_alignment="left">
+            <div id="login-container">
+                <div id="g_id_onload" data-client_id="109192770054200088033.apps.googleusercontent.com"
+                    data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                    data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline"
+                    data-text="signin_with" data-size="medium" data-logo_alignment="left">
+                </div>
             </div>
             <button class="icon-btn" mv-action="add(video)" title="Upload Video"><i class="fas fa-plus"></i></button>
             <button class="icon-btn"><i class="fas fa-bell"></i></button>
-            <div class="user-avatar" property="currentUserAvatar">J</div>
+            <div class="user-avatar" id="user-avatar" property="currentUserAvatar">?</div>
         </div>
     </header>
 
@@ -174,9 +175,39 @@
 
     <script>
         function handleCredentialResponse(response) {
-            console.log("Encoded JWT ID token: " + response.credential);
-            // Decode and handle user info here
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const payload = JSON.parse(window.atob(base64));
+
+            console.log("Welcome:", payload.name);
+
+            // Save to LocalStorage
+            localStorage.setItem('vitox_user', JSON.stringify(payload));
+
+            updateLoginUI(payload);
         }
+
+        function updateLoginUI(user) {
+            if (user) {
+                // Hide login button
+                document.getElementById('login-container').style.display = 'none';
+                // Update avatar
+                const avatar = document.getElementById('user-avatar');
+                avatar.textContent = user.name.charAt(0).toUpperCase();
+                if (user.picture) {
+                    avatar.style.backgroundImage = `url(${user.picture})`;
+                    avatar.style.backgroundSize = 'cover';
+                }
+            }
+        }
+
+        // Check if user is already logged in on page load
+        window.addEventListener('load', () => {
+            const savedUser = localStorage.getItem('vitox_user');
+            if (savedUser) {
+                updateLoginUI(JSON.parse(savedUser));
+            }
+        });
     </script>
 </body>
 
