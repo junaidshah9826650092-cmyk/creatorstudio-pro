@@ -425,3 +425,11 @@ hr {
         margin-left: 0;
     }
 }
+
+/* Force Hide Mavo Framework UI */
+[mv-app] .mv-bar,
+[mv-app] .mv-status,
+[mv-app] .mv-message,
+.mv-ui.mv-bar {
+    display: none !important;
+}
