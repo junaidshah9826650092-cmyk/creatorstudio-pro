@@ -101,9 +101,9 @@
             <nav class="sidebar-nav">
                 <!-- Main -->
                 <a href="#" class="nav-item active" onclick="loadVideos(); return false;"><i class="fas fa-home"></i>
-                    <span>Home</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Shorts'); return false;"><i
-                        class="fas fa-play-circle"></i> <span>Shorts</span></a>
+                    <span>Feed</span></a>
+                <a href="#" class="nav-item" onclick="loadSnapsView(); return false;"><i class="fas fa-play-circle"></i>
+                    <span>V-Snaps</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Squad'); return false;"><i
                         class="fas fa-layer-group"></i> <span>Squad</span></a>
                 <hr>
@@ -114,18 +114,19 @@
                     You <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
                 </div>
 
-                <a href="#" class="nav-item" onclick="loadView('History'); return false;"><i class="fas fa-history"></i>
-                    <span>History</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Playlists'); return false;"><i class="fas fa-list"></i>
-                    <span>Playlists</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Watch Later'); return false;"><i
-                        class="fas fa-clock"></i> <span>Watch later</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Rewind'); return false;"><i class="fas fa-history"></i>
+                    <span>Rewind</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Collections'); return false;"><i
+                        class="fas fa-list"></i>
+                    <span>Collections</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Bookmarks'); return false;"><i class="fas fa-clock"></i>
+                    <span>Bookmarks</span></a>
                 <a href="#" class="nav-item" onclick="loadLikedVideosView(); return false;"><i
-                        class="fas fa-thumbs-up"></i> <span>Liked videos</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Your Videos'); return false;"><i
-                        class="fas fa-video"></i> <span>Your videos</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Downloads'); return false;"><i
-                        class="fas fa-download"></i> <span>Downloads</span></a>
+                        class="fas fa-thumbs-up"></i> <span>Favorites</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Creator Hub'); return false;"><i
+                        class="fas fa-video"></i> <span>Creator Hub</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Vault'); return false;"><i class="fas fa-download"></i>
+                    <span>Vault</span></a>
             </nav>
         </aside>
 
@@ -182,7 +183,17 @@
 
             if (emptyState) emptyState.style.display = 'none';
             if (grid) {
+                // Reset Grid Styles
                 grid.style.display = 'grid';
+                grid.style.flexDirection = '';
+                grid.style.alignItems = '';
+                grid.style.gap = '';
+                grid.style.padding = '';
+                grid.style.height = '';
+                grid.style.overflowY = '';
+                grid.style.scrollSnapType = '';
+                grid.style.justifyContent = 'start';
+
                 grid.innerHTML = '';
 
                 videosToRender.forEach((vid, index) => {
@@ -220,6 +231,106 @@
                     grid.appendChild(card);
                 });
             }
+
+            // Update Sidebar Active State
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector('.nav-item').classList.add('active'); // Home/Feed is index 0
+        }
+
+        async function loadSnapsView() {
+            const grid = document.getElementById('main-video-grid');
+            const emptyState = document.getElementById('empty-state');
+            if (!grid) return;
+
+            // Update UI
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            const snapLink = Array.from(document.querySelectorAll('.nav-item')).find(a => a.innerText.includes('V-Snaps'));
+            if (snapLink) snapLink.classList.add('active');
+
+            try {
+                const res = await fetch('/api/videos');
+                const vids = await res.json();
+
+                if (!vids || vids.length === 0) {
+                    loadView('V-Snaps');
+                    return;
+                }
+
+                if (emptyState) emptyState.style.display = 'none';
+
+                // Set Vertical Snap Layout
+                grid.style.display = 'flex';
+                grid.style.flexDirection = 'column';
+                grid.style.alignItems = 'center';
+                grid.style.gap = '24px';
+                grid.style.padding = '20px 0';
+                grid.style.height = '85vh';
+                grid.style.overflowY = 'auto';
+                grid.style.scrollSnapType = 'y mandatory';
+                grid.style.scrollBehavior = 'smooth';
+                grid.innerHTML = '';
+
+                vids.forEach((vid, index) => {
+                    const snap = document.createElement('div');
+                    snap.style.cssText = `
+                        min-width: 340px;
+                        max-width: 380px;
+                        height: 600px;
+                        min-height: 600px;
+                        background: #000;
+                        border-radius: 20px;
+                        overflow: hidden;
+                        position: relative;
+                        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+                        scroll-snap-align: center;
+                        border: 1px solid rgba(255,255,255,0.1);
+                        transition: transform 0.3s;
+                    `;
+
+                    snap.innerHTML = `
+                        <video src="${vid.video_url}" loop style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"></video>
+                        
+                        <!-- Overlay Content -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 24px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); color: white; pointer-events: none;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #ff0055; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white;">
+                                    ${(vid.user_email || '?').charAt(0).toUpperCase()}
+                                </div>
+                                <span style="font-weight: 700; font-size: 0.95rem;">@${vid.user_email.split('@')[0]}</span>
+                                <button style="background: white; color: black; border: none; padding: 5px 12px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; pointer-events: auto;">Join</button>
+                            </div>
+                            <h3 style="margin: 0; font-size: 1rem; font-weight: 500; line-height: 1.4;">${vid.title}</h3>
+                        </div>
+
+                        <!-- Interaction Bar -->
+                        <div style="position: absolute; right: 12px; bottom: 100px; display: flex; flex-direction: column; gap: 24px; align-items: center; color: white;">
+                            <div style="text-align: center; cursor: pointer;"><i class="fas fa-heart" style="font-size: 1.6rem;"></i><div style="font-size: 0.75rem; font-weight: 600; margin-top: 4px;">${vid.likes || 0}</div></div>
+                            <div style="text-align: center; cursor: pointer;"><i class="fas fa-comment-dots" style="font-size: 1.6rem;"></i><div style="font-size: 0.75rem; font-weight: 600; margin-top: 4px;">${vid.comment_count || 0}</div></div>
+                            <div style="text-align: center; cursor: pointer;"><i class="fas fa-share" style="font-size: 1.6rem;"></i><div style="font-size: 0.75rem; font-weight: 600; margin-top: 4px;">Share</div></div>
+                        </div>
+                    `;
+
+                    const video = snap.querySelector('video');
+                    snap.onclick = () => {
+                        if (video.paused) {
+                            // Pause all other videos first
+                            grid.querySelectorAll('video').forEach(v => v.pause());
+                            video.play();
+                        } else {
+                            video.pause();
+                        }
+                    };
+
+                    grid.appendChild(snap);
+                });
+
+                // Auto-play the first video
+                setTimeout(() => {
+                    const firstVideo = grid.querySelector('video');
+                    if (firstVideo) firstVideo.play();
+                }, 500);
+
+            } catch (e) { console.error(e); }
         }
 
         async function loadLikedVideosView() {
