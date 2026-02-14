@@ -1,0 +1,56 @@
+/* Sidebar Toggle State (Collapsed) */
+.sidebar.active {
+    width: 72px;
+}
+
+.sidebar.active .nav-item span,
+.sidebar.active .nav-section-title {
+    display: none;
+}
+
+.sidebar.active .nav-item {
+    justify-content: center;
+    padding: 16px 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar.active .nav-item i {
+    margin-bottom: 4px;
+    font-size: 1.2rem;
+}
+
+/* Adjust Content Margin when sidebar is collapsed */
+.sidebar.active+.content {
+    margin-left: 72px;
+}
+
+/* Mobile: Sidebar overlay behavior needed? 
+   Currently sticking to desktop-first approach as per user context 
+   but adding basic media query for small screens 
+*/
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 240px;
+        z-index: 1000;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+        width: 240px;
+    }
+
+    .sidebar.active .nav-item {
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    .sidebar.active .nav-item span {
+        display: inline;
+    }
+
+    .content {
+        margin-left: 0 !important;
+    }
+}

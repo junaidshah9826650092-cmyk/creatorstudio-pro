@@ -85,6 +85,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
+                <!-- Main -->
                 <a href="#" class="nav-item active" onclick="loadVideos(); return false;"><i class="fas fa-home"></i>
                     <span>Home</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Shorts'); return false;"><i
@@ -92,14 +93,25 @@
                 <a href="#" class="nav-item" onclick="loadView('Subscriptions'); return false;"><i
                         class="fas fa-layer-group"></i> <span>Subscriptions</span></a>
                 <hr>
-                <a href="#" class="nav-item" onclick="loadView('Library'); return false;"><i
-                        class="fas fa-video-slash"></i> <span>Library</span></a>
+
+                <!-- You Section -->
+                <div class="nav-section-title"
+                    style="padding: 8px 12px; font-weight: 600; font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                    You <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
+                </div>
+
                 <a href="#" class="nav-item" onclick="loadView('History'); return false;"><i class="fas fa-history"></i>
                     <span>History</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Playlists'); return false;"><i class="fas fa-list"></i>
+                    <span>Playlists</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Watch Later'); return false;"><i
                         class="fas fa-clock"></i> <span>Watch later</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Liked Videos'); return false;"><i
+                <a href="#" class="nav-item" onclick="loadLikedVideosView(); return false;"><i
                         class="fas fa-thumbs-up"></i> <span>Liked videos</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Your Videos'); return false;"><i
+                        class="fas fa-video"></i> <span>Your videos</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Downloads'); return false;"><i
+                        class="fas fa-download"></i> <span>Downloads</span></a>
             </nav>
         </aside>
 
@@ -117,39 +129,7 @@
                 <button class="chip" onclick="filterByCategory('Education')">Education</button>
             </div>
 
-            <!-- Skeleton Loader (Visible during initial load) -->
-            <div id="loading-shimmer">
-                <div class="skeleton-card">
-                    <div class="skeleton skeleton-thumbnail"></div>
-                    <div style="display: flex; gap: 12px; margin-top: 12px;">
-                        <div class="skeleton skeleton-avatar"></div>
-                        <div style="flex: 1;">
-                            <div class="skeleton skeleton-text"></div>
-                            <div class="skeleton skeleton-text" style="width: 50%;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton skeleton-thumbnail"></div>
-                    <div style="display: flex; gap: 12px; margin-top: 12px;">
-                        <div class="skeleton skeleton-avatar"></div>
-                        <div style="flex: 1;">
-                            <div class="skeleton skeleton-text"></div>
-                            <div class="skeleton skeleton-text" style="width: 50%;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton skeleton-thumbnail"></div>
-                    <div style="display: flex; gap: 12px; margin-top: 12px;">
-                        <div class="skeleton skeleton-avatar"></div>
-                        <div style="flex: 1;">
-                            <div class="skeleton skeleton-text"></div>
-                            <div class="skeleton skeleton-text" style="width: 50%;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Video Grid -->
 
             <!-- Video Grid -->
             <div class="video-grid" id="main-video-grid">
@@ -168,24 +148,12 @@
     <script>
         let allVideos = []; // Global for search
 
-        // Safety: Hide Shimmer after 2 seconds max
-        setTimeout(() => {
-            const shimmer = document.getElementById('loading-shimmer');
-            if (shimmer) shimmer.style.display = 'none';
-        }, 2000);
-
         async function loadVideos() {
-            const shimmer = document.getElementById('loading-shimmer');
-            if (shimmer) shimmer.style.display = 'grid';
-
             try {
                 const res = await fetch('/api/videos');
                 allVideos = await res.json();
                 renderVideos(allVideos);
             } catch (e) { console.error(e); }
-            finally {
-                if (shimmer) shimmer.style.display = 'none';
-            }
         }
 
         function renderVideos(videosToRender) {
@@ -237,6 +205,102 @@
                         `;
                     grid.appendChild(card);
                 });
+            }
+        }
+
+        async function loadLikedVideosView() {
+            const grid = document.getElementById('main-video-grid');
+            const emptyState = document.getElementById('empty-state');
+            if (!grid) return;
+
+            // Check Login
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) return loadView('Liked Videos'); // Default blocking view if not logged in
+
+            // Fetch Likes
+            try {
+                const res = await fetch(`/api/user/liked-videos/${user.email}`);
+                const likedVideos = await res.json();
+
+                if (emptyState) emptyState.style.display = 'none';
+                grid.style.display = 'block'; // Block for custom layout
+
+                if (likedVideos.length === 0) {
+                    loadView('Liked Videos'); // Show empty state
+                    return;
+                }
+
+                const firstVideo = likedVideos[0];
+
+                grid.innerHTML = `
+                    <div class="liked-layout" style="display: flex; gap: 24px; color: white; height: 85vh;">
+                        <!-- Left Hero -->
+                        <div class="liked-hero" style="
+                            width: 360px; 
+                            background: linear-gradient(180deg, rgba(50,50,50,0.8), rgba(15,15,15,1)); 
+                            border-radius: 16px; 
+                            padding: 24px; 
+                            display: flex; 
+                            flex-direction: column; 
+                            justify-content: flex-end; 
+                            position: relative; 
+                            overflow: hidden;
+                            flex-shrink: 0;
+                        ">
+                            <!-- Blurry Backdrop -->
+                            <div style="
+                                position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                                background-image: url('${firstVideo.video_url}#t=5'); 
+                                background-size: cover; 
+                                filter: blur(30px) brightness(0.6); 
+                                z-index: 0;
+                            "></div>
+                            
+                            <div style="position: relative; z-index: 2;">
+                                <img src="${firstVideo.video_url}#t=5" style="width: 100%; aspect-ratio: 16/9; border-radius: 12px; object-fit: cover; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                <h1 style="font-size: 1.8rem; margin: 0 0 10px 0;">Liked videos</h1>
+                                <p style="margin: 0; font-weight: 500;">${user.name}</p>
+                                <p style="color: #aaa; font-size: 0.9rem; margin-top: 4px;">${likedVideos.length} videos • No views</p>
+                                
+                                <div style="display: flex; gap: 10px; margin-top: 24px;">
+                                    <button style="border-radius: 50%; width: 40px; height: 40px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer;"><i class="fas fa-download"></i></button>
+                                    <button style="border-radius: 50%; width: 40px; height: 40px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer;"><i class="fas fa-ellipsis-v"></i></button>
+                                </div>
+                                <button style="margin-top: 20px; padding: 10px 24px; background: white; color: black; border: none; border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-play"></i> Play all
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right List -->
+                        <div class="liked-list" style="flex: 1; overflow-y: auto;">
+                            ${likedVideos.map((vid, idx) => `
+                                <div onclick="playVideo('${vid.video_url}', '${vid.title}', '${vid.user_email}', ${vid.views}, '${vid.timestamp}', '', ${vid.id})" 
+                                    style="display: flex; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer; transition: background 0.2s;"
+                                    onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                                    onmouseout="this.style.background='transparent'">
+                                    
+                                    <span style="color: #aaa; width: 20px; display: flex; align-items: center; justify-content: center;">${idx + 1}</span>
+                                    
+                                    <div style="width: 160px; height: 90px; border-radius: 8px; overflow: hidden; flex-shrink: 0; position: relative;">
+                                        <video src="${vid.video_url}" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                    </div>
+                                    
+                                    <div style="flex: 1;">
+                                        <h4 style="margin: 0 0 4px 0; font-size: 1rem;">${vid.title || 'Untitled Video'}</h4>
+                                        <p style="margin: 0; font-size: 0.85rem; color: #aaa;">${vid.user_email} • ${vid.views || 0} views</p>
+                                    </div>
+
+                                    <button style="background: none; border: none; color: white; opacity: 0; align-self: center;" class="more-btn"><i class="fas fa-ellipsis-v"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+            } catch (e) {
+                console.error(e);
+                loadView('Liked Videos');
             }
         }
 

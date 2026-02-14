@@ -301,6 +301,36 @@ def get_transactions(email):
 
 # --- ENGAGEMENT API ---
 
+@app.route('/api/user/liked-videos/<email>', methods=['GET'])
+def get_liked_videos(email):
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('''
+                SELECT v.id, v.title, v.description, v.video_url, v.timestamp, v.views, v.user_email
+                FROM videos v
+                JOIN video_likes l ON v.id = l.video_id
+                WHERE l.user_email = %s
+                ORDER BY v.timestamp DESC
+            ''', (email,))
+            videos = cursor.fetchall()
+        else:
+            videos = conn.execute('''
+                SELECT v.id, v.title, v.description, v.video_url, v.timestamp, v.views, v.user_email
+                FROM videos v
+                JOIN video_likes l ON v.id = l.video_id
+                WHERE l.user_email = ?
+                ORDER BY v.timestamp DESC
+            ''', (email,)).fetchall()
+            videos = [dict(row) for row in videos]
+        
+        return jsonify(videos)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
 @app.route('/api/video/view', methods=['POST'])
 def increment_view():
     data = request.json
