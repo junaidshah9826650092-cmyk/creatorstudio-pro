@@ -21,8 +21,16 @@
 
     <div class="upload-container">
         <header class="upload-header">
-            <h2 id="modal-title"><i class="fas fa-satellite-dish" style="color: #ff003c; margin-right: 12px;"></i>Elite
-                Cloud Studio</h2>
+            <div style="display: flex; flex-direction: column;">
+                <h2 id="modal-title" style="margin-bottom: 4px;">Elite Cloud Studio</h2>
+                <div style="font-size: 0.75rem; color: #888;">Saved as private <i class="far fa-comment-alt"></i></div>
+            </div>
+            <div class="stepper">
+                <div class="step active" id="step-node-1" data-title="Details"></div>
+                <div class="step" id="step-node-2" data-title="Elements"></div>
+                <div class="step" id="step-node-3" data-title="Checks"></div>
+                <div class="step" id="step-node-4" data-title="Visibility"></div>
+            </div>
             <div class="actions">
                 <button class="icon-btn" onclick="location.href='index.html'"><i class="fas fa-times"></i></button>
             </div>
@@ -30,57 +38,218 @@
 
         <div class="upload-body">
             <div class="form-area" id="main-scroll-area">
+                <!-- Drop Zone (Initial) -->
                 <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-                    <div class="circle-icon"><i class="fas fa-cloud"></i></div>
-                    <p style="font-size: 1.1rem; margin-bottom: 8px; font-weight: 600;">Cloud Deployment Engine</p>
-                    <button class="btn-upload" style="margin-top:0;">Select Video</button>
+                    <div class="circle-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <p style="font-size: 1.1rem; margin-bottom: 8px; font-weight: 600;">Elite Cloud Studio</p>
+                    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 20px;">Drag and drop video files to upload
+                    </p>
+                    <button class="btn-upload" style="background:#fff; color:#000;">Select Files</button>
                     <input type="file" id="file-input" accept="video/*" style="display: none;"
                         onchange="handleFileSelect(event)">
                 </div>
 
-                <div class="details-section" id="details-section">
-                    <div class="section-title">Video Metadata</div>
-                    <div class="input-wrapper">
-                        <label>Title (required)</label>
-                        <input type="text" id="video-title" placeholder="Add a title that describes your video">
-                        <div class="ai-btn-wrapper">
-                            <button class="btn-ai" onclick="suggestAI(event)"><i class="fas fa-magic"></i> AI</button>
+                <!-- Step 1: Details -->
+                <div class="step-content" id="step-1" style="display: none;">
+                    <div class="details-section" id="details-section" style="display: block;">
+                        <div class="section-title">Details</div>
+                        <div class="input-wrapper">
+                            <label>Title (required) <i class="far fa-question-circle"></i></label>
+                            <input type="text" id="video-title" placeholder="Add a title that describes your video">
+                            <div class="ai-btn-wrapper">
+                                <button class="btn-ai" onclick="suggestAI(event)"><i class="fas fa-magic"></i>
+                                    AI</button>
+                            </div>
+                        </div>
+                        <div class="input-wrapper" style="margin-top: 32px;">
+                            <label>Description <i class="far fa-question-circle"></i></label>
+                            <textarea id="video-desc" rows="5"
+                                placeholder="Tell viewers about your video (type @ to mention a channel)"></textarea>
+                        </div>
+
+                        <div style="margin-top: 40px;">
+                            <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 12px;">Thumbnail</div>
+                            <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 16px;">Set a thumbnail that
+                                stands out and draws viewers' attention. <a href="#"
+                                    style="color: #3ea6ff; text-decoration: none;">Learn more</a></div>
+                            <div style="display: flex; gap: 12px;">
+                                <div
+                                    style="width: 120px; height: 68px; border: 1px dashed #444; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; cursor: pointer; background: rgba(255,255,255,0.02);">
+                                    <i class="fas fa-image" style="margin-bottom: 4px;"></i>
+                                    <span style="font-size: 0.65rem;">Upload thumbnail</span>
+                                </div>
+                                <div
+                                    style="width: 120px; height: 68px; background: #222; border-radius: 4px; border: 1px solid #333;">
+                                </div>
+                                <div
+                                    style="width: 120px; height: 68px; background: #222; border-radius: 4px; border: 1px solid #333;">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="input-wrapper">
-                        <label>Description</label>
-                        <textarea id="video-desc" rows="5" placeholder="Tell viewers about your video"></textarea>
+                </div>
+
+                <!-- Step 2: Elements -->
+                <div class="step-content" id="step-2" style="display: none;">
+                    <div class="section-title">Video elements</div>
+                    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 24px;">Use cards and an end screen to show
+                        viewers related videos, websites, and calls to action. <a href="#"
+                            style="color: #3ea6ff; text-decoration: none;">Learn more</a></p>
+
+                    <div class="element-row">
+                        <div class="element-icon"><i class="fas fa-closed-captioning"></i></div>
+                        <div class="element-info">
+                            <div class="element-title">Add subtitles</div>
+                            <div class="element-desc">Reach a broader audience by adding subtitles to your video</div>
+                        </div>
+                        <button class="element-btn">ADD</button>
+                    </div>
+
+                    <div class="element-row">
+                        <div class="element-icon"><i class="fas fa-window-restore"></i></div>
+                        <div class="element-info">
+                            <div class="element-title">Add an end screen</div>
+                            <div class="element-desc">Promote related content at the end of your video</div>
+                        </div>
+                        <button class="element-btn">ADD</button>
+                    </div>
+
+                    <div class="element-row">
+                        <div class="element-icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="element-info">
+                            <div class="element-title">Add cards</div>
+                            <div class="element-desc">Promote related content during your video</div>
+                        </div>
+                        <button class="element-btn">ADD</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Checks -->
+                <div class="step-content" id="step-3" style="display: none;">
+                    <div class="section-title">Checks</div>
+                    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 24px;">We'll check your video for issues
+                        that may restrict its visibility and then you will have the opportunity to fix issues before
+                        publishing your video. <a href="#" style="color: #3ea6ff; text-decoration: none;">Learn more</a>
+                    </p>
+
+                    <div style="margin-top: 40px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="font-weight: 700;">Copyright</div>
+                                <div id="copyright-status" style="color: #00ff88;"><i class="fas fa-check"></i> No
+                                    issues found</div>
+                            </div>
+                            <i class="fas fa-check" style="color: #00ff88;"></i>
+                        </div>
+                        <hr style="border:none; border-top: 1px solid #333; margin: 20px 0;">
+                        <p style="font-size: 0.75rem; color: #888;">Remember: These check results aren't final. Issues
+                            may come up in the future that impact your video. <a href="#"
+                                style="color: #3ea6ff; text-decoration: none;">Learn more</a></p>
+                    </div>
+                </div>
+
+                <!-- Step 4: Visibility -->
+                <div class="step-content" id="step-4" style="display: none;">
+                    <div class="section-title">Visibility</div>
+                    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 24px;">Choose when to publish and who can
+                        see your video</p>
+
+                    <div
+                        style="border: 1px solid #333; border-radius: 8px; padding: 24px; background: rgba(255,255,255,0.02);">
+                        <div style="font-weight: 700; margin-bottom: 8px;">Save or publish</div>
+                        <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 20px;">Make your video <span
+                                style="font-weight:700;">public, unlisted,</span> or <span
+                                style="font-weight:700;">private</span></div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px; padding-left: 10px;">
+                            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                                <input type="radio" name="visibility" value="private" checked style="margin-top: 4px;">
+                                <div>
+                                    <div style="font-weight: 500; font-size: 0.9rem;">Private</div>
+                                    <div style="font-size: 0.75rem; color: #888;">Only you and people who you choose can
+                                        watch your video</div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                                <input type="radio" name="visibility" value="unlisted" style="margin-top: 4px;">
+                                <div>
+                                    <div style="font-weight: 500; font-size: 0.9rem;">Unlisted</div>
+                                    <div style="font-size: 0.75rem; color: #888;">Anyone with the video link can watch
+                                        your video</div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                                <input type="radio" name="visibility" value="public" style="margin-top: 4px;">
+                                <div>
+                                    <div style="font-weight: 500; font-size: 0.9rem;">Public</div>
+                                    <div style="font-size: 0.75rem; color: #888;">Everyone can watch your video</div>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <aside class="video-preview-sidebar" id="preview-sidebar">
-                <div class="preview-player">
-                    <video id="preview-video" controls></video>
-                </div>
-                <div class="file-info-item">
-                    <div class="file-info-label">Network Status</div>
-                    <div class="file-info-value" style="color: #00ff88;"><i class="fas fa-signal"></i> Global Nodes Live
+                <div class="preview-player" style="position: relative;">
+                    <video id="preview-video" controls style="width: 100%; height: 100%; object-fit: contain;"></video>
+                    <div id="processing-overlay"
+                        style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; z-index: 10;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+                        <span style="font-size: 0.8rem; font-weight: 600;">Processing video...</span>
                     </div>
                 </div>
                 <div class="file-info-item">
-                    <div class="file-info-label">Encryption</div>
-                    <div class="file-info-value" style="color: #ff003c;">Cloud-Direct SSL</div>
+                    <div class="file-info-label">Video link</div>
+                    <div class="file-info-value" style="color: #3ea6ff; cursor: pointer;">https://vitox.ai/v/PnlbyZ6Z6KM
+                        <i class="far fa-copy" style="margin-left: 8px;"></i></div>
+                </div>
+                <div class="file-info-item">
+                    <div class="file-info-label">Filename</div>
+                    <div class="file-info-value" id="file-name-val" style="color: #fff;">-</div>
+                </div>
+
+                <div style="margin-top: auto; padding-top: 20px;">
+                    <div class="file-info-item" style="display:flex; align-items:center; gap:12px; margin-bottom:0;">
+                        <i class="fas fa-upload" style="color:#aaa;"></i>
+                        <div id="upload-status-badge"
+                            style="background:#333; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:800; color:#fff;">
+                            SD</div>
+                        <i class="fas fa-check-circle" style="color:#00ff88;"></i>
+                        <div style="font-size: 0.75rem; color:#aaa;" id="bottom-status-text">Checks complete. No issues
+                            found.</div>
+                    </div>
                 </div>
             </aside>
         </div>
 
         <footer class="upload-footer">
-            <div class="progress-section" id="progress-container" style="display: block;">
-                <div class="progress-bar-bg" style="height: 6px; background: #222;">
-                    <div class="progress-bar-fill" id="progress-fill"
-                        style="background: linear-gradient(90deg, #ff003c, #8a2be2);"></div>
+            <div class="status-indicators" style="display: flex; align-items: center; gap: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-up" style="font-size: 0.8rem; color: #aaa;"></i>
+                    <i class="fas fa-closed-captioning" style="font-size: 0.8rem; color: #aaa;"></i>
+                    <i class="fas fa-check-circle" style="font-size: 0.8rem; color: #aaa;"></i>
                 </div>
-                <div class="status-text" id="status-msg" style="font-weight: 700; text-transform: uppercase;">Cloud
-                    Engine Ready (V8)</div>
+                <div id="status-msg" style="font-size: 0.8rem; color: #aaa; font-weight: 500;">Checks complete. No
+                    issues found.</div>
             </div>
-            <div style="margin-left: auto;">
-                <button class="btn-main" id="next-btn" disabled onclick="handleUpload()">Publish to Cloud</button>
+
+            <div class="progress-section" id="progress-container"
+                style="display: none; position: absolute; bottom: 0; left: 0; right: 0; margin: 0;">
+                <div class="progress-bar-bg" style="height: 2px;">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div style="margin-left: auto; display: flex; gap: 12px;">
+                <button class="btn-secondary" id="back-btn"
+                    style="display:none; background:#222; border:1px solid #444; color:#fff; padding: 8px 16px; border-radius:4px; font-weight:600; cursor:pointer;"
+                    onclick="changeStep(-1)">Back</button>
+                <button class="btn-main" id="next-btn" disabled onclick="changeStep(1)"
+                    style="background:#fff; color:#000; padding: 8px 24px; border-radius:4px; font-weight:600; border:none; cursor:pointer;">Next</button>
+                <button class="btn-main" id="publish-btn"
+                    style="display:none; background: #fff; color: #000; padding: 8px 24px; border-radius:4px; font-weight:600; border:none; cursor:pointer;"
+                    onclick="handleUpload()">Save</button>
             </div>
         </footer>
     </div>
@@ -99,6 +268,7 @@
         const statusMsg = document.getElementById('status-msg');
 
         let selectedFile = null;
+        let currentStep = 1;
 
         function handleFileSelect(e) { if (e.target.files.length > 0) handleFile(e.target.files[0]); }
 
@@ -106,12 +276,46 @@
             if (!file.type.startsWith('video/')) { alert("Please upload a video file."); return; }
             selectedFile = file;
             dropZone.style.display = 'none';
-            detailsSection.style.display = 'block';
             previewSidebar.style.display = 'flex';
             nextBtn.disabled = false;
-            document.getElementById('video-title').value = file.name.replace(/\.[^/.]+$/, "");
+
+            const title = file.name.replace(/\.[^/.]+$/, "");
+            document.getElementById('video-title').value = title;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('file-name-val').innerText = file.name;
             previewVideo.src = URL.createObjectURL(file);
-            statusMsg.innerText = "READY FOR CLOUD PUBLISH";
+
+            // Show first step
+            changeStep(0);
+
+            // Auto start dummy processing
+            setTimeout(() => {
+                document.getElementById('processing-overlay').style.display = 'none';
+                document.getElementById('bottom-status-text').innerText = "Processing complete";
+            }, 3000);
+        }
+
+        function changeStep(delta) {
+            currentStep += delta;
+            if (currentStep < 1) currentStep = 1;
+            if (currentStep > 4) currentStep = 4;
+
+            // Hide all content
+            document.querySelectorAll('.step-content').forEach(el => el.style.display = 'none');
+            // Show current
+            document.getElementById(`step-${currentStep}`).style.display = 'block';
+
+            // Update Stepper UI
+            document.querySelectorAll('.stepper .step').forEach((el, idx) => {
+                el.classList.remove('active', 'completed');
+                if (idx + 1 < currentStep) el.classList.add('completed');
+                if (idx + 1 === currentStep) el.classList.add('active');
+            });
+
+            // Footer buttons
+            document.getElementById('back-btn').style.display = currentStep > 1 ? 'block' : 'none';
+            document.getElementById('next-btn').style.display = currentStep < 4 ? 'block' : 'none';
+            document.getElementById('publish-btn').style.display = currentStep === 4 ? 'block' : 'none';
         }
 
         async function suggestAI(event) {
