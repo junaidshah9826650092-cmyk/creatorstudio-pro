@@ -357,6 +357,24 @@ def update_transaction():
     conn.close()
     return jsonify({'status': 'success'})
 
+@app.route('/api/admin/delete-video', methods=['POST'])
+def delete_video():
+    data = request.json
+    admin_email = data.get('admin_email')
+    video_id = data.get('video_id')
+
+    if admin_email != ADMIN_EMAIL:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    try:
+        conn = get_db_connection()
+        conn.execute('DELETE FROM videos WHERE id = ?', (video_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/api/ai/suggest', methods=['POST'])
 def ai_suggest():
     data = request.json

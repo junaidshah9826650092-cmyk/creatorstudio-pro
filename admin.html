@@ -232,22 +232,21 @@
         </table>
     </div>
 
-    <!-- Transactions Table -->
+    <!-- Video Management Table -->
     <div class="data-section" style="margin-top: 40px;">
-        <div class="section-title"><i class="fas fa-exchange-alt"></i> All Transactions</div>
-        <table id="tx-table">
+        <div class="section-title"><i class="fas fa-video"></i> Video Management</div>
+        <table id="video-table">
             <thead>
                 <tr>
-                    <th>User</th>
-                    <th>Amount</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Time</th>
+                    <th>Title</th>
+                    <th>Uploader</th>
+                    <th>Views</th>
+                    <th>Upload Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Transactions injected here -->
+                <!-- Videos injected here -->
             </tbody>
         </table>
     </div>
@@ -294,28 +293,23 @@
                     </tr>
                 `).join('');
 
-                // Load Transactions
-                const txRes = await fetch(`${API_URL}/admin/transactions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: savedUser.email })
-                });
-                const txs = await txRes.json();
-                const txTbody = document.querySelector('#tx-table tbody');
-                txTbody.innerHTML = txs.map(tx => `
+                // Load All Videos
+                const vidRes = await fetch(`${API_URL}/videos`);
+                const allVideos = await vidRes.json();
+                const vidTbody = document.querySelector('#video-table tbody');
+                vidTbody.innerHTML = allVideos.map(v => `
                     <tr>
-                        <td style="font-size: 0.85rem;">${tx.user_email}</td>
-                        <td class="${tx.amount > 0 ? 'status-earn' : 'status-withdraw'}" style="font-weight: bold;">
-                            ${tx.amount > 0 ? '+' : ''}${tx.amount}
-                        </td>
-                        <td>${tx.description}</td>
-                        <td><span class="status-badge status-${tx.status}">${tx.status}</span></td>
-                        <td style="font-size: 0.75rem; color: var(--text-dim);">${new Date(tx.timestamp).toLocaleString()}</td>
                         <td>
-                            ${tx.status === 'pending' ? `
-                                <button class="btn-action btn-approve" onclick="updateTx(${tx.id}, 'completed')">Approve</button>
-                                <button class="btn-action btn-reject" onclick="updateTx(${tx.id}, 'rejected')">Reject</button>
-                            ` : '---'}
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <video src="${v.video_url}" style="width: 50px; height: 30px; border-radius: 4px; object-fit: cover;"></video>
+                                <span style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${v.title || 'Untitled'}</span>
+                            </div>
+                        </td>
+                        <td style="font-size: 0.85rem; color: var(--text-dim);">${v.user_email}</td>
+                        <td style="font-weight: 700;">${v.views || 0}</td>
+                        <td style="font-size: 0.75rem; color: var(--text-dim);">${new Date(v.timestamp).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn-action btn-reject" onclick="deleteVideo(${v.id})">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -324,6 +318,28 @@
                 console.error(e);
             } finally {
                 document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        async function deleteVideo(id) {
+            if (!confirm("Are you sure you want to delete this video? This cannot be undone.")) return;
+            try {
+                const res = await fetch(`${API_URL}/admin/delete-video`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_email: savedUser.email,
+                        video_id: id
+                    })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    refreshData();
+                } else {
+                    alert("Delete Failed: " + result.message);
+                }
+            } catch (e) {
+                alert("Error deleting video: " + e.message);
             }
         }
 
