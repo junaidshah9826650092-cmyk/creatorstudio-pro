@@ -87,18 +87,18 @@
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" onclick="loadVideos(); return false;"><i class="fas fa-home"></i>
                     <span>Home</span></a>
-                <a href="#" class="nav-item" onclick="showToast('Shorts coming soon!'); return false;"><i
+                <a href="#" class="nav-item" onclick="loadView('Shorts'); return false;"><i
                         class="fas fa-play-circle"></i> <span>Shorts</span></a>
-                <a href="#" class="nav-item" onclick="showToast('Subscriptions feature coming soon'); return false;"><i
+                <a href="#" class="nav-item" onclick="loadView('Subscriptions'); return false;"><i
                         class="fas fa-layer-group"></i> <span>Subscriptions</span></a>
                 <hr>
-                <a href="#" class="nav-item" onclick="showToast('Library is empty'); return false;"><i
+                <a href="#" class="nav-item" onclick="loadView('Library'); return false;"><i
                         class="fas fa-video-slash"></i> <span>Library</span></a>
-                <a href="#" class="nav-item" onclick="showToast('History coming soon'); return false;"><i
-                        class="fas fa-history"></i> <span>History</span></a>
-                <a href="#" class="nav-item" onclick="showToast('Watch Later coming soon'); return false;"><i
+                <a href="#" class="nav-item" onclick="loadView('History'); return false;"><i class="fas fa-history"></i>
+                    <span>History</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Watch Later'); return false;"><i
                         class="fas fa-clock"></i> <span>Watch later</span></a>
-                <a href="#" class="nav-item" onclick="showToast('Liked videos coming soon'); return false;"><i
+                <a href="#" class="nav-item" onclick="loadView('Liked Videos'); return false;"><i
                         class="fas fa-thumbs-up"></i> <span>Liked videos</span></a>
             </nav>
         </aside>
@@ -168,6 +168,12 @@
     <script>
         let allVideos = []; // Global for search
 
+        // Safety: Hide Shimmer after 2 seconds max
+        setTimeout(() => {
+            const shimmer = document.getElementById('loading-shimmer');
+            if (shimmer) shimmer.style.display = 'none';
+        }, 2000);
+
         async function loadVideos() {
             const shimmer = document.getElementById('loading-shimmer');
             if (shimmer) shimmer.style.display = 'grid';
@@ -231,6 +237,27 @@
                         `;
                     grid.appendChild(card);
                 });
+            }
+        }
+
+        function loadView(viewName) {
+            const grid = document.getElementById('main-video-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            // Clear Grid
+            if (grid) grid.innerHTML = '';
+
+            // Show Custom Message
+            if (emptyState) {
+                emptyState.style.display = 'block';
+                emptyState.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                        <h2 style="color: var(--text-primary); margin-bottom: 10px;">${viewName}</h2>
+                        <p>This feature is currently under development.</p>
+                        <button onclick="loadVideos()" style="margin-top: 20px; padding: 10px 24px; background: var(--accent); border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: 600;">Back to Home</button>
+                    </div>
+                `;
             }
         }
 
