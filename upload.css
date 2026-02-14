@@ -8,6 +8,8 @@
     --input-bg: rgba(255, 255, 255, 0.05);
     --text-main: #ffffff;
     --text-secondary: #aaaaaa;
+    --success: #4eff4e;
+    --error: #ff4e4e;
 }
 
 body {
@@ -64,6 +66,18 @@ body {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.upload-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.form-area {
+    flex: 1;
+    padding: 32px 40px;
+    overflow-y: auto;
 }
 
 .drop-zone {
@@ -145,16 +159,19 @@ body {
 }
 
 .section-title {
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: 1.25rem;
+    font-weight: 700;
     margin-bottom: 24px;
+    color: #fff;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
 }
 
 .input-wrapper {
     position: relative;
     margin-bottom: 24px;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 12px;
     background: var(--input-bg);
     transition: border-color 0.2s;
 }

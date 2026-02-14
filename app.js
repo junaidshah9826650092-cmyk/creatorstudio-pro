@@ -3,7 +3,7 @@ const CLIENT_ID = "392918089798-sqv6ro56e2lkdhu8jmh0j7mb1ka3lhbj.apps.googleuser
 const API_URL = "/api";
 
 // App State
-let user = JSON.parse(localStorage.getItem('swift_user')) || null;
+let user = JSON.parse(localStorage.getItem('vitox_user')) || null;
 const conversionRate = 10 / 500; // 10 Rupees for 500 points
 
 // UI Elements
@@ -42,7 +42,7 @@ async function onGoogleSignIn(resp) {
 
         const dbUser = await response.json();
         user = dbUser;
-        localStorage.setItem('swift_user', JSON.stringify(user));
+        localStorage.setItem('vitox_user', JSON.stringify(user));
 
         updateUI();
         showToast(`Welcome, ${user.name}!`);
@@ -145,7 +145,7 @@ async function addPoints(amount, description) {
 
         const data = await response.json();
         user.points = data.new_points;
-        localStorage.setItem('swift_user', JSON.stringify(user));
+        localStorage.setItem('vitox_user', JSON.stringify(user));
         updateUI();
         showToast(`${amount} Points Added!`);
     } catch (e) {
@@ -223,7 +223,7 @@ async function openWithdraw() {
             if (data.status === 'success') {
                 showToast('Withdrawal Requested!');
                 user.points = 0;
-                localStorage.setItem('swift_user', JSON.stringify(user));
+                localStorage.setItem('vitox_user', JSON.stringify(user));
                 updateUI();
             }
         }
