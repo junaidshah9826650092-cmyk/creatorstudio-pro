@@ -38,25 +38,28 @@ else:
 _db_ready = False
 
 def get_db_connection():
-    global _db_ready
-    if not _db_ready:
-        init_db()
-        _db_ready = True
-    
     if USE_POSTGRES:
         conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
         return conn
     else:
         conn = sqlite3.connect(DB_FILE)
         conn.row_factory = sqlite3.Row
+        # Military-grade optimization for SQLite
+        conn.execute('PRAGMA journal_mode = WAL')
+        conn.execute('PRAGMA synchronous = NORMAL')
         return conn
 
 def init_db():
-    print(f"--- INITIALIZING DATABASE AT {DB_FILE} ---")
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
+    print(f"--- INITIALIZING MILITARY-GRADE DATABASE SYSTEM ---")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Unified SQL for both SQLite and PostgreSQL (using TEXT for simplicity)
+    # Note: PostgreSQL uses SERIAL while SQLite uses AUTOINCREMENT
+    id_type = "SERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    
     # Users table
-    conn.execute('''
+    cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS users (
             email TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -66,23 +69,24 @@ def init_db():
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    # Transactions table with status for withdrawals
-    conn.execute('''
+    
+    # Transactions table
+    cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_type},
             user_email TEXT,
             amount INTEGER,
             type TEXT,
             description TEXT,
             status TEXT DEFAULT 'completed',
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_email) REFERENCES users (email)
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
     # Videos table
-    conn.execute('''
+    cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS videos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_type},
             user_email TEXT,
             title TEXT NOT NULL,
             description TEXT,
@@ -90,40 +94,41 @@ def init_db():
             thumbnail_url TEXT,
             views INTEGER DEFAULT 0,
             likes INTEGER DEFAULT 0,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_email) REFERENCES users (email)
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
     # Subscriptions table
-    conn.execute('''
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS subscriptions (
             subscriber_email TEXT,
             channel_email TEXT,
             PRIMARY KEY (subscriber_email, channel_email)
         )
     ''')
+    
     # Video Likes table
-    conn.execute('''
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS video_likes (
             user_email TEXT,
             video_id INTEGER,
             PRIMARY KEY (user_email, video_id)
         )
     ''')
+    
     # Comments table
-    conn.execute('''
+    cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS comments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_type},
             video_id INTEGER,
             user_email TEXT,
             content TEXT,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (video_id) REFERENCES videos (id)
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 
     # Video Views
-    conn.execute('''
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS video_views (
             video_id INTEGER,
             user_email TEXT,
@@ -132,19 +137,19 @@ def init_db():
         )
     ''')
 
-    # Add columns if they don't exist (migrations)
-    try:
-        conn.execute('ALTER TABLE transactions ADD COLUMN status TEXT DEFAULT "completed"')
-    except: pass
-    try:
-        conn.execute('ALTER TABLE videos ADD COLUMN likes INTEGER DEFAULT 0')
-    except: pass
+    if not USE_POSTGRES:
+        # SQLite migrations
+        try: cursor.execute('ALTER TABLE transactions ADD COLUMN status TEXT DEFAULT "completed"')
+        except: pass
+        try: cursor.execute('ALTER TABLE videos ADD COLUMN likes INTEGER DEFAULT 0')
+        except: pass
 
     conn.commit()
     conn.close()
-    print("Database Initialized Successfully.")
+    print("Military-Grade Database Initialized.")
 
-# Run DB Init immediately on load (needed for Gunicorn/Render)
+# Run DB Init
+_db_ready = True # Prevent recursion in get_db_connection during init
 init_db()
 
 # --- Serve Static Files ---
