@@ -7,132 +7,102 @@
     <title>Vitox AI | Creator Dashboard - Manage Your Videos</title>
     <meta name="description" content="Manage your video uploads, track analytics, and grow your channel on Vitox AI.">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --studio-bg: #1f1f1f;
-            --studio-sidebar: #282828;
-            --studio-card: #282828;
-            --studio-border: #3e3e3e;
-            --blue-accent: #3ea6ff;
+            --bg-main: #000000;
+            --bg-sidebar: #050505;
+            --accent: #ff003c;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
-            background: var(--studio-bg);
+            background: var(--bg-main);
+            color: white;
+            font-family: 'Outfit', sans-serif;
         }
 
         .studio-layout {
             display: grid;
-            grid-template-columns: 256px 1fr;
+            grid-template-columns: 260px 1fr;
             min-height: 100vh;
         }
 
         .studio-sidebar {
-            background: var(--studio-sidebar);
-            border-right: 1px solid var(--studio-border);
-            padding: 24px 0;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 32px 16px;
             position: sticky;
             top: 0;
             height: 100vh;
         }
 
-        .channel-info {
-            padding: 0 24px 24px;
-            text-align: center;
-            border-bottom: 1px solid var(--studio-border);
-            margin-bottom: 16px;
-        }
-
         .studio-avatar {
-            width: 112px;
-            height: 112px;
-            border-radius: 50%;
-            margin: 0 auto 12px;
-            background: #607d8b;
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin: 0 auto 16px;
+            background: linear-gradient(45deg, var(--accent), #8800ff);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: white;
-            border: 2px solid var(--studio-border);
+            font-weight: 800;
+            box-shadow: 0 10px 20px rgba(255, 0, 60, 0.3);
         }
 
         .sidebar-menu a {
             display: flex;
             align-items: center;
-            gap: 24px;
-            padding: 12px 24px;
-            color: #aaa;
+            gap: 16px;
+            padding: 14px 20px;
+            color: #888;
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: 0.2s;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 12px;
+            transition: all 0.3s;
+            margin-bottom: 4px;
         }
 
         .sidebar-menu a:hover,
         .sidebar-menu a.active {
-            background: #333;
-            color: #ff4e4e;
-            border-left: 4px solid #ff4e4e;
+            background: var(--glass);
+            color: white;
         }
 
-        .studio-main {
-            padding: 24px 40px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+        .sidebar-menu a.active {
+            background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
         }
 
         .studio-card {
-            background: var(--studio-card);
-            border: 1px solid var(--studio-border);
-            border-radius: 8px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+
+        .studio-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .card-title {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            color: white;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-
-        .stat-value {
-            color: white;
-            font-weight: 500;
-        }
-
-        .btn-blue {
-            color: var(--blue-accent);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
-        .upload-section {
-            border: 2px dashed var(--studio-border);
-            border-radius: 8px;
-            padding: 40px;
-            text-align: center;
-            margin-top: 24px;
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            color: #555;
-            margin-bottom: 16px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(90deg, #fff, #999);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
