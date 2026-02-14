@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Channel Analytics - Vitox Studio</title>
+    <title>Channel Analytics | Vitox</title>
     <link rel="stylesheet" href="style.css?v=6.0">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -269,7 +269,8 @@
 
         .realtime-header {
             display: flex;
-            items-center justify-content: space-between;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 20px;
         }
 
@@ -362,13 +363,15 @@
             <i class="fas fa-bars" style="color: #aaa; cursor: pointer;"></i>
             <a href="index.html"
                 style="text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.25rem;">
-                <i class="fas fa-bolt-lightning" style="color: var(--accent);"></i> Vitox Studio
+                <svg width="24" height="24" viewBox="0 0 64 64">
+                    <path fill="#ff0055" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z" />
+                </svg> Vitox
             </a>
         </div>
         <div style="display: flex; align-items: center; gap: 20px;">
             <button class="studio-btn" onclick="location.href='upload.html'"><i class="fas fa-plus"></i> CREATE</button>
             <div id="user-avatar"
-                style="width:36px; height:36px; border-radius:50%; background: #222; border: 2px solid var(--accent); display: flex; items-center justify-content: center; font-weight: 800; cursor: pointer;">
+                style="width:36px; height:36px; border-radius:50%; background: #222; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer;">
                 ?</div>
         </div>
     </header>
@@ -422,7 +425,7 @@
                             <div class="summary-value">0.0</div>
                         </div>
                         <div class="summary-item">
-                            <div class="summary-label">Subscribers</div>
+                            <div class="summary-label">Squad members</div>
                             <div class="summary-value" id="main-subs">—</div>
                         </div>
                     </div>
@@ -462,7 +465,7 @@
 
                     <div class="realtime-stat">
                         <div class="realtime-val" id="rt-subs">0</div>
-                        <div class="realtime-sub">Subscribers</div>
+                        <div class="realtime-sub">Squad members</div>
                         <div class="action-link" style="margin-top: 10px; display: block;">See live count</div>
                     </div>
 
