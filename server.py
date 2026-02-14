@@ -19,8 +19,9 @@ if os.path.exists('.env'):
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-DB_FILE = 'vitox.db'
-ADMIN_EMAIL = "junaidshah78634@gmail.com" # Setting you as the default admin
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
+ADMIN_EMAIL = "junaidshah78634@gmail.com" 
 
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
@@ -80,6 +81,14 @@ def init_db():
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
+
+@app.errorhandler(500)
+def handle_500(e):
+    return jsonify({"status": "error", "message": "Internal Server Error", "details": str(e)}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/<path:path>')
 def serve_static(path):
@@ -173,7 +182,6 @@ def upload_file():
         # Return URL relative to server root
         return jsonify({'url': f"/uploads/{filename}"})
 
-@app.route('/api/video/upload', methods=['POST'])
 @app.route('/api/video/upload', methods=['POST'])
 def upload_video():
     try:
