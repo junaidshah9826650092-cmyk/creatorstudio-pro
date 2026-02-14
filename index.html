@@ -133,95 +133,84 @@
                 </div>
             </div>
 
-            <!-- Video Grid (Initially hidden) -->
-            <div class="video-grid" style="display: none;">
-                <!-- Video 1 -->
-                <div property="video" mv-multiple class="video-card">
-                    <div class="thumbnail-wrapper">
-                        <img property="thumbnail"
-                            src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=1000&auto=format&fit=crop"
-                            alt="Thumbnail">
-                        <span class="duration" property="duration">15:02</span>
-                    </div>
-                    <div class="video-info">
-                        <div class="channel-avatar">
-                            <img property="channelAvatar" src="https://i.pravatar.cc/100?u=tech" alt="">
-                        </div>
-                        <div class="text-info">
-                            <h3 class="video-title" property="title">Building a YouTube Clone with Mavo</h3>
-                            <p class="channel-name" property="channel">Code with Mavo <i
-                                    class="fas fa-check-circle"></i></p>
-                            <div class="meta-data">
-                                <span property="views">45K</span> views • <span property="timestamp">1 day ago</span>
-                            </div>
-                        </div>
-                        <button class="mv-ui mv-delete icon-btn-small" title="Delete video"><i
-                                class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-
-                <!-- Video 2 -->
-                <div property="video" mv-multiple class="video-card">
-                    <div class="thumbnail-wrapper">
-                        <img property="thumbnail"
-                            src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop"
-                            alt="Thumbnail">
-                        <span class="duration" property="duration">08:20</span>
-                    </div>
-                    <div class="video-info">
-                        <div class="channel-avatar">
-                            <img property="channelAvatar" src="https://i.pravatar.cc/100?u=design" alt="">
-                        </div>
-                        <div class="text-info">
-                            <h3 class="video-title" property="title">Modern UI/UX Design Trends 2024</h3>
-                            <p class="channel-name" property="channel">Design Mastery <i
-                                    class="fas fa-check-circle"></i></p>
-                            <div class="meta-data">
-                                <span property="views">120K</span> views • <span property="timestamp">3 hours ago</span>
-                            </div>
-                        </div>
-                        <button class="mv-ui mv-delete icon-btn-small" title="Delete video"><i
-                                class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-
-                <!-- Video 3 -->
-                <div property="video" mv-multiple class="video-card">
-                    <div class="thumbnail-wrapper">
-                        <img property="thumbnail"
-                            src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=1000&auto=format&fit=crop"
-                            alt="Thumbnail">
-                        <span class="duration" property="duration">22:15</span>
-                    </div>
-                    <div class="video-info">
-                        <div class="channel-avatar">
-                            <img property="channelAvatar" src="https://i.pravatar.cc/100?u=gaming" alt="">
-                        </div>
-                        <div class="text-info">
-                            <h3 class="video-title" property="title">The Future of AI in Web Development</h3>
-                            <p class="channel-name" property="channel">Tech Today <i class="fas fa-check-circle"></i>
-                            </p>
-                            <div class="meta-data">
-                                <span property="views">890K</span> views • <span property="timestamp">5 hours ago</span>
-                            </div>
-                        </div>
-                        <button class="mv-ui mv-delete icon-btn-small" title="Delete video"><i
-                                class="fas fa-trash"></i></button>
-                    </div>
-                </div>
+            <!-- Video Grid -->
+            <div class="video-grid" id="main-video-grid">
+                <!-- Real videos will be injected here via JavaScript -->
             </div>
 
             <!-- Empty State if no videos -->
-            <div mv-if="count(video) == 0" class="empty-state">
+            <div id="empty-state" class="empty-state" style="display: none;">
                 <i class="fas fa-video-slash"></i>
-                <p>No videos found. Click "Create" to add one!</p>
+                <p>No videos found. Be the first to upload one!</p>
             </div>
         </main>
     </div>
 
-
-
     <script>
+        async function loadVideos() {
+            try {
+                const res = await fetch('/api/videos');
+                const videos = await res.json();
+
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
+
+                if (videos.length === 0) {
+                    emptyState.style.display = 'block';
+                    grid.style.display = 'none';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                grid.style.display = 'grid';
+
+                grid.innerHTML = videos.map(vid => `
+                    <div class="video-card" onclick="playVideo('${vid.video_url}', '${vid.title}')">
+                        <div class="thumbnail-wrapper">
+                            <video src="${vid.video_url}" muted onmouseover="this.play()" onmouseout="this.pause()" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            <span class="duration">LIVE</span>
+                        </div>
+                        <div class="video-info">
+                            <div class="channel-avatar">
+                                ${vid.user_email.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="text-info">
+                                <h3 class="video-title">${vid.title}</h3>
+                                <p class="channel-name">${vid.user_email.split('@')[0]} <i class="fas fa-check-circle"></i></p>
+                                <div class="meta-data">
+                                    <span>${vid.views} views</span> • <span>${new Date(vid.timestamp).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error("Failed to load videos", e);
+            }
+        }
+
+        function playVideo(url, title) {
+            // Simple full-screen player for now
+            const playerOverlay = document.createElement('div');
+            playerOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.95); z-index: 5000;
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+            `;
+            playerOverlay.innerHTML = `
+                <div style="width: 90%; max-width: 1000px; position: relative;">
+                    <video src="${url}" controls autoplay style="width: 100%; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.5);"></video>
+                    <div style="margin-top: 20px; color: white;">
+                        <h2 style="margin: 0;">${title}</h2>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                style="position: absolute; top: -50px; right: 0; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">&times;</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(playerOverlay);
+        }
+
         async function handleCredentialResponse(response) {
             const base64Url = response.credential.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -300,13 +289,8 @@
                 updateLoginUI(JSON.parse(savedUser));
             }
 
-            // Hide Shimmer and Show Content after 1 second (Simulates real loading)
-            setTimeout(() => {
-                const shimmer = document.getElementById('loading-shimmer');
-                const grid = document.querySelector('.video-grid');
-                if (shimmer) shimmer.style.display = 'none';
-                if (grid) grid.style.display = 'grid';
-            }, 1200);
+            // Load real videos from DB
+            loadVideos();
 
             // Category Chip Interaction
             const chips = document.querySelectorAll('.chip');
