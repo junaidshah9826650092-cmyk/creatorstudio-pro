@@ -42,7 +42,9 @@
             </div>
         </div>
 
-        <div class="header-center">
+        <div class="header-center" id="search-bar-container">
+            <button class="icon-btn mobile-back-btn" onclick="toggleMobileSearch()"
+                style="display: none; margin-right: 8px;"><i class="fas fa-arrow-left"></i></button>
             <div class="search-container">
                 <div class="search-box">
                     <input type="text" id="search-input" placeholder="Search">
@@ -53,6 +55,8 @@
         </div>
 
         <div class="header-right">
+            <button class="icon-btn mobile-search-trigger" onclick="toggleMobileSearch()"><i
+                    class="fas fa-search"></i></button>
             <!-- Create Menu (YouTube Style but Custom) -->
             <div class="create-container">
                 <button class="create-btn" id="create-btn" onclick="toggleCreateMenu()">
@@ -857,21 +861,23 @@
             });
         }
 
-        // Search Functionality
-        document.querySelector('.search-btn').addEventListener('click', performSearch);
-        document.querySelector('.search-box input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
+        // Mobile Search Toggle
+        function toggleMobileSearch() {
+            const searchBar = document.getElementById('search-bar-container');
+            const backBtn = document.querySelector('.mobile-back-btn');
 
-        function performSearch() {
-            const query = document.querySelector('.search-box input').value.toLowerCase();
-            const cards = document.querySelectorAll('.video-card');
-            cards.forEach(card => {
-                const title = card.querySelector('.video-title').innerText.toLowerCase();
-                const channel = card.querySelector('.channel-name').innerText.toLowerCase();
-                card.style.display = (title.includes(query) || channel.includes(query)) ? 'block' : 'none';
-            });
+            searchBar.classList.toggle('mobile-active');
+
+            if (searchBar.classList.contains('mobile-active')) {
+                backBtn.style.display = 'flex';
+                document.getElementById('search-input').focus();
+            } else {
+                backBtn.style.display = 'none';
+            }
         }
+
+        // Mobile Search Toggle Logic is handled by toggleMobileSearch above
+
 
         async function handleCredentialResponse(response) {
             const base64Url = response.credential.split('.')[1];

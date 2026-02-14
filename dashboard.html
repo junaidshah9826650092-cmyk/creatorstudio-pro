@@ -69,6 +69,22 @@
             background: var(--hover);
         }
 
+        /* Sidebar Overlay for Mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2500;
+        }
+
+        .sidebar.active+.sidebar-overlay {
+            display: block;
+        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -473,6 +489,119 @@
             cursor: pointer;
             align-self: flex-end;
         }
+
+        /* Responsive Dashboard */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 72px;
+            }
+
+            .sidebar:hover {
+                width: 256px;
+                z-index: 2000;
+            }
+
+            .channel-profile,
+            .nav-item span,
+            .channel-name,
+            .channel-handle {
+                display: none;
+            }
+
+            .sidebar:hover .channel-profile,
+            .sidebar:hover .nav-item span,
+            .sidebar:hover .channel-name,
+            .sidebar:hover .channel-handle {
+                display: block;
+            }
+
+            main {
+                margin-left: 72px;
+            }
+
+            .search-container {
+                flex: 1;
+                margin: 0 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-left .logo span {
+                display: none;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                width: 256px;
+                z-index: 3000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            main {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            /* Table Responsive Card Layout */
+            .content-table thead {
+                display: none;
+            }
+
+            .content-table,
+            .content-table tbody,
+            .content-table tr,
+            .content-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .content-table tr {
+                margin-bottom: 16px;
+                background: #1a1a1a;
+                border-radius: 8px;
+                padding: 12px;
+                border: 1px solid var(--border);
+            }
+
+            .content-table td {
+                padding: 8px 0;
+                border: none;
+                text-align: left;
+            }
+
+            .video-cell {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .video-thumb {
+                width: 100%;
+                aspect-ratio: 16/9;
+                height: auto;
+            }
+
+            .stats-cell {
+                text-align: left;
+                display: flex;
+                flex-direction: column;
+                color: var(--text-dim);
+                font-size: 0.8rem;
+            }
+
+            .stats-cell::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: white;
+                margin-bottom: 4px;
+            }
+        }
     </style>
     <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
 </head>
@@ -481,7 +610,8 @@
     <amp-auto-ads type="adsense" data-ad-client="ca-pub-7142476355791158"></amp-auto-ads>
     <header>
         <div class="header-left">
-            <button class="menu-btn"><i class="fas fa-bars"></i></button>
+            <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('active')"><i
+                    class="fas fa-bars"></i></button>
             <a href="index.html" class="logo"
                 style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
                 <svg width="28" height="28" viewBox="0 0 64 64">
@@ -534,6 +664,7 @@
             <a href="#"><i class="fas fa-comment-alt"></i> Send feedback</a>
         </nav>
     </aside>
+    <div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active')"></div>
 
     <main>
         <div class="page-header">
@@ -654,9 +785,9 @@
                             ${new Date(vid.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                             <div class="date-sub">Published</div>
                         </td>
-                        <td class="stats-cell">${vid.views || 0}</td>
-                        <td class="stats-cell">0</td>
-                        <td class="stats-cell">100.0%<br><span style="font-size: 0.7rem; color: var(--text-dim);">0 likes</span></td>
+                        <td class="stats-cell" data-label="Views">${vid.views || 0}</td>
+                        <td class="stats-cell" data-label="Comments">0</td>
+                        <td class="stats-cell" data-label="Likes">100.0%<br><span style="font-size: 0.7rem; color: var(--text-dim);">0 likes</span></td>
                     </tr>
                 `).join('');
 
