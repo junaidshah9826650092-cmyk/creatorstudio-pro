@@ -336,9 +336,17 @@
     <header>
         <div class="header-left">
             <button class="studio-btn" style="border:none;"><i class="fas fa-bars"></i></button>
-            <a href="index.html" class="logo">
-                <i class="fas fa-bolt-lightning"></i>
-                <span>Vitox Studio</span>
+            <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 8px;">
+                <svg width="28" height="28" viewBox="0 0 64 64">
+                    <defs>
+                        <linearGradient id="vStackDash" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff0055;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#ff5500;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#vStackDash)" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z" />
+                </svg>
+                <span style="font-family: 'Outfit', sans-serif;">Vitox Studio</span>
             </a>
         </div>
         <div class="header-right" style="display:flex; align-items:center; gap:24px;">

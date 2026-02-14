@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Vitox AI Video Platform</title>
+    <title>Sign In - Vitox Platform</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -134,9 +134,17 @@
 
 <body>
     <div class="login-card">
-        <div class="login-logo">
-            <i class="fas fa-bolt-lightning" style="color: #ff0000;"></i>
-            <span style="color: white;">Vitox AI</span>
+        <div class="login-logo" style="gap: 12px; display: flex; align-items: center; justify-content: center;">
+            <svg width="48" height="48" viewBox="0 0 64 64">
+                <defs>
+                    <linearGradient id="vStackLogin" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ff0055;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ff5500;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#vStackLogin)" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z" />
+            </svg>
+            <span style="color: white; font-family: 'Roboto', sans-serif;">Vitox</span>
         </div>
         <h1>Sign In</h1>
         <p>to continue to Creator Studio</p>
