@@ -11,6 +11,8 @@
     --hover: rgba(255, 255, 255, 0.1);
     --card-bg: #161616;
     --chip-bg: #222222;
+    --chip-active-bg: #ffffff;
+    --chip-active-text: #000000;
 }
 
 * {
@@ -18,6 +20,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Outfit', 'Inter', 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 body {
@@ -25,6 +28,72 @@ body {
     color: var(--text-primary);
     overflow-x: hidden;
     letter-spacing: -0.01em;
+    position: relative;
+}
+
+/* Cosmic Background */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 10% 20%, rgba(255, 0, 60, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(138, 43, 226, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 60%);
+    z-index: -1;
+    animation: cosmic-pulse 20s ease-in-out infinite alternate;
+}
+
+@keyframes cosmic-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Animations Hub */
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scale-in {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes logo-glow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 5px rgba(255, 0, 60, 0.4));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 15px rgba(255, 0, 60, 0.8));
+    }
 }
 
 /* Scrollbar */
@@ -259,6 +328,7 @@ button {
     font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: -0.5px;
+    animation: logo-glow 4s ease-in-out infinite;
 }
 
 .country-code {
@@ -313,11 +383,12 @@ button {
     background: transparent;
     padding: 0 20px;
     color: var(--text-secondary);
-    transition: color 0.2s;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .search-btn:hover {
-    color: white;
+    color: var(--accent);
+    transform: scale(1.2);
 }
 
 .header-right {
@@ -386,9 +457,10 @@ button {
 }
 
 .nav-item.active {
-    background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
+    background: linear-gradient(90deg, rgba(255, 0, 60, 0.15), transparent);
     color: var(--accent);
     border-left: 3px solid var(--accent);
+    box-shadow: inset 5px 0 10px rgba(255, 0, 60, 0.05);
 }
 
 /* Content */
@@ -446,14 +518,17 @@ button {
     background: var(--card-bg);
     border-radius: 16px;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    animation: fade-up 0.6s ease-out backwards;
 }
 
 .video-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--border);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-10px) scale(1.02);
+    border-color: rgba(255, 0, 60, 0.3);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(255, 0, 60, 0.1);
 }
 
 .thumbnail-wrapper {

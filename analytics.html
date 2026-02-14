@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Analytics - Vitox Studio</title>
+    <link rel="stylesheet" href="style.css?v=6.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --studio-bg: #0a0a0a;
+            --sidebar-bg: rgba(15, 15, 15, 0.8);
+            --header-bg: rgba(10, 10, 10, 0.9);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-dim: #aaa;
+            --accent: #ff003c;
+            --card-bg: rgba(255, 255, 255, 0.03);
+        }
+
+        body {
+            background: var(--studio-bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Cosmic Aura */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 90% 10%, rgba(255, 0, 60, 0.05) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            width: 256px;
+            height: calc(100vh - 64px);
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border);
+            padding: 12px 0;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 24px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 2px 12px;
+            border-radius: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+
+        main {
+            margin-left: 256px;
+            margin-top: 64px;
+            padding: 32px;
+            animation: fade-up 0.8s ease-out;
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .ai-insights {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .insight-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .insight-pill:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .insight-pill i {
+            color: var(--accent);
+            font-size: 0.8rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 32px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+        .tab {
+            padding: 12px 0;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: white;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .analytics-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 40px;
+        }
+
+        .main-stats {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .main-stats h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .summary-item {
+            background: var(--studio-bg);
+            padding: 24px;
+            text-align: left;
+        }
+
+        .summary-label {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .graph-container {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            height: 300px;
+            position: relative;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .graph-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-line {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .graph-fill {
+            fill: url(#graphGradient);
+            opacity: 0.1;
+        }
+
+        /* Realtime Sidebar */
+        .realtime-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .realtime-header {
+            display: flex;
+            items-center justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #8a2be2;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #8a2be2;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .realtime-stat {
+            margin-bottom: 24px;
+        }
+
+        .realtime-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .realtime-sub {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .action-link {
+            color: #3ea6ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-advanced {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-advanced:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .studio-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <i class="fas fa-bars" style="color: #aaa; cursor: pointer;"></i>
+            <a href="index.html"
+                style="text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.25rem;">
+                <i class="fas fa-bolt-lightning" style="color: var(--accent);"></i> Vitox Studio
+            </a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <button class="studio-btn" onclick="location.href='upload.html'"><i class="fas fa-plus"></i> CREATE</button>
+            <div id="user-avatar"
+                style="width:36px; height:36px; border-radius:50%; background: #222; border: 2px solid var(--accent); display: flex; items-center justify-content: center; font-weight: 800; cursor: pointer;">
+                ?</div>
+        </div>
+    </header>
+
+    <div class="sidebar">
+        <nav>
+            <a href="dashboard_overview.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-play-rectangle"></i> Content</a>
+            <a href="analytics.html" class="nav-item active"><i class="fas fa-chart-line"></i> Analytics</a>
+            <a href="community.html" class="nav-item"><i class="fas fa-comment-dots"></i> Community</a>
+            <a href="#" class="nav-item"><i class="fas fa-closed-captioning"></i> Subtitles</a>
+            <hr style="border:none; border-top: 1px solid var(--border); margin: 12px 24px;">
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </div>
+
+    <main>
+        <div class="analytics-header">
+            <h1 style="font-size: 1.5rem; font-weight: 800;">Channel analytics</h1>
+            <button class="btn-advanced">Advanced mode</button>
+        </div>
+
+        <div class="ai-insights">
+            <div class="insight-pill"><i class="fas fa-sparkles"></i> How did viewers find my content?</div>
+            <div class="insight-pill"><i class="fas fa-sparkles"></i> How many new viewers did I reach?</div>
+            <div class="insight-pill"><i class="fas fa-sparkles"></i> Summarise my latest video performance</div>
+            <div class="insight-pill"
+                style="width: 40px; height: 40px; border-radius: 50%; padding: 0; justify-content: center;"><i
+                    class="fas fa-ellipsis-v"></i></div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab">Overview</div>
+            <div class="tab active">Content</div>
+            <div class="tab">Audience</div>
+            <div class="tab">Trends</div>
+        </div>
+
+        <div class="analytics-layout">
+            <div class="analytics-main">
+                <div class="main-stats">
+                    <h2 id="views-headline">Your channel got 0 views in the last 28 days</h2>
+
+                    <div class="stats-summary">
+                        <div class="summary-item">
+                            <div class="summary-label">Views</div>
+                            <div class="summary-value" id="main-views">0</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Watch time (hours)</div>
+                            <div class="summary-value">0.0</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Subscribers</div>
+                            <div class="summary-value" id="main-subs">—</div>
+                        </div>
+                    </div>
+
+                    <div class="graph-container">
+                        <svg class="graph-svg" viewBox="0 0 1000 300">
+                            <defs>
+                                <linearGradient id="graphGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#ff003c" stop-opacity="0.2" />
+                                    <stop offset="100%" stop-color="#ff003c" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <polyline class="graph-line"
+                                points="0,280 100,280 200,250 300,280 400,100 500,220 600,280 700,280 800,280 900,280 1000,280" />
+                            <path class="graph-fill"
+                                d="M0,280 L100,280 L200,250 L300,280 L400,100 L500,220 L600,280 L700,280 L800,280 L900,280 L1000,280 L1000,300 L0,300 Z" />
+                        </svg>
+                        <div
+                            style="position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; color: var(--text-dim); font-size: 0.75rem; padding: 0 40px;">
+                            <span>Jan 16</span>
+                            <span>Today</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analytics-sidebar">
+                <div class="realtime-card">
+                    <div class="realtime-header">
+                        <div style="font-weight: 800; font-size: 1.1rem;">Realtime</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="live-dot"></div>
+                            <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: 700;">Updating
+                                live</span>
+                        </div>
+                    </div>
+
+                    <div class="realtime-stat">
+                        <div class="realtime-val" id="rt-subs">0</div>
+                        <div class="realtime-sub">Subscribers</div>
+                        <div class="action-link" style="margin-top: 10px; display: block;">See live count</div>
+                    </div>
+
+                    <hr style="border:none; border-top: 1px solid var(--border); margin-bottom: 24px;">
+
+                    <div class="realtime-stat">
+                        <div class="realtime-val" id="rt-views">0</div>
+                        <div class="realtime-sub">Views · Last 48 hours</div>
+                    </div>
+
+                    <div class="graph-container" style="height: 60px; padding: 5px; margin-bottom: 20px;">
+                        <svg viewBox="0 0 400 60" style="width: 100%; height: 100%;">
+                            <rect x="0" y="40" width="10" height="20" fill="var(--accent)" opacity="0.5" />
+                            <rect x="20" y="30" width="10" height="30" fill="var(--accent)" opacity="0.5" />
+                            <rect x="40" y="50" width="10" height="10" fill="var(--accent)" opacity="1" />
+                        </svg>
+                    </div>
+
+                    <div class="action-link">See more</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadAnalytics() {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) { location.href = 'login.html'; return; }
+            document.getElementById('user-avatar').innerText = user.name.charAt(0).toUpperCase();
+
+            try {
+                const res = await fetch('/api/creator/stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email })
+                });
+                const stats = await res.json();
+
+                document.getElementById('views-headline').innerText = `Your channel got ${stats.views || 0} views in the last 28 days`;
+                document.getElementById('main-views').innerText = (stats.views || 0).toLocaleString();
+                document.getElementById('main-subs').innerText = stats.subscribers || 0;
+                document.getElementById('rt-subs').innerText = stats.subscribers || 0;
+                document.getElementById('rt-views').innerText = stats.views || 0;
+
+            } catch (e) { console.error(e); }
+        }
+        window.onload = loadAnalytics;
+    </script>
+</body>
+
+</html>

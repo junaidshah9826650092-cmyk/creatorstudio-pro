@@ -8,7 +8,7 @@
     <meta name="description"
         content="Vitox AI is India's next-gen video platform. Upload, share, and discover amazing videos powered by AI. Join the community of creators today.">
     <meta name="keywords" content="video platform, video sharing, indian youtube alternative, vitox ai, ai video">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=11.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -45,7 +45,7 @@
                     <i class="fas fa-plus"></i> <span>Create</span>
                 </button>
                 <div class="create-dropdown" id="create-dropdown">
-                    <a href="upload.html"><i class="fas fa-upload"></i> Upload video</a>
+                    <a href="upload.html?v=8.0"><i class="fas fa-upload"></i> Upload video</a>
                     <a href="#" onclick="alert('Go Live coming soon!')"><i class="fas fa-tower-broadcast"></i> Go
                         live</a>
                     <a href="#" onclick="alert('Posts coming soon!')"><i class="fas fa-pen-to-square"></i> Create
@@ -53,7 +53,7 @@
                 </div>
             </div>
 
-            <button class="icon-btn" onclick="location.href='dashboard.html'" title="Creator Studio">
+            <button class="icon-btn" onclick="location.href='dashboard_overview.html'" title="Creator Studio">
                 <i class="fas fa-clapperboard"></i>
             </button>
             <div id="login-container">
@@ -75,7 +75,7 @@
                     style="display:none; padding: 12px; border-bottom: 1px solid var(--border);">
                     <div id="menu-user-name" style="font-weight: 600;">User</div>
                 </div>
-                <a href="dashboard.html"><i class="fas fa-user-circle"></i> View Channel</a>
+                <a href="dashboard_overview.html"><i class="fas fa-user-circle"></i> View Channel</a>
                 <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
@@ -107,15 +107,14 @@
         <main class="content">
             <!-- Categories -->
             <div class="categories-bar">
-                <button class="chip active">All</button>
-                <button class="chip">Music</button>
-                <button class="chip">Gaming</button>
-                <button class="chip">Live</button>
-                <button class="chip">Tech</button>
-                <button class="chip">News</button>
-                <button class="chip">Comedy</button>
-                <button class="chip">Education</button>
-                <button class="chip">Recent</button>
+                <button class="chip active" onclick="filterByCategory('All')">All</button>
+                <button class="chip" onclick="filterByCategory('Music')">Music</button>
+                <button class="chip" onclick="filterByCategory('Gaming')">Gaming</button>
+                <button class="chip" onclick="filterByCategory('Live')">Live</button>
+                <button class="chip" onclick="filterByCategory('Tech')">Tech</button>
+                <button class="chip" onclick="filterByCategory('News')">News</button>
+                <button class="chip" onclick="filterByCategory('Comedy')">Comedy</button>
+                <button class="chip" onclick="filterByCategory('Education')">Education</button>
             </div>
 
             <!-- Skeleton Loader (Visible during initial load) -->
@@ -173,49 +172,76 @@
 
                 const grid = document.getElementById('main-video-grid');
                 const emptyState = document.getElementById('empty-state');
-                const skeleton = document.getElementById('loading-shimmer');
-
-                if (skeleton) skeleton.style.display = 'none';
 
                 if (videos.length === 0) {
-                    emptyState.style.display = 'block';
-                    grid.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'block';
+                    if (grid) grid.style.display = 'none';
                     return;
                 }
 
-                emptyState.style.display = 'none';
-                grid.style.display = 'grid';
+                if (emptyState) emptyState.style.display = 'none';
+                if (grid) {
+                    grid.style.display = 'grid';
+                    grid.innerHTML = '';
 
-                grid.innerHTML = videos.map(vid => `
-                    <div class="video-card" onclick="playVideo('${vid.video_url}', '${vid.title}', '${vid.user_email}', ${vid.views}, '${vid.timestamp}', '${(vid.description || "").replace(/'/g, "\\'")}')">
-                        <div class="thumbnail-wrapper">
-                            <video src="${vid.video_url}" muted onmouseover="this.play()" onmouseout="this.pause()" style="width: 100%; height: 100%; object-fit: cover;"></video>
-                        </div>
-                        <div class="video-info">
-                            <div class="channel-avatar">
-                                ${vid.user_email.charAt(0).toUpperCase()}
+                    videos.forEach((vid, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'video-card';
+                        card.style.animationDelay = `${index * 50}ms`;
+
+                        card.onclick = () => playVideo(
+                            vid.video_url,
+                            vid.title || 'Untitled',
+                            vid.user_email,
+                            vid.views || 0,
+                            vid.timestamp,
+                            vid.description || '',
+                            vid.id
+                        );
+
+                        card.innerHTML = `
+                            <div class="thumbnail-wrapper">
+                                <video src="${vid.video_url}" muted onmouseover="this.play()" onmouseout="this.pause()" style="width: 100%; height: 100%; object-fit: cover;"></video>
                             </div>
-                            <div class="text-info">
-                                <h3 class="video-title">${vid.title || 'Untitled Video'}</h3>
-                                <p class="channel-name">${(vid.user_email || 'User').split('@')[0]} <i class="fas fa-check-circle"></i></p>
-                                <div class="meta-data">
-                                    <span>${vid.views || 0} views</span> • <span>${vid.timestamp ? new Date(vid.timestamp).toLocaleDateString() : 'Just now'}</span>
+                            <div class="video-info">
+                                <div class="channel-avatar">
+                                    ${(vid.user_email || '?').charAt(0).toUpperCase()}
+                                </div>
+                                <div class="text-info">
+                                    <h3 class="video-title">${vid.title || 'Untitled Video'}</h3>
+                                    <p class="channel-name">${(vid.user_email || 'User').split('@')[0]} <i class="fas fa-check-circle"></i></p>
+                                    <div class="meta-data">
+                                        <span>${vid.views || 0} views</span> • <span>${vid.timestamp ? new Date(vid.timestamp).toLocaleDateString() : 'Just now'}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                `).join('');
+                        `;
+                        grid.appendChild(card);
+                    });
+                }
 
-            } catch (e) {
-                console.error("Failed to load videos", e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        function playVideo(url, title, channel, views, timestamp, description = "") {
+        async function playVideo(url, title, channel, initialViews, timestamp, description = "", videoId) {
+            console.log("Playing Video ID:", videoId, "Title:", title);
             const user = JSON.parse(localStorage.getItem('vitox_user'));
-            const isSelf = user && user.email === channel;
 
-            // Enhanced YouTube-style Player Modal
+            // Scrub 'undefined' strings that might leak from storage/API
+            const scrub = (val, fallback) => (val === undefined || val === null || val === 'undefined' ? fallback : val);
+
+            const safeTitle = scrub(title, 'Vitox Exclusive');
+            const safeChannel = scrub(channel, 'Official Creator');
+            const safeId = videoId;
+            const isSelf = user && user.email === safeChannel;
+
+            // Increment View Immediately
+            fetch('/api/video/view', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ video_id: safeId })
+            }).catch(e => console.error("View increment failed:", e));
+
             const playerOverlay = document.createElement('div');
             playerOverlay.id = 'video-modal';
             playerOverlay.style.cssText = `
@@ -224,56 +250,110 @@
                 display: flex; justify-content: center; overflow-y: auto; padding: 20px 0;
             `;
 
-            // Format time
-            const timeAgo = new Date(timestamp).toLocaleDateString();
-            const displayDesc = description || `Watching ${title} on Vitox AI. Experience the future of video sharing.`;
+            const timeAgo = timestamp ? new Date(timestamp).toLocaleDateString() : 'Just now';
+            const displayDesc = description || `Watching ${safeTitle} on Vitox AI. Experience the future of video sharing.`;
 
             playerOverlay.innerHTML = `
-                <div style="width: 90%; max-width: 1000px; position: relative; background: #0f0f0f; min-height: 100vh;">
+                <div id="modal-container" style="width: 95%; max-width: 1400px; position: relative; background: rgba(10,10,10,0.85); min-height: 90vh; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(40px); display: flex; flex-direction: row; overflow: hidden; animation: scale-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 50px 100px rgba(0,0,0,0.8);">
+                    
+                    <style>
+                        @media (max-width: 1100px) {
+                            #modal-container { flex-direction: column !important; width: 100% !important; border-radius: 0 !important; height: 100vh !important; }
+                            #side-panel { width: 100% !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.1) !important; }
+                        }
+                    </style>
+                    
                     <!-- Close Button -->
                     <button onclick="document.getElementById('video-modal').remove()" 
-                            style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; z-index: 10;">&times;</button>
+                            style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; z-index: 100; transition: all 0.3s;">&times;</button>
                     
-                    <!-- Video Player -->
-                    <div style="width: 100%; background: black; aspect-ratio: 16/9;">
-                        <video src="${url}" controls autoplay style="width: 100%; height: 100%;"></video>
-                    </div>
+                    <!-- Left: Main Video & Info -->
+                    <div style="flex: 1; min-width: 0; padding: 25px; overflow-y: auto;">
+                        <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
+                            <video src="${url}" controls autoplay style="width: 100%; height: 100%; object-fit: contain;"></video>
+                        </div>
 
-                    <!-- Video Info -->
-                    <div style="padding: 20px;">
-                        <h1 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 10px 0;">${title || 'Untitled Video'}</h1>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <!-- Channel Info -->
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 40px; height: 40px; border-radius: 50%; background: #555; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">
-                                    ${channel.charAt(0).toUpperCase()}
+                        <div style="margin-top: 24px;">
+                            <h1 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 15px 0; letter-spacing: -0.5px;">${safeTitle}</h1>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #ff003c, #8a2be2); display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; border: 2px solid rgba(255,255,255,0.1); font-size: 1.2rem;">
+                                        ${safeChannel.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">
+                                            ${safeChannel.split('@')[0]} <i class="fas fa-check-circle" style="color: #3ea6ff; font-size: 0.9rem;"></i>
+                                        </div>
+                                        <div style="font-size: 0.85rem; color: #aaa;" id="sub-count">Loading subscribers...</div>
+                                    </div>
+                                    ${isSelf ? '' : `
+                                    <button id="sub-btn" onclick="toggleSubscribe('${safeChannel}', ${safeId})" 
+                                        style="background: linear-gradient(135deg, #fff, #f0f0f0); color: #000; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 800; cursor: pointer; margin-left: 10px; transition: all 0.3s; box-shadow: 0 4px 20px rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-bolt"></i> Join SQUAD
+                                    </button>
+                                    `}
                                 </div>
-                                <div>
-                                    <div style="font-weight: 700; font-size: 1rem;">${channel.split('@')[0]} <i class="fas fa-check-circle" style="color: #aaa; font-size: 0.8rem;"></i></div>
-                                    <div style="font-size: 0.75rem; color: #aaa;">0 subscribers</div>
+
+                                <div style="display: flex; gap: 10px;">
+                                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 30px; display: flex; overflow: hidden; backdrop-filter: blur(10px);">
+                                        <button class="action-btn" id="like-btn" onclick="toggleLike(${safeId}, '${safeChannel}')" style="padding: 10px 18px; color: #fff; background: transparent; border: none; cursor: pointer; transition: all 0.2s;"><i class="fas fa-thumbs-up" style="margin-right: 8px;"></i> <span id="like-count">0</span></button>
+                                        <div style="width: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>
+                                        <button class="action-btn" style="padding: 10px 18px; color: #fff; background: transparent; border: none; cursor: pointer; transition: all 0.2s;"><i class="fas fa-thumbs-down"></i></button>
+                                    </div>
+                                    <button class="action-btn secondary" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #fff; padding: 10px 24px; border-radius: 30px; font-weight: 700; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-paper-plane"></i> Forward Pulse
+                                    </button>
                                 </div>
-                                ${isSelf ? '' : `
-                                <button onclick="this.innerText = this.innerText === 'Subscribe' ? 'Subscribed' : 'Subscribe'; this.style.background = this.innerText === 'Subscribed' ? '#333' : '#fff'; this.style.color = this.innerText === 'Subscribed' ? '#fff' : '#000';" 
-                                    style="background: #fff; color: #000; border: none; padding: 10px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; margin-left: 10px;">Subscribe</button>
-                                `}
                             </div>
 
-                            <!-- Actions -->
-                            <div style="display: flex; gap: 8px;">
-                                <div style="background: #272727; border-radius: 18px; display: flex; overflow: hidden;">
-                                    <button class="action-btn" onclick="this.style.color = '#ff003c'"><i class="fas fa-thumbs-up"></i> <span>0</span></button>
-                                    <div style="width: 1px; background: #3f3f3f; margin: 6px 0;"></div>
-                                    <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; margin-top: 24px; font-size: 0.95rem;">
+                                    <div style="font-weight: 800; margin-bottom: 10px; color: #fff;"><span id="view-count">${initialViews}</span> views • Published on ${timeAgo}</div>
+                                    <p style="color: #ddd; margin: 0; white-space: pre-wrap; line-height: 1.6;">${displayDesc}</p>
                                 </div>
-                                <button class="action-btn secondary"><i class="fas fa-share"></i> Share</button>
+
+                                <!-- Comments Section -->
+                                <div style="margin-top: 32px;">
+                                    <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 20px;"><span id="comment-total">0</span> Comments</h3>
+                                    
+                                    <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #444; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 1px solid rgba(255,255,255,0.1);">
+                                            ${user ? user.name.charAt(0).toUpperCase() : '?'}
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <input type="text" id="comment-input" placeholder="Add a comment..." 
+                                                style="width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 0; font-size: 0.95rem; outline: none; transition: border-bottom 0.3s;">
+                                            <div id="comment-actions" style="display: none; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                                                <button onclick="document.getElementById('comment-input').value=''; document.getElementById('comment-actions').style.display='none';" 
+                                                    style="background:transparent; border:none; color:#aaa; font-weight:600; cursor:pointer;">Cancel</button>
+                                                <button onclick="submitComment(${videoId})" id="submit-comment-btn" 
+                                                    style="background: linear-gradient(135deg, #3ea6ff, #0072ff); border:none; color:#fff; padding: 10px 24px; border-radius: 30px; font-weight:800; cursor:pointer; opacity:0.5; transition: all 0.3s;" disabled>Drop Reaction</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="comments-box" style="display: flex; flex-direction: column; gap: 24px;">
+                                        <!-- Comments dynamic -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Description Box -->
-                        <div style="background: #272727; border-radius: 12px; padding: 12px; margin-top: 20px; font-size: 0.9rem;">
-                            <div style="font-weight: 700; margin-bottom: 8px;">${views} views • ${timeAgo}</div>
-                            <p style="color: #eee; margin: 0; white-space: pre-wrap;">${displayDesc}</p>
+                        <!-- Right: Recommendations Section -->
+                        <div id="side-panel" style="width: 400px; border-left: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; padding: 25px;">
+                            <div style="display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 10px;" class="pill-filters">
+                                <span class="pill active">All</span>
+                                <span class="pill">Related</span>
+                                <span class="pill">Recently uploaded</span>
+                            </div>
+                            <style>
+                                .pill { background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+                                .pill.active { background: #fff; color: #000; }
+                                .pill:hover:not(.active) { background: rgba(255,255,255,0.1); }
+                            </style>
+                            <div id="related-videos" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                                <!-- Dynamically loaded -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -281,11 +361,223 @@
             document.body.appendChild(playerOverlay);
             document.body.style.overflow = 'hidden';
 
+            // Add simple logic to fill recommendations for visual flair
+            const relatedGrid = document.getElementById('related-videos');
+            fetch('/api/videos')
+                .then(r => r.json())
+                .then(vids => {
+                    relatedGrid.innerHTML = '';
+                    vids.filter(v => v.id != videoId).slice(0, 10).forEach(v => {
+                        const item = document.createElement('div');
+                        item.style.cssText = `
+                            display: flex; gap: 12px; cursor: pointer; transition: all 0.3s;
+                            padding: 8px; border-radius: 12px;
+                        `;
+                        item.innerHTML = `
+                            <div style="width: 140px; height: 80px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: #222; border: 1px solid rgba(255,255,255,0.05);">
+                                <video src="${v.video_url}" muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-weight: 700; font-size: 0.9rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #fff;">${v.title}</div>
+                                <div style="font-size: 0.75rem; color: #aaa; margin-top: 4px;">${v.user_email.split('@')[0]}</div>
+                                <div style="font-size: 0.75rem; color: #888;">${v.views} views</div>
+                            </div>
+                        `;
+                        item.onmouseover = () => {
+                            item.style.background = 'rgba(255,255,255,0.05)';
+                            item.querySelector('video').play();
+                        };
+                        item.onmouseout = () => {
+                            item.style.background = 'transparent';
+                            item.querySelector('video').pause();
+                        };
+                        item.onclick = () => {
+                            document.getElementById('video-modal').remove();
+                            playVideo(v.video_url, v.title, v.user_email, v.views, v.timestamp, v.description, v.id);
+                        };
+                        relatedGrid.appendChild(item);
+                    });
+                });
+            // Setup Comment Input Logic
+            const commentInput = document.getElementById('comment-input');
+            const commentActions = document.getElementById('comment-actions');
+            const submitBtn = document.getElementById('submit-comment-btn');
+
+            commentInput.onfocus = () => commentActions.style.display = 'flex';
+            commentInput.oninput = () => {
+                submitBtn.disabled = !commentInput.value.trim();
+                submitBtn.style.opacity = commentInput.value.trim() ? '1' : '0.5';
+            };
+
+            // Load Real Engagement Stats
+            loadEngagementStats(safeId, safeChannel);
+            loadComments(safeId);
+
             const originalRemove = playerOverlay.remove.bind(playerOverlay);
             playerOverlay.remove = function () {
                 document.body.style.overflow = '';
                 originalRemove();
+                loadVideos(); // Refresh home grid views
             };
+        }
+
+        async function loadEngagementStats(videoId, channelEmail) {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            try {
+                const res = await fetch(`/api/video/stats/${videoId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user ? user.email : '' })
+                });
+                const stats = await res.json();
+
+                document.getElementById('view-count').innerText = stats.views.toLocaleString();
+                document.getElementById('like-count').innerText = stats.likes.toLocaleString();
+                document.getElementById('sub-count').innerText = `${stats.subscribers} subscribers`;
+                document.getElementById('comment-total').innerText = stats.comment_count.toLocaleString();
+
+                const likeBtn = document.getElementById('like-btn');
+                if (stats.liked) likeBtn.style.color = '#ff003c';
+
+                const subBtn = document.getElementById('sub-btn');
+                if (subBtn) {
+                    subBtn.innerHTML = stats.subbed ? '<i class="fas fa-check"></i> SQUAD MEMBER' : '<i class="fas fa-bolt"></i> Join SQUAD';
+                    subBtn.style.background = stats.subbed ? 'rgba(255,255,255,0.1)' : '#fff';
+                    subBtn.style.color = stats.subbed ? '#fff' : '#000';
+                    subBtn.style.border = stats.subbed ? '1px solid rgba(255,255,255,0.2)' : 'none';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadComments(videoId) {
+            try {
+                const res = await fetch(`/api/video/comments/${videoId}`);
+                const comments = await res.json();
+                const box = document.getElementById('comments-box');
+                box.innerHTML = '';
+
+                comments.forEach(c => {
+                    const el = document.createElement('div');
+                    el.style.display = 'flex';
+                    el.style.gap = '15px';
+                    el.style.animation = 'fade-up 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards';
+                    el.style.opacity = '0';
+                    el.innerHTML = `
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; items-center justify-content: center; font-weight: 800; font-size: 0.9rem;">
+                            ${c.user_email.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; margin-bottom: 4px;">
+                                <span style="font-weight: 800;">@${c.user_email.split('@')[0]}</span>
+                                <span style="color: #aaa; margin-left: 8px;">${new Date(c.timestamp).toLocaleDateString()}</span>
+                            </div>
+                            <div style="font-size: 0.95rem; line-height: 1.4; color: #eee;">${c.content}</div>
+                            <div style="display: flex; gap: 16px; margin-top: 8px; color: #aaa; font-size: 0.8rem;">
+                                <span><i class="far fa-thumbs-up"></i></span>
+                                <span><i class="far fa-thumbs-down"></i></span>
+                                <span style="font-weight: 700; color: #fff; cursor: pointer;">REPLY</span>
+                            </div>
+                        </div>
+                    `;
+                    box.appendChild(el);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function submitComment(videoId) {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            const input = document.getElementById('comment-input');
+            const content = input.value.trim();
+            if (!user) { alert("Login to comment!"); return; }
+            if (!content) return;
+
+            try {
+                await fetch('/api/video/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ video_id: videoId, email: user.email, content: content })
+                });
+                input.value = '';
+                document.getElementById('comment-actions').style.display = 'none';
+                loadComments(videoId);
+                // Increment visual total
+                const total = document.getElementById('comment-total');
+                total.innerText = (parseInt(total.innerText.replace(/,/g, '')) + 1).toLocaleString();
+            } catch (e) { console.error(e); }
+        }
+
+        // Toast Engine
+        function showToast(msg) {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                document.body.appendChild(container);
+            }
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        async function toggleLike(videoId, channelEmail) {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) { showToast("Please login to like!"); return; }
+
+            const btn = document.getElementById('like-btn');
+            btn.classList.add('pulse-active');
+            setTimeout(() => btn.classList.remove('pulse-active'), 300);
+
+            try {
+                const res = await fetch('/api/video/like', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ video_id: videoId, email: user.email })
+                });
+                const data = await res.json();
+                showToast(data.status === 'liked' ? "Video Liked!" : "Like Removed");
+                loadEngagementStats(videoId, channelEmail);
+            } catch (e) { console.error(e); }
+        }
+
+        async function toggleSubscribe(channelEmail, videoId) {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) { showToast("Please login to subscribe!"); return; }
+
+            const btn = document.getElementById('sub-btn');
+            btn.classList.add('pulse-active');
+            setTimeout(() => btn.classList.remove('pulse-active'), 300);
+
+            try {
+                const res = await fetch('/api/channel/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscriber: user.email, channel: channelEmail })
+                });
+                const data = await res.json();
+                showToast(data.status === 'subscribed' ? "Subscribed!" : "Unsubscribed");
+                loadEngagementStats(videoId, channelEmail);
+            } catch (e) { console.error(e); }
+        }
+
+        // Logic for Category Filtering
+        function filterByCategory(cat) {
+            const cards = document.querySelectorAll('.video-card');
+            const chips = document.querySelectorAll('.chip');
+            chips.forEach(c => c.classList.remove('active'));
+            if (event) event.target.classList.add('active');
+
+            if (cat === 'All') {
+                cards.forEach(c => c.style.display = 'block');
+                return;
+            }
+
+            cards.forEach(card => {
+                const title = card.querySelector('.video-title').innerText.toLowerCase();
+                const fits = title.includes(cat.toLowerCase());
+                card.style.display = fits ? 'block' : 'none';
+            });
         }
 
         // Search Functionality
@@ -297,27 +589,11 @@
         function performSearch() {
             const query = document.querySelector('.search-box input').value.toLowerCase();
             const cards = document.querySelectorAll('.video-card');
-            let found = false;
-
             cards.forEach(card => {
                 const title = card.querySelector('.video-title').innerText.toLowerCase();
                 const channel = card.querySelector('.channel-name').innerText.toLowerCase();
-                if (title.includes(query) || channel.includes(query)) {
-                    card.style.display = 'flex'; // grid/flex
-                    found = true;
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = (title.includes(query) || channel.includes(query)) ? 'block' : 'none';
             });
-
-            const emptyState = document.getElementById('empty-state');
-            const grid = document.getElementById('main-video-grid');
-
-            if (!found && query !== '') {
-                // Show custom "No results" message if needed, or just let empty state handle it if grid is empty
-                // For now, if grid is empty (all hidden), show empty state
-                // But simplified:
-            }
         }
 
         async function handleCredentialResponse(response) {

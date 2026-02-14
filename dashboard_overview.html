@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Dashboard - Vitox Studio</title>
+    <link rel="stylesheet" href="style.css?v=6.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --studio-bg: #0a0a0a;
+            --sidebar-bg: rgba(15, 15, 15, 0.8);
+            --header-bg: rgba(10, 10, 10, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-dim: #aaa;
+            --accent: #ff003c;
+            --card-glass: rgba(255, 255, 255, 0.03);
+        }
+
+        body {
+            background: var(--studio-bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Cosmic Aura */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(255, 0, 60, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(138, 43, 226, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 60%);
+            z-index: -1;
+            animation: cosmic-pulse 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes cosmic-pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes logo-glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 5px rgba(255, 0, 60, 0.4));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 15px rgba(255, 0, 60, 0.8));
+            }
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: 800;
+            font-size: 1.25rem;
+            animation: logo-glow 4s ease-in-out infinite;
+        }
+
+        .logo i {
+            color: var(--accent);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            width: 256px;
+            height: calc(100vh - 64px);
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border);
+            padding: 12px 0;
+            z-index: 999;
+        }
+
+        .channel-profile {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .channel-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .channel-avatar-large:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.5);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 24px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 2px 12px;
+            border-radius: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            padding-left: 30px;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+
+        main {
+            margin-left: 256px;
+            margin-top: 64px;
+            padding: 32px;
+            animation: fade-up 0.8s ease-out;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .studio-card {
+            background: var(--card-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            animation: fade-up 0.6s ease-out backwards;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .studio-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 0, 60, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 0, 60, 0.1);
+        }
+
+        .card-title {
+            font-weight: 800;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-large {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-sub {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: color 0.2s;
+        }
+
+        .stat-row:hover {
+            color: #fff;
+        }
+
+        .stat-val {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .studio-btn {
+            background: #222;
+            border: 1px solid var(--border);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .studio-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        .action-btn-full {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-top: auto;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .action-btn-full:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .upload-btn-large {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 60, 0.3);
+            transition: all 0.3s;
+        }
+
+        .upload-btn-large:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 0, 60, 0.5);
+        }
+
+        .latest-video-box {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #111;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .latest-video-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <button class="studio-btn" style="border:none;"><i class="fas fa-bars"></i></button>
+            <a href="index.html" class="logo">
+                <i class="fas fa-bolt-lightning"></i>
+                <span>Vitox Studio</span>
+            </a>
+        </div>
+        <div class="header-right" style="display:flex; align-items:center; gap:24px;">
+            <div style="display:flex; gap:16px; color: var(--text-dim);">
+                <i class="far fa-question-circle" style="font-size: 1.2rem; cursor: pointer;"></i>
+                <i class="fas fa-wand-magic-sparkles"
+                    style="font-size: 1.2rem; cursor: pointer; color: var(--accent);"></i>
+                <i class="far fa-bell" style="font-size: 1.2rem; cursor: pointer;"></i>
+            </div>
+            <button onclick="location.href='upload.html'" class="upload-btn-large">
+                <i class="fas fa-plus"></i> CREATE
+            </button>
+            <div id="top-avatar" class="channel-avatar-large"
+                style="width:36px; height:36px; font-size: 1rem; margin:0; cursor:pointer;" onclick="toggleSidebar()">?
+            </div>
+        </div>
+    </header>
+
+    <div class="sidebar">
+        <div class="channel-profile">
+            <div id="side-avatar" class="channel-avatar-large">?</div>
+            <div id="side-name" style="font-weight: 700; margin-top: 10px; font-size: 1.1rem;">Channel Name</div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">Your channel</div>
+        </div>
+        <nav>
+            <a href="dashboard_overview.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-play-rectangle"></i> Content</a>
+            <a href="analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+            <a href="community.html" class="nav-item"><i class="fas fa-comment-dots"></i> Community</a>
+            <a href="#" class="nav-item"><i class="fas fa-closed-captioning"></i> Subtitles</a>
+            <hr style="border:none; border-top: 1px solid var(--border); margin: 12px 24px;">
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+            <a href="#" class="nav-item"><i class="fas fa-info-circle"></i> Send feedback</a>
+        </nav>
+    </div>
+
+    <main>
+        <div class="card-title" style="font-size: 1.5rem; margin-bottom: 32px;">Channel dashboard</div>
+
+        <div class="dashboard-grid">
+            <!-- Latest Video -->
+            <div class="studio-card" style="animation-delay: 0.1s;">
+                <div class="card-title">Latest video performance</div>
+                <div id="latest-content">
+                    <div style="color: var(--text-dim); text-align: center; padding: 40px 0;">No videos yet</div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="studio-card" style="animation-delay: 0.2s;">
+                <div class="card-title">Channel analytics</div>
+                <div class="stat-sub">Current subscribers</div>
+                <div id="total-subs" class="stat-large">0</div>
+                <div style="color: #2ba640; font-size: 0.85rem; margin-bottom: 16px;"><i class="fas fa-arrow-up"></i> 0
+                    in last 28 days</div>
+                <hr style="border:none; border-top: 1px solid var(--border); margin-bottom: 20px;">
+                <div style="font-weight: 700; margin-bottom: 12px;">Summary <span class="stat-sub">Last 28 days</span>
+                </div>
+                <div class="stat-row"><span>Views</span> <span id="total-views" class="stat-val">0</span></div>
+                <div class="stat-row"><span>Watch time (hours)</span> <span class="stat-val">0.0</span></div>
+                <a href="#" class="action-btn-full" style="margin-top: 24px;">GO TO CHANNEL ANALYTICS</a>
+            </div>
+
+            <!-- Insights / Ideas -->
+            <div class="studio-card" style="animation-delay: 0.3s;">
+                <div class="card-title">Ideas for you</div>
+                <div style="margin-bottom: 20px;">
+                    <div style="font-weight: 700; margin-bottom: 8px;">Protect your channel</div>
+                    <div style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.4;">Your account is at greater
+                        risk of attack without 2-Step Verification. Turn it on now for extra security.</div>
+                </div>
+                <a href="#" class="action-btn-full">GET STARTED</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadOverview() {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) { location.href = 'login.html'; return; }
+
+            document.getElementById('side-name').innerText = user.name;
+            const initial = user.name.charAt(0).toUpperCase();
+            document.getElementById('top-avatar').innerText = initial;
+            document.getElementById('side-avatar').innerText = initial;
+
+            try {
+                const statsRes = await fetch('/api/creator/stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email })
+                });
+                const stats = await statsRes.json();
+                animateValue('total-subs', 0, stats.subscribers || 0, 1000);
+                animateValue('total-views', 0, stats.views || 0, 1000);
+
+                const vidRes = await fetch(`/api/videos/${user.email}`);
+                const videos = await vidRes.json();
+
+                if (videos.length > 0) {
+                    const latest = videos[0];
+                    document.getElementById('latest-content').innerHTML = `
+                        <div class="latest-video-box">
+                            <video src="${latest.video_url}" muted onmouseover="this.play()" onmouseout="this.pause(); this.currentTime=0;"></video>
+                        </div>
+                        <div style="font-weight:700; margin-bottom:12px; font-size: 1rem; color: #fff;">${latest.title}</div>
+                        <div class="stat-row"><span>Ranking by views</span> <span class="stat-val">1 of ${videos.length}</span></div>
+                        <div class="stat-row"><span>Views</span> <span class="stat-val">${latest.views}</span></div>
+                        <div class="stat-row"><span>Likes</span> <span class="stat-val">${latest.likes || 0}</span></div>
+                        <button class="action-btn-full" style="margin-top: 16px;">GO TO VIDEO ANALYTICS</button>
+                    `;
+                }
+            } catch (e) {
+                console.error("Studio Error:", e);
+            }
+        }
+
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            const range = end - start;
+            const minTimer = 50;
+            let stepTime = Math.abs(Math.floor(duration / range));
+            stepTime = Math.max(stepTime, minTimer);
+            const startTime = new Date().getTime();
+            const endTime = startTime + duration;
+            let timer;
+
+            function run() {
+                const now = new Date().getTime();
+                const remaining = Math.max((endTime - now) / duration, 0);
+                const value = Math.round(end - (remaining * range));
+                obj.innerText = value.toLocaleString();
+                if (value == end) {
+                    clearInterval(timer);
+                }
+            }
+
+            timer = setInterval(run, stepTime);
+            run();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.style.transform = sidebar.style.transform === 'translateX(0px)' ? 'translateX(-100%)' : 'translateX(0px)';
+        }
+
+        window.onload = loadOverview;
+    </script>
+</body>
+
+</html>

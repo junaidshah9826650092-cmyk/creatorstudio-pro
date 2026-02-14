@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Community - Vitox Studio</title>
+    <link rel="stylesheet" href="style.css?v=6.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --studio-bg: #0a0a0a;
+            --sidebar-bg: rgba(15, 15, 15, 0.8);
+            --header-bg: rgba(10, 10, 10, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-dim: #aaa;
+            --accent: #ff003c;
+        }
+
+        body {
+            background: var(--studio-bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Cosmic Aura Subtle */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(255, 0, 60, 0.03) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            width: 256px;
+            height: calc(100vh - 64px);
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border);
+            padding: 12px 0;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 24px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 2px 12px;
+            border-radius: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+
+        main {
+            margin-left: 256px;
+            margin-top: 64px;
+            padding: 32px;
+            animation: fade-up 0.8s ease-out;
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .community-header {
+            margin-bottom: 32px;
+        }
+
+        .community-tabs {
+            display: flex;
+            gap: 32px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 0;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--accent);
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .filter-bar {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .filter-item {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .filter-item:hover {
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 0;
+        }
+
+        .empty-state img {
+            width: 240px;
+            margin-bottom: 24px;
+            opacity: 0.8;
+            filter: drop-shadow(0 10px 20px rgba(138, 43, 226, 0.3));
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: var(--text-dim);
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .comment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .comment-card {
+            background: var(--studio-bg);
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            transition: background 0.2s;
+        }
+
+        .comment-card:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+
+        .comment-info {
+            flex: 1;
+        }
+
+        .author-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .author-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .comment-time {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        .comment-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #ddd;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 12px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .action {
+            cursor: pointer;
+        }
+
+        .action:hover {
+            color: #fff;
+        }
+
+        .studio-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .studio-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <i class="fas fa-bars" style="color: #aaa; cursor: pointer;"></i>
+            <a href="index.html"
+                style="text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.25rem;">
+                <i class="fas fa-bolt-lightning" style="color: var(--accent);"></i> Vitox Studio
+            </a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <button class="studio-btn" onclick="location.href='upload.html'"><i class="fas fa-plus"></i> CREATE</button>
+            <div id="user-avatar" class="comment-avatar"
+                style="width:36px; height:36px; border: 2px solid var(--accent); cursor: pointer;">?</div>
+        </div>
+    </header>
+
+    <div class="sidebar">
+        <nav>
+            <a href="dashboard_overview.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-play-rectangle"></i> Content</a>
+            <a href="analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+            <a href="community.html" class="nav-item active"><i class="fas fa-comment-dots"></i> Community</a>
+            <a href="#" class="nav-item"><i class="fas fa-closed-captioning"></i> Subtitles</a>
+            <hr style="border:none; border-top: 1px solid var(--border); margin: 12px 24px;">
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </div>
+
+    <main>
+        <div class="community-header">
+            <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Channel community</h1>
+            <div class="community-tabs">
+                <div class="tab active">Comments</div>
+                <div class="tab">Viewer posts</div>
+                <div class="tab">Mentions</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-item"><i class="fas fa-filter"></i> Filter</div>
+            <div class="filter-item" style="border-left: 1px solid var(--border); padding-left: 20px;">Status:
+                Unresponded <i class="fas fa-times"></i></div>
+        </div>
+
+        <div id="comments-container">
+            <div class="empty-state" id="no-comments">
+                <img src="https://www.gstatic.com/youtube/img/promos/growth/community_tab_monster_v2.png" alt="Monster">
+                <h3>No comments found</h3>
+                <p>Try searching for something else or removing filters. Engage with your audience to build a community!
+                </p>
+            </div>
+            <div class="comment-list" id="real-comments" style="display: none;">
+                <!-- Comments dynamically loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadCommunity() {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) { location.href = 'login.html'; return; }
+            document.getElementById('user-avatar').innerText = user.name.charAt(0).toUpperCase();
+
+            try {
+                // In a real app, we'd fetch comments for ALL videos owned by this user
+                // For this demo, we'll fetch comments for the most recent video
+                const vidRes = await fetch(`/api/videos/${user.email}`);
+                const videos = await vidRes.json();
+
+                if (videos.length > 0) {
+                    const commentsRes = await fetch(`/api/video/comments/${videos[0].id}`);
+                    const comments = await commentsRes.json();
+
+                    if (comments.length > 0) {
+                        document.getElementById('no-comments').style.display = 'none';
+                        const list = document.getElementById('real-comments');
+                        list.style.display = 'flex';
+                        list.innerHTML = '';
+
+                        comments.forEach(c => {
+                            const card = document.createElement('div');
+                            card.className = 'comment-card';
+                            card.innerHTML = `
+                                <div class="comment-avatar">${c.user_email.charAt(0).toUpperCase()}</div>
+                                <div class="comment-info">
+                                    <div class="author-meta">
+                                        <span class="author-name">${c.user_email.split('@')[0]}</span>
+                                        <span class="comment-time">${new Date(c.timestamp).toLocaleDateString()}</span>
+                                    </div>
+                                    <div class="comment-content">${c.content}</div>
+                                    <div class="comment-actions">
+                                        <span class="action"><i class="far fa-thumbs-up"></i></span>
+                                        <span class="action"><i class="far fa-thumbs-down"></i></span>
+                                        <span class="action" style="font-weight: 700; color: var(--accent);">REPLY</span>
+                                    </div>
+                                </div>
+                            `;
+                            list.appendChild(card);
+                        });
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+        window.onload = loadCommunity;
+    </script>
+</body>
+
+</html>

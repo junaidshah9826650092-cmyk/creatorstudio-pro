@@ -4,9 +4,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
 
-# Ensure upload directory exists
-if not os.path.exists('uploads'):
-    os.makedirs('uploads')
+# Local disk storage disabled (Cloud Only)
 
 # Load .env manually for local development
 if os.path.exists('.env'):
@@ -72,15 +70,46 @@ def init_db():
             video_url TEXT NOT NULL,
             thumbnail_url TEXT,
             views INTEGER DEFAULT 0,
+            likes INTEGER DEFAULT 0,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_email) REFERENCES users (email)
         )
     ''')
-    # Add status column if it doesn't exist (migration)
+    # Subscriptions table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS subscriptions (
+            subscriber_email TEXT,
+            channel_email TEXT,
+            PRIMARY KEY (subscriber_email, channel_email)
+        )
+    ''')
+    # Video Likes table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS video_likes (
+            user_email TEXT,
+            video_id INTEGER,
+            PRIMARY KEY (user_email, video_id)
+        )
+    ''')
+    # Comments table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            video_id INTEGER,
+            user_email TEXT,
+            content TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (video_id) REFERENCES videos (id)
+        )
+    ''')
+
+    # Add columns if they don't exist (migrations)
     try:
         conn.execute('ALTER TABLE transactions ADD COLUMN status TEXT DEFAULT "completed"')
-    except:
-        pass
+    except: pass
+    try:
+        conn.execute('ALTER TABLE videos ADD COLUMN likes INTEGER DEFAULT 0')
+    except: pass
 
     conn.commit()
     conn.close()
@@ -93,6 +122,10 @@ init_db()
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
+
+@app.route('/ads.txt')
+def ads_txt():
+    return send_from_directory('.', 'ads.txt')
 
 @app.errorhandler(500)
 def handle_500(e):
@@ -179,32 +212,7 @@ def withdraw():
     conn.close()
     return jsonify({'status': status, 'message': message})
 
-# Ensure upload directory exists (absolute path)
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-if not os.path.exists(UPLOAD_FOLDER):
-    try:
-        os.makedirs(UPLOAD_FOLDER)
-    except Exception as e:
-        print(f"Error creating uploads dir: {e}")
-
-@app.route('/api/video/upload-file', methods=['POST'])
-def upload_file():
-    try:
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file part'}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': 'No selected file'}), 400
-            
-        if file:
-            filename = f"{int(datetime.now().timestamp())}_{file.filename}"
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(filepath)
-            # Return URL relative to server root
-            return jsonify({'url': f"/uploads/{filename}"})
-    except Exception as e:
-        print(f"File Save Error: {e}")
-        return jsonify({'status': 'error', 'message': f"Failed to save file: {str(e)}"}), 500
+# Local file storage has been decommissioned in favor of Cloud Storage (Firebase/Cloudinary).
 
 @app.route('/api/video/upload', methods=['POST'])
 def upload_video():
@@ -254,6 +262,7 @@ def get_user_videos(email):
     conn.close()
     return jsonify([dict(v) for v in videos])
 
+
 @app.route('/api/transactions/<email>', methods=['GET'])
 def get_transactions(email):
     conn = get_db_connection()
@@ -261,7 +270,107 @@ def get_transactions(email):
     conn.close()
     return jsonify([dict(tx) for tx in txs])
 
-# --- Admin Routes ---
+# --- ENGAGEMENT API ---
+
+@app.route('/api/video/view', methods=['POST'])
+def increment_view():
+    video_id = request.json.get('video_id')
+    conn = get_db_connection()
+    conn.execute('UPDATE videos SET views = views + 1 WHERE id = ?', (video_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+@app.route('/api/video/like', methods=['POST'])
+def like_video():
+    data = request.json
+    video_id = data.get('video_id')
+    email = data.get('email')
+    
+    conn = get_db_connection()
+    already_liked = conn.execute('SELECT 1 FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id)).fetchone()
+    
+    if already_liked:
+        conn.execute('DELETE FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id))
+        conn.execute('UPDATE videos SET likes = likes - 1 WHERE id = ?', (video_id,))
+        status = 'unliked'
+    else:
+        conn.execute('INSERT INTO video_likes (user_email, video_id) VALUES (?, ?)', (email, video_id))
+        conn.execute('UPDATE videos SET likes = likes + 1 WHERE id = ?', (video_id,))
+        status = 'liked'
+    
+    conn.commit()
+    likes = conn.execute('SELECT likes FROM videos WHERE id = ?', (video_id,)).fetchone()['likes']
+    conn.close()
+    return jsonify({'status': status, 'likes': likes})
+
+@app.route('/api/channel/subscribe', methods=['POST'])
+def subscribe():
+    data = request.json
+    subscriber = data.get('subscriber')
+    channel = data.get('channel')
+    
+    conn = get_db_connection()
+    already_subbed = conn.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (subscriber, channel)).fetchone()
+    
+    if already_subbed:
+        conn.execute('DELETE FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (subscriber, channel))
+        status = 'unsubscribed'
+    else:
+        conn.execute('INSERT INTO subscriptions (subscriber_email, channel_email) VALUES (?, ?)', (subscriber, channel))
+        status = 'subscribed'
+    
+    conn.commit()
+    count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (channel,)).fetchone()[0]
+    conn.close()
+    return jsonify({'status': status, 'subscribers': count})
+
+@app.route('/api/video/comment', methods=['POST'])
+def add_comment():
+    data = request.json
+    video_id = data.get('video_id')
+    email = data.get('email')
+    content = data.get('content')
+    
+    conn = get_db_connection()
+    conn.execute('INSERT INTO comments (video_id, user_email, content) VALUES (?, ?, ?)', (video_id, email, content))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+@app.route('/api/video/comments/<video_id>', methods=['GET'])
+def get_comments(video_id):
+    conn = get_db_connection()
+    comments = conn.execute('SELECT * FROM comments WHERE video_id = ? ORDER BY timestamp DESC', (video_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(c) for c in comments])
+
+@app.route('/api/video/stats/<video_id>', methods=['POST'])
+def get_video_stats(video_id):
+    email = request.json.get('email', '')
+    conn = get_db_connection()
+    vid = conn.execute('SELECT views, likes FROM videos WHERE id = ?', (video_id,)).fetchone()
+    liked = conn.execute('SELECT 1 FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id)).fetchone()
+    subbed = False
+    if email:
+        channel_email = conn.execute('SELECT user_email FROM videos WHERE id = ?', (video_id,)).fetchone()['user_email']
+        subbed = conn.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (email, channel_email)).fetchone() is not None
+        subs_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (channel_email,)).fetchone()[0]
+    else:
+        subs_count = 0
+
+    comment_count = conn.execute('SELECT COUNT(*) FROM comments WHERE video_id = ?', (video_id,)).fetchone()[0]
+    conn.close()
+    return jsonify({
+        'views': vid['views'],
+        'likes': vid['likes'],
+        'liked': liked is not None,
+        'subbed': subbed,
+        'subscribers': subs_count,
+        'comment_count': comment_count
+    })
+
+# --- Admin/Stats Routes ---
 
 @app.route('/api/admin/stats', methods=['POST'])
 def admin_stats():
@@ -288,25 +397,18 @@ def creator_stats():
     email = data.get('email')
     
     conn = get_db_connection()
-    
-    # Real stats from videos table
     video_stats = conn.execute('SELECT COUNT(*) as count, SUM(views) as total_views FROM videos WHERE user_email = ?', (email,)).fetchone()
-    
     total_videos = video_stats['count'] if video_stats['count'] else 0
     total_views = video_stats['total_views'] if video_stats['total_views'] else 0
-    
-    # For now, subscribers are 0 as we haven't implemented subscription logic yet
-    # Watch time is estimated or 0
+    subs_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (email,)).fetchone()[0]
     
     conn.close()
     return jsonify({
-        'subscribers': 0, 
+        'subscribers': subs_count, 
         'views': total_views,
         'watch_time': 0,
         'video_count': total_videos
     })
-
-@app.route('/api/admin/users', methods=['POST'])
 def admin_users():
     data = request.json
     email = data.get('email')

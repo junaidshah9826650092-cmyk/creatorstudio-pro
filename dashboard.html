@@ -4,273 +4,662 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitox AI | Creator Dashboard - Manage Your Videos</title>
-    <meta name="description" content="Manage your video uploads, track analytics, and grow your channel on Vitox AI.">
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <title>Channel content - Vitox Studio</title>
+    <link rel="stylesheet" href="style.css?v=5.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-main: #000000;
-            --bg-sidebar: #050505;
-            --accent: #ff003c;
-            --glass: rgba(255, 255, 255, 0.03);
+            --studio-bg: #0f0f0f;
+            --sidebar-bg: #0f0f0f;
+            --header-bg: #0f0f0f;
             --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-dim: #aaa;
+            --accent: #3ea6ff;
+            --hover: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            background: var(--bg-main);
-            color: white;
-            font-family: 'Outfit', sans-serif;
+            background: var(--studio-bg);
+            color: var(--text-main);
+            font-family: 'Roboto', sans-serif;
+            overflow-x: hidden;
         }
 
-        .studio-layout {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
-        }
-
-        .studio-sidebar {
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border);
-            padding: 32px 16px;
-            position: sticky;
+        /* Header */
+        header {
+            position: fixed;
             top: 0;
-            height: 100vh;
-        }
-
-        .studio-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
-            margin: 0 auto 16px;
-            background: linear-gradient(45deg, var(--accent), #8800ff);
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--header-bg);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: white;
-            font-weight: 800;
-            box-shadow: 0 10px 20px rgba(255, 0, 60, 0.3);
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
         }
 
-        .sidebar-menu a {
+        .header-left {
             display: flex;
             align-items: center;
             gap: 16px;
-            padding: 14px 20px;
-            color: #888;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .menu-btn:hover {
+            background: var(--hover);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 4px;
             text-decoration: none;
-            font-size: 0.95rem;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .logo i {
+            color: #ff0000;
+        }
+
+        .logo span {
+            color: white;
             font-weight: 500;
-            border-radius: 12px;
-            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+
+        .search-container {
+            flex: 0 1 700px;
+            background: #121212;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            height: 40px;
+        }
+
+        .search-container input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            padding: 0 12px;
+            outline: none;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .create-btn {
+            background: #272727;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .create-btn:hover {
+            background: #3f3f3f;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            width: 256px;
+            height: calc(100vh - 64px);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 12px 0;
+        }
+
+        .channel-profile {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .channel-avatar-large {
+            width: 112px;
+            height: 112px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            border: 2px solid var(--accent);
+        }
+
+        .channel-name {
+            font-weight: 500;
+            font-size: 0.95rem;
             margin-bottom: 4px;
         }
 
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background: var(--glass);
+        .channel-handle {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 12px 24px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-item:hover {
+            background: var(--hover);
             color: white;
         }
 
-        .sidebar-menu a.active {
-            background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
-            color: var(--accent);
-            border-left: 3px solid var(--accent);
+        .nav-item.active {
+            background: rgba(255, 0, 60, 0.05);
+            color: #ff003c;
+            border-left: 3px solid #ff003c;
         }
 
-        .studio-card {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 24px;
+        /* Main Content */
+        main {
+            margin-left: 256px;
+            margin-top: 64px;
             padding: 24px;
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s;
         }
 
-        .studio-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
+        .page-header {
             margin-bottom: 24px;
-            background: linear-gradient(90deg, #fff, #999);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .tabs-container {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 0;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        /* Filter Section */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+            gap: 16px;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Table */
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .content-table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+        }
+
+        .content-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .video-cell {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .video-thumb {
+            width: 120px;
+            aspect-ratio: 16/9;
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .vid-title {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .vid-desc {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .visibility-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            width: fit-content;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .visibility-tag:hover {
+            background: var(--hover);
+        }
+
+        .visibility-tag i:first-child {
+            color: #00ff88;
+            font-size: 0.8rem;
+        }
+
+        .date-cell {
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .date-sub {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+
+        .stats-cell {
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        /* YouTube-Style Row Enhancements */
+        .duration-tag {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 4px;
+            font-size: 0.75rem;
+            border-radius: 2px;
+            font-weight: 500;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            height: 24px;
+        }
+
+        .video-row:hover .row-actions {
+            opacity: 1;
+        }
+
+        .row-actions button {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .row-actions button:hover {
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 80px 0;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            opacity: 0.2;
+        }
+
+        /* Ask Studio AI Bubble */
+        .ai-bubble {
+            background: #1e1e1e;
+            border: 1px solid var(--accent);
+            padding: 16px;
+            border-radius: 12px;
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 2000;
+        }
+
+        .ai-header {
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-header i {
+            color: var(--accent);
+        }
+
+        .ai-text {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #ccc;
+        }
+
+        .ai-close {
+            background: white;
+            color: black;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            align-self: flex-end;
         }
     </style>
 </head>
 
 <body>
-    <div class="studio-layout">
-        <aside class="studio-sidebar">
-            <div class="channel-info" onclick="location.href='index.html'" style="cursor: pointer;">
-                <div class="studio-avatar" id="studio-avatar">J</div>
-                <div style="font-weight: 500; margin-top: 12px;">Your channel</div>
-                <div style="font-size: 0.75rem; color: #888;" id="studio-name">Creator</div>
+    <header>
+        <div class="header-left">
+            <button class="menu-btn"><i class="fas fa-bars"></i></button>
+            <a href="index.html" class="logo">
+                <i class="fas fa-play-circle" style="font-size: 1.5rem;"></i>
+                <span>Studio</span>
+            </a>
+        </div>
+
+        <div class="search-container">
+            <i class="fas fa-search" style="color: #666;"></i>
+            <input type="text" placeholder="Search across your channel">
+        </div>
+
+        <div class="header-right">
+            <i class="far fa-question-circle" style="font-size: 1.2rem; cursor: pointer;"></i>
+            <i class="fas fa-wand-magic-sparkles" style="font-size: 1.2rem; cursor: pointer; color: #ff003c;"></i>
+            <i class="far fa-bell" style="font-size: 1.2rem; cursor: pointer;"></i>
+            <button class="create-btn" onclick="location.href='upload.html'">
+                <i class="fas fa-video"></i> Create
+            </button>
+            <div class="user-avatar" id="top-avatar">?</div>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="channel-profile">
+            <div class="channel-avatar-large" id="side-avatar">J</div>
+            <div class="channel-name" id="side-name">Your channel</div>
+            <div class="channel-handle" id="side-handle">@user_handle</div>
+        </div>
+
+        <nav>
+            <a href="dashboard_overview.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="dashboard.html" class="nav-item active"><i class="fas fa-clapperboard"></i> Content</a>
+            <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
+            <a href="#"><i class="fas fa-comment-dots"></i> Community</a>
+            <a href="#"><i class="fas fa-closed-captioning"></i> Subtitles</a>
+            <a href="#"><i class="fas fa-copyright"></i> Copyright</a>
+            <a href="#"><i class="fas fa-dollar-sign"></i> Earn</a>
+            <a href="#"><i class="fas fa-music"></i> Audio library</a>
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 8px 0;">
+            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            <a href="#"><i class="fas fa-comment-alt"></i> Send feedback</a>
+        </nav>
+    </aside>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">Channel content</h1>
+            <div class="tabs-container">
+                <div class="tab active">Videos</div>
+                <div class="tab">Shorts</div>
+                <div class="tab">Live</div>
+                <div class="tab">Posts</div>
+                <div class="tab">Playlists</div>
             </div>
-            <nav class="sidebar-menu">
-                <a href="index.html" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="index.html"><i class="fas fa-video"></i> Content</a>
-                <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
-                <a href="#"><i class="fas fa-comment-alt"></i> Comments</a>
-                <a href="#"><i class="fas fa-copyright"></i> Copyright</a>
-                <a href="#"><i class="fas fa-dollar-sign"></i> Earn</a>
-                <a href="#"><i class="fas fa-cog"></i> Settings</a>
-            </nav>
-        </aside>
+        </div>
 
-        <main class="studio-main">
-            <h1 style="margin-bottom: 32px; font-size: 1.5rem;">Channel dashboard</h1>
-
-            <div class="dashboard-grid">
-                <!-- Latest Video Performance -->
-                <div class="studio-card">
-                    <div class="card-title">Latest video performance</div>
-                    <div id="latest-video-preview"
-                        style="background: #121212; height: 150px; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        <i class="fas fa-play-circle" style="font-size: 3rem; color: #333;"></i>
-                    </div>
-                    <div class="stat-row">
-                        <span>Views</span>
-                        <span class="stat-value" id="latest-video-views">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Impression click-through rate</span>
-                        <span class="stat-value">0%</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Average view duration</span>
-                        <span class="stat-value">0:00</span>
-                    </div>
-                    <hr style="border: none; border-top: 1px solid var(--studio-border); margin: 16px 0;">
-                    <a href="#" class="btn-blue">Go to video analytics</a>
-                </div>
-
-                <!-- Channel Analytics -->
-                <div class="studio-card">
-                    <div class="card-title">Channel analytics</div>
-                    <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 8px;">Current subscribers</div>
-                    <div style="font-size: 2rem; font-weight: 500; margin-bottom: 24px;" id="total-subscribers">0</div>
-
-                    <div style="padding: 12px 0; border-top: 1px solid var(--studio-border);">
-                        <div style="font-weight: 500; margin-bottom: 12px;">Summary (All time)</div>
-                        <div class="stat-row"><span>Views</span> <span class="stat-value"
-                                id="total-channel-views">0</span></div>
-                        <div class="stat-row"><span>Watch time (hours)</span> <span class="stat-value">0</span></div>
-                    </div>
-                    <a href="#" class="btn-blue">Go to channel analytics</a>
-                </div>
-
-                <!-- Your Content Section -->
-                <div class="studio-card" style="grid-column: 1 / -1; margin-top: 24px;">
-                    <div class="card-title">Your Content</div>
-                    <div id="videos-list"
-                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
-                        <p style="color: #666; font-size: 0.9rem;">No videos uploaded yet.</p>
-                    </div>
-                </div>
-
-                <!-- Upload Card -->
-                <div class="studio-card" style="grid-column: span 1.5;">
-                    <div class="card-title">Quick Actions</div>
-                    <div class="upload-section">
-                        <div class="upload-icon"><i class="fas fa-upload"></i></div>
-                        <p style="color: #aaa; margin-bottom: 16px;">Ready to share your next masterpiece?</p>
-                        <button class="btn-login" onclick="location.href='upload.html'"
-                            style="width: auto; padding: 10px 24px; background: #3ea6ff;">Go to Upload</button>
-                    </div>
-                </div>
+        <div class="content-table-wrapper"
+            style="background: #1e1e1e; border-radius: 8px; border: 1px solid var(--border);">
+            <div class="filter-bar">
+                <div class="filter-item"><i class="fas fa-filter"></i> Filter</div>
             </div>
-        </main>
+
+            <table class="content-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox"></th>
+                        <th style="width: 450px;">Video</th>
+                        <th>Visibility</th>
+                        <th>Restrictions</th>
+                        <th>Date</th>
+                        <th style="text-align: right;">Views</th>
+                        <th style="text-align: right;">Comments</th>
+                        <th style="text-align: right;">Likes (vs. dislikes)</th>
+                    </tr>
+                </thead>
+                <tbody id="video-table-body">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+
+            <div id="loading-state" style="padding: 40px; text-align: center;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #ff003c;"></i>
+            </div>
+
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <i class="fas fa-video-slash"></i>
+                <h3>No content available</h3>
+                <p>Upload a video to get started</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Ask Studio AI UI (From Screenshot) -->
+    <div class="ai-bubble" id="ai-bubble">
+        <div class="ai-header">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Ask Studio: A creative partner
+        </div>
+        <div class="ai-text">
+            Try a new experimental feature to ask about comments, channel analytics and video ideas.
+        </div>
+        <button class="ai-close" onclick="document.getElementById('ai-bubble').remove()">Close</button>
     </div>
-    <script>
-        window.addEventListener('load', async () => {
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
 
-            // Update Header Name/Avatar
-            if (document.getElementById('studio-name')) document.getElementById('studio-name').innerText = user.name;
-            const avatar = document.getElementById('studio-avatar');
-            if (avatar) {
-                avatar.innerText = user.name.charAt(0).toUpperCase();
-                if (user.picture) {
-                    avatar.style.backgroundImage = `url(${user.picture})`;
-                    avatar.style.backgroundSize = 'cover';
-                    avatar.style.color = 'transparent';
-                }
-            }
+    <script>
+        window.addEventListener('contentLoaded', () => { lucide.createIcons(); });
+
+        async function initDashboard() {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) { window.location.href = 'login.html'; return; }
+
+            // Profile UI
+            document.getElementById('side-name').innerText = user.name;
+            document.getElementById('side-handle').innerText = '@' + user.email.split('@')[0];
+            const avatarChar = user.name.charAt(0).toUpperCase();
+            document.getElementById('top-avatar').innerText = avatarChar;
+            document.getElementById('side-avatar').innerText = avatarChar;
 
             try {
-                // 1. Fetch Overall Channel Stats
-                const statsRes = await fetch('/api/creator/stats', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: user.email })
-                });
-                const stats = await statsRes.json();
+                const res = await fetch(`/api/videos/${user.email}`);
+                const videos = await res.json();
 
-                // Update specific elements by ID
-                if (document.getElementById('total-subscribers'))
-                    document.getElementById('total-subscribers').innerText = stats.subscribers.toLocaleString();
-                if (document.getElementById('total-channel-views'))
-                    document.getElementById('total-channel-views').innerText = stats.views.toLocaleString();
+                document.getElementById('loading-state').style.display = 'none';
+                const tableBody = document.getElementById('video-table-body');
 
-                // 2. Fetch User Videos (for Latest Video & List)
-                const vidRes = await fetch(`/api/videos/${user.email}`);
-                const videos = await vidRes.json();
-
-                // --- Latest Video Logic ---
-                if (videos.length > 0) {
-                    const latest = videos[0];
-                    if (document.getElementById('latest-video-views'))
-                        document.getElementById('latest-video-views').innerText = latest.views.toLocaleString();
-
-                    const previewContainer = document.getElementById('latest-video-preview');
-                    if (previewContainer) {
-                        previewContainer.innerHTML = `
-                            <video src="${latest.video_url}" style="width: 100%; height: 100%; object-fit: cover;" muted></video>
-                            <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; font-size: 0.7rem; border-radius: 4px;">Latest</div>
-                        `;
-                        // Auto-play on hover for effect
-                        const v = previewContainer.querySelector('video');
-                        previewContainer.addEventListener('mouseenter', () => v.play());
-                        previewContainer.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
-                    }
+                if (videos.length === 0) {
+                    document.getElementById('empty-state').style.display = 'block';
+                    return;
                 }
 
-                // --- Video List Logic ---
-                const videoList = document.getElementById('videos-list');
-                if (videos.length > 0) {
-                    videoList.innerHTML = videos.map(vid => `
-                        <div style="background: #121212; border-radius: 8px; overflow: hidden; border: 1px solid var(--studio-border);">
-                            <div style="height: 120px; background: #333; position: relative;">
-                                <video src="${vid.video_url}" style="width: 100%; height: 100%; object-fit: cover;"></video>
-                                <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); padding: 2px 4px; font-size: 0.7rem; border-radius: 2px;">LIVE</div>
+                tableBody.innerHTML = videos.map(vid => `
+                    <tr class="video-row">
+                        <td><input type="checkbox"></td>
+                        <td>
+                            <div class="video-cell">
+                                <div class="video-thumb">
+                                    <video src="${vid.video_url}" muted onmouseover="this.play()" onmouseout="this.pause(); this.currentTime=0;"></video>
+                                    <div class="duration-tag">6:22</div>
+                                </div>
+                                <div class="video-meta">
+                                    <div class="vid-title">${vid.title || 'Untitled'}</div>
+                                    <div class="vid-desc">${vid.description || 'Add description'}</div>
+                                    <div class="row-actions">
+                                        <button title="Details"><i class="fas fa-pencil-alt"></i></button>
+                                        <button title="Analytics"><i class="fas fa-chart-bar"></i></button>
+                                        <button title="Comments"><i class="fas fa-comment"></i></button>
+                                        <button title="View on Cloud"><i class="fab fa-youtube"></i></button>
+                                        <button title="Options"><i class="fas fa-ellipsis-v"></i></button>
+                                    </div>
+                                </div>
                             </div>
-                            <div style="padding: 12px;">
-                                <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${vid.title}</div>
-                                <div style="font-size: 0.75rem; color: #aaa;">${vid.views} views • ${new Date(vid.timestamp).toLocaleDateString()}</div>
+                        </td>
+                        <td>
+                            <div class="visibility-tag">
+                                <i class="fas fa-globe"></i> <span>Public</span> <i class="fas fa-chevron-down" style="font-size: 0.6rem; margin-left: auto;"></i>
                             </div>
-                        </div>
-                    `).join('');
-                } else {
-                    videoList.innerHTML = '<p style="color: #666; font-size: 0.9rem; padding: 20px;">No videos uploaded yet.</p>';
-                }
+                        </td>
+                        <td style="color: var(--text-dim); font-size: 0.9rem;">None</td>
+                        <td class="date-cell">
+                            ${new Date(vid.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            <div class="date-sub">Published</div>
+                        </td>
+                        <td class="stats-cell">${vid.views || 0}</td>
+                        <td class="stats-cell">0</td>
+                        <td class="stats-cell">100.0%<br><span style="font-size: 0.7rem; color: var(--text-dim);">0 likes</span></td>
+                    </tr>
+                `).join('');
 
             } catch (e) {
-                console.error("Dashboard Sync Failed", e);
+                console.error(e);
+                document.getElementById('loading-state').innerHTML = '<span style="color: #ff4e4e;">Failed to load cloud data.</span>';
             }
-        });
+        }
+
+        function logout() {
+            localStorage.removeItem('vitox_user');
+            window.location.href = 'index.html';
+        }
+
+        initDashboard();
     </script>
 </body>
 
