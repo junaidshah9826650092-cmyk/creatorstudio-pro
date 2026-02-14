@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitox Upload | Premium V4</title>
-    <link rel="stylesheet" href="style.css?v=1.3">
-    <link rel="stylesheet" href="upload.css?v=1.3">
+    <title>Vitox Upload | Premium V5 (Stable)</title>
+    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="stylesheet" href="upload.css?v=2.0">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -86,14 +86,14 @@
         </div>
 
         <footer class="upload-footer">
-            <div class="progress-section" id="progress-container">
+            <div class="progress-section" id="progress-container" style="display: block;">
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progress-fill"></div>
                 </div>
-                <div class="status-text" id="status-msg">Ready to upload</div>
+                <div class="status-text" id="status-msg">READY TO UPLOAD V5</div>
             </div>
             <div style="margin-left: auto;">
-                <button class="btn-main" id="next-btn" disabled onclick="handleUpload()">Next</button>
+                <button class="btn-main" id="next-btn" disabled onclick="handleUpload()">Publish Video</button>
             </div>
         </footer>
     </div>
@@ -123,6 +123,7 @@
             document.getElementById('video-title').value = file.name.replace(/\.[^/.]+$/, "");
             document.getElementById('filename-display').innerText = file.name;
             previewVideo.src = URL.createObjectURL(file);
+            statusMsg.innerText = "Video selected. Click Publish.";
         }
 
         async function suggestAI(event) {
@@ -143,42 +144,47 @@
 
         async function handleUpload() {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) { alert("Login first"); location.href = 'login.html'; return; }
+            if (!user) { alert("Please login first"); location.href = 'login.html'; return; }
 
             const title = document.getElementById('video-title').value;
             if (!title) { alert("Title is required"); return; }
 
-            const cloudName = 'dybxv45hp';
-            const uploadPreset = 'vitox_preset';
-
             nextBtn.disabled = true;
-            progressContainer.style.display = 'block';
-            statusMsg.innerText = "Attempting Cloud Upload...";
+            statusMsg.innerText = "Step 1: Connecting to Cloud Storage...";
             statusMsg.style.color = "#ff003c";
+            progressFill.style.width = "20%";
+
+            let finalVideoUrl = "";
+            let finalThumbUrl = "";
 
             try {
-                // --- TRY CLOUDINARY FIRST ---
+                // --- ATTEMPT 1: CLOUDINARY ---
+                const cloudName = 'dybxv45hp';
+                const uploadPreset = 'vitox_preset';
                 const cloudFormData = new FormData();
                 cloudFormData.append('file', selectedFile);
                 cloudFormData.append('upload_preset', uploadPreset);
 
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
-                    method: 'POST',
-                    body: cloudFormData
-                });
+                try {
+                    const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
+                        method: 'POST',
+                        body: cloudFormData
+                    });
 
-                let videoUrl = "";
-                let thumbUrl = "";
-
-                if (res.ok) {
-                    const data = await res.json();
-                    videoUrl = data.secure_url;
-                    thumbUrl = data.thumbnail_url || '';
-                    statusMsg.innerText = "Cloud Upload Success!";
-                } else {
-                    // --- FALLBACK TO LOCAL SERVER ---
-                    console.warn("Cloudinary failed, trying local fallback...");
-                    statusMsg.innerText = "Cloud preset missing. Using Local Storage fallback...";
+                    if (cloudRes.ok) {
+                        const data = await cloudRes.json();
+                        finalVideoUrl = data.secure_url;
+                        finalThumbUrl = data.thumbnail_url || '';
+                        statusMsg.innerText = "Cloud storage verified! Finishing up...";
+                        progressFill.style.width = "70%";
+                    } else {
+                        throw new Error("Cloud rejected. Moving to Step 2.");
+                    }
+                } catch (cloudErr) {
+                    // --- ATTEMPT 2: LOCAL SERVER FALLBACK ---
+                    console.warn("Cloudinary failed, using local server fallback.");
+                    statusMsg.innerText = "Step 2: Using Local Storage Fallback...";
+                    progressFill.style.width = "40%";
 
                     const localFormData = new FormData();
                     localFormData.append('file', selectedFile);
@@ -188,14 +194,15 @@
                         body: localFormData
                     });
 
-                    if (!localRes.ok) throw new Error("Both Cloud and Local upload failed.");
+                    if (!localRes.ok) throw new Error("High traffic. Try again later.");
 
                     const localData = await localRes.json();
-                    videoUrl = localData.url;
+                    finalVideoUrl = localData.url;
+                    progressFill.style.width = "70%";
                 }
 
-                // Final Step: Save to Database
-                statusMsg.innerText = "Saving to database...";
+                // Final Step: Link with Database
+                statusMsg.innerText = "Step 3: Updating your dashboard...";
                 const dbRes = await fetch('/api/video/upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -203,24 +210,25 @@
                         email: user.email,
                         title: title,
                         description: document.getElementById('video-desc').value,
-                        video_url: videoUrl,
-                        thumbnail_url: thumbUrl
+                        video_url: finalVideoUrl,
+                        thumbnail_url: finalThumbUrl
                     })
                 });
 
                 const dbData = await dbRes.json();
                 if (dbData.status === 'success') {
-                    alert("Video Published Successfully!");
-                    location.href = 'index.html';
+                    progressFill.style.width = "100%";
+                    statusMsg.innerText = "SUCCESS! Redirecting...";
+                    setTimeout(() => { location.href = 'index.html'; }, 1500);
                 } else {
-                    throw new Error(dbData.message);
+                    throw new Error("DB Sync Failed");
                 }
 
             } catch (e) {
                 console.error(e);
-                statusMsg.innerText = "Error: " + e.message;
+                statusMsg.innerText = "FATAL ERROR: " + e.message;
                 statusMsg.style.color = "#ff4e4e";
-                alert("Upload failed: " + e.message);
+                alert("STILL ERROR: " + e.message + "\n\nTry clearing your browser cache (Ctrl+Shift+Delete) if you see an old message.");
                 nextBtn.disabled = false;
             }
         }
