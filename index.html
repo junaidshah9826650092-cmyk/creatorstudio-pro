@@ -234,7 +234,7 @@
             const safeChannel = scrub(channel, 'Official Creator');
             const safeDesc = scrub(description, `Exploring the depth of ${safeTitle} on Vitox AI.`);
             const safeId = videoId;
-            const isSelf = user && user.email === safeChannel;
+            const isSelf = user && (user.email === safeChannel || user.email.toLowerCase() === safeChannel.toLowerCase());
 
             // Increment View Immediately (Only if not own video)
             if (!isSelf) {
