@@ -9,8 +9,8 @@
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path fill='%23ff0055' d='M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z'/></svg>">
     <meta name="description"
-        content="Vitox AI is India's next-gen video platform. Upload, share, and discover amazing videos powered by AI. Join the community of creators today.">
-    <meta name="keywords" content="video platform, video sharing, indian youtube alternative, vitox ai, ai video">
+        content="Vitox is India's next-gen video platform. Upload, share, and discover amazing videos. Join the community of creators today.">
+    <meta name="keywords" content="video platform, video sharing, indian youtube alternative, vitox, video">
     <link rel="stylesheet" href="style.css?v=15.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -390,7 +390,7 @@
 
             const safeTitle = scrub(title, 'Vitox Exclusive');
             const safeChannel = scrub(channel, 'Official Creator');
-            const safeDesc = scrub(description, `Exploring the depth of ${safeTitle} on Vitox AI.`);
+            const safeDesc = scrub(description, `Exploring the depth of ${safeTitle} on Vitox.`);
             const safeId = videoId;
             const isSelf = user && (user.email === safeChannel || user.email.toLowerCase() === safeChannel.toLowerCase());
 
