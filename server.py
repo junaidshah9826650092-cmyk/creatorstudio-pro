@@ -514,12 +514,48 @@ def delete_video():
         
     try:
         conn = get_db_connection()
-        conn.execute('DELETE FROM videos WHERE id = ?', (video_id,))
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM videos WHERE id = %s', (video_id,))
+        else:
+            conn.execute('DELETE FROM videos WHERE id = ?', (video_id,))
         conn.commit()
         conn.close()
         return jsonify({'status': 'success'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/video/delete', methods=['POST'])
+def creator_delete_video():
+    data = request.json
+    user_email = data.get('email')
+    video_id = data.get('video_id')
+
+    conn = get_db_connection()
+    
+    # Verify ownership
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('SELECT user_email FROM videos WHERE id = %s', (video_id,))
+        video = cursor.fetchone()
+        owner = video['user_email'] if video else None
+    else:
+        video = conn.execute('SELECT user_email FROM videos WHERE id = ?', (video_id,)).fetchone()
+        owner = video['user_email'] if video else None
+    
+    if not owner or owner != user_email:
+        conn.close()
+        return jsonify({'status': 'error', 'message': 'Unauthorized or video not found'}), 403
+
+    # Delete
+    if USE_POSTGRES:
+        cursor.execute('DELETE FROM videos WHERE id = %s', (video_id,))
+    else:
+        conn.execute('DELETE FROM videos WHERE id = ?', (video_id,))
+        
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
 
 @app.route('/api/ai/suggest', methods=['POST'])
 def ai_suggest():

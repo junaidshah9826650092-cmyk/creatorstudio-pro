@@ -623,11 +623,12 @@
                                     <div class="vid-title">${vid.title || 'Vitox Masterpiece'}</div>
                                     <div class="vid-desc">${vid.description || 'Exclusive Vid Content'}</div>
                                     <div class="row-actions">
-                                        <button title="Details"><i class="fas fa-pencil-alt"></i></button>
-                                        <button title="Analytics"><i class="fas fa-chart-bar"></i></button>
-                                        <button title="Comments"><i class="fas fa-comment"></i></button>
-                                        <button title="View on Cloud"><i class="fab fa-youtube"></i></button>
-                                        <button title="Options"><i class="fas fa-ellipsis-v"></i></button>
+                                        <button title="View on Platform" onclick="window.open('index.html?v=${vid.id}', '_blank')">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </button>
+                                        <button title="Delete Video" onclick="deleteVideo(${vid.id})" style="color: #ff4e4e;">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -651,6 +652,37 @@
             } catch (e) {
                 console.error(e);
                 document.getElementById('loading-state').innerHTML = '<span style="color: #ff4e4e;">Failed to load cloud data.</span>';
+            }
+        }
+
+        async function deleteVideo(videoId) {
+            if (!confirm("Are you sure you want to delete this video? This action cannot be undone.")) return;
+
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            try {
+                const res = await fetch('/api/video/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email, video_id: videoId })
+                });
+
+                const data = await res.json();
+                if (data.status === 'success') {
+                    // Show toast
+                    const toast = document.createElement('div');
+                    toast.innerText = "Video Deleted Successfully";
+                    toast.style.cssText = "position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 4px; z-index: 1000;";
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+
+                    // Refresh
+                    initDashboard();
+                } else {
+                    alert("Error deleting video: " + (data.message || "Unknown error"));
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Failed to connect to server");
             }
         }
 
