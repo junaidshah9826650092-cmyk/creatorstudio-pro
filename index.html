@@ -228,10 +228,11 @@
             const user = JSON.parse(localStorage.getItem('vitox_user'));
 
             // Scrub 'undefined' strings that might leak from storage/API
-            const scrub = (val, fallback) => (val === undefined || val === null || val === 'undefined' ? fallback : val);
+            const scrub = (val, fallback) => (!val || val === 'undefined' || val === 'null' ? fallback : val);
 
             const safeTitle = scrub(title, 'Vitox Exclusive');
             const safeChannel = scrub(channel, 'Official Creator');
+            const safeDesc = scrub(description, `Exploring the depth of ${safeTitle} on Vitox AI.`);
             const safeId = videoId;
             const isSelf = user && user.email === safeChannel;
 
@@ -251,7 +252,7 @@
             `;
 
             const timeAgo = timestamp ? new Date(timestamp).toLocaleDateString() : 'Just now';
-            const displayDesc = description || `Watching ${safeTitle} on Vitox AI. Experience the future of video sharing.`;
+            const displayDesc = safeDesc;
 
             playerOverlay.innerHTML = `
                 <div id="modal-container" style="width: 95%; max-width: 1400px; position: relative; background: rgba(10,10,10,0.85); min-height: 90vh; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(40px); display: flex; flex-direction: row; overflow: hidden; animation: scale-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 50px 100px rgba(0,0,0,0.8);">
