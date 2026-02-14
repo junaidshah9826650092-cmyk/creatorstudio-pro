@@ -470,7 +470,7 @@
             </div>
 
             <div style="margin-left: auto;">
-                <button class="btn-main" id="next-btn" disabled onclick="uploadVideo()">Next</button>
+                <button class="btn-main" id="next-btn" disabled onclick="handleUpload()">Next</button>
             </div>
         </footer>
     </div>
@@ -589,7 +589,7 @@
             }
         }
 
-        function uploadVideo() {
+        async function handleUpload() {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             if (!user) {
                 alert("Please login first");
@@ -597,39 +597,47 @@
                 return;
             }
 
-            nextBtn.disabled = true;
-            nextBtn.innerText = "Uploading...";
+            if (!selectedFile) {
+                alert("Please select a video file first");
+                return;
+            }
 
             const title = document.getElementById('video-title').value;
             const desc = document.getElementById('video-desc').value;
 
-            // Firebase Storage Upload
-            // Note: In production, use user's configured bucket or a public one
-            // We'll trust the user has put valid config if they edited it, or use default logic
-            const storageRef = storage.ref(`videos/${user.email}/${Date.now()}_${selectedFile.name}`);
-            const uploadTask = storageRef.put(selectedFile);
+            if (!title) {
+                alert("Please enter a title");
+                return;
+            }
 
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    progressFill.style.width = progress + '%';
-                    statusMsg.innerText = `Uploading ${Math.round(progress)}% ...`;
-                },
-                (error) => {
-                    console.error("Upload failed", error);
-                    statusMsg.style.color = "var(--error)";
-                    statusMsg.innerText = "Upload failed. Check console/API key.";
-                    nextBtn.disabled = false;
-                    nextBtn.innerText = "Try Again";
-                },
-                async () => {
-                    // Success
-                    const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+            uploadBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            statusMsg.innerText = "Uploading to Server...";
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            // XHR for Progress Tracking
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/video/upload-file', true);
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressFill.style.width = percentComplete + '%';
+                    statusMsg.innerText = `Uploading ${Math.round(percentComplete)}% ...`;
+                }
+            };
+
+            xhr.onload = async () => {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    const videoUrl = response.url; // URL from server
 
                     statusMsg.style.color = "var(--success)";
-                    statusMsg.innerText = "Processing complete. Saving...";
+                    statusMsg.innerText = "Processing complete. Saving metadata...";
 
-                    // Save to Backend
+                    // Save Metadata
                     try {
                         await fetch('/api/video/upload', {
                             method: 'POST',
@@ -638,7 +646,7 @@
                                 email: user.email,
                                 title: title,
                                 description: desc,
-                                video_url: downloadURL,
+                                video_url: videoUrl,
                                 thumbnail_url: ''
                             })
                         });
@@ -649,10 +657,23 @@
                         console.error("Backend Save Failed", e);
                         statusMsg.innerText = "Saved to storage but database sync failed.";
                     }
+                } else {
+                    statusMsg.style.color = "var(--error)";
+                    statusMsg.innerText = "Upload failed: Server Error";
+                    uploadBtn.disabled = false;
                 }
-            );
+            };
+
+            xhr.onerror = () => {
+                statusMsg.style.color = "var(--error)";
+                statusMsg.innerText = "Upload failed: Network Error";
+                uploadBtn.disabled = false;
+            };
+
+            xhr.send(formData);
         }
     </script>
 </body>
 
 </html>
+```

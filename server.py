@@ -4,6 +4,10 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
 
+# Ensure upload directory exists
+if not os.path.exists('uploads'):
+    os.makedirs('uploads')
+
 # Load .env manually for local development
 if os.path.exists('.env'):
     with open('.env') as f:
@@ -153,6 +157,21 @@ def withdraw():
         
     conn.close()
     return jsonify({'status': status, 'message': message})
+
+@app.route('/api/video/upload-file', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
+    if file:
+        filename = f"{int(datetime.now().timestamp())}_{file.filename}"
+        filepath = os.path.join('uploads', filename)
+        file.save(filepath)
+        # Return URL relative to server root
+        return jsonify({'url': f"/uploads/{filename}"})
 
 @app.route('/api/video/upload', methods=['POST'])
 def upload_video():
