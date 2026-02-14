@@ -303,9 +303,10 @@ def update_transaction():
 def ai_suggest():
     data = request.json
     topic = data.get('topic', 'General Gaming')
-    api_key = os.environ.get('GOOGLE_API_KEY')
+    api_key = os.environ.get('GOOGLE_API_KEY', '').strip()
     
     if not api_key:
+        print("API Key missing")
         return jsonify({'error': 'AI API Key not configured'}), 500
         
     try:
