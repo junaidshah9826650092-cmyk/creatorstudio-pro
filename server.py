@@ -23,13 +23,21 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
 ADMIN_EMAIL = "junaidshah78634@gmail.com" 
 
+_db_ready = False
+
 def get_db_connection():
+    global _db_ready
+    if not _db_ready:
+        init_db()
+        _db_ready = True
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
-    conn = get_db_connection()
+    print(f"--- INITIALIZING DATABASE AT {DB_FILE} ---")
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
     # Users table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -215,6 +223,13 @@ def upload_video():
             return jsonify({'status': 'error', 'message': 'Missing data'}), 400
             
         conn = get_db_connection()
+        # Double check if table exists as fallback
+        try:
+            conn.execute('SELECT 1 FROM videos LIMIT 1')
+        except sqlite3.OperationalError:
+            print("Fallback: Table 'videos' missing in route. Re-init...")
+            init_db()
+
         conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url) VALUES (?, ?, ?, ?, ?)', 
                      (email, title, desc, video_url, thumb_url))
         conn.commit()
@@ -314,6 +329,17 @@ def admin_transactions():
     txs = conn.execute('SELECT * FROM transactions ORDER BY timestamp DESC').fetchall()
     conn.close()
     return jsonify([dict(tx) for tx in txs])
+
+@app.route('/api/debug/db', methods=['GET'])
+def debug_db():
+    try:
+        conn = get_db_connection()
+        tables = conn.execute('SELECT name FROM sqlite_master WHERE type="table"').fetchall()
+        table_list = [t[0] for t in tables]
+        conn.close()
+        return jsonify({"status": "ok", "tables": table_list, "db_path": DB_FILE})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/api/admin/update-tx', methods=['POST'])
 def update_transaction():
