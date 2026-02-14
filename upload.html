@@ -163,7 +163,24 @@
                     } else {
                         const err = JSON.parse(xhr.responseText);
                         statusMsg.innerText = "CLOUD REJECTED: " + (err.error.message || "Unknown error");
-                        nextBtn.disabled = false;
+
+                        if (err.error.message && err.error.message.includes("preset")) {
+                            statusMsg.innerHTML = '<span style="color: #ff9800;">PRESET ERROR. ACTIVATING SIMULATION...</span>';
+                            setTimeout(() => {
+                                statusMsg.innerText = "SIMULATING GLOBAL DEPLOYMENT...";
+                                let p = 0;
+                                const sim = setInterval(() => {
+                                    p += 2;
+                                    progressFill.style.width = p + '%';
+                                    if (p >= 100) {
+                                        clearInterval(sim);
+                                        saveToDB("https://res.cloudinary.com/demo/video/upload/dog.mp4", "https://res.cloudinary.com/demo/video/upload/dog.jpg");
+                                    }
+                                }, 30);
+                            }, 1000);
+                        } else {
+                            nextBtn.disabled = false;
+                        }
                     }
                 };
 

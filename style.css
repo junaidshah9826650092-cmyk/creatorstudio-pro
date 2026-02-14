@@ -59,17 +59,23 @@ body::before {
     }
 }
 
-/* Animations Hub */
-@keyframes fade-up {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
+@keyframes haptic-pulse {
+    0% {
+        transform: scale(1);
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    50% {
+        transform: scale(0.92);
+        filter: brightness(1.2);
     }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse-active {
+    animation: haptic-pulse 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes scale-in {
@@ -290,15 +296,15 @@ button {
     left: 0;
     right: 0;
     height: 64px;
-    background: var(--bg-header);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
     z-index: 2000;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logo {
@@ -419,13 +425,15 @@ button {
 /* Sidebar Overhaul */
 .sidebar {
     width: 240px;
-    background: var(--bg-sidebar);
+    background: rgba(15, 15, 15, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 24px 12px;
     position: fixed;
     height: calc(100vh - 64px);
     overflow-y: auto;
-    border-right: 1px solid var(--border);
-    transition: transform 0.3s ease;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-item {
@@ -733,3 +741,16 @@ button {
 .mv-ui.mv-bar {
     display: none !important;
 }
+/* Global Transitions */
+@keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Toast System */
+#toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+.toast { 
+    background: linear-gradient(135deg, #ff003c, #8a2be2); 
+    color: white; padding: 12px 28px; border-radius: 50px; font-weight: 700; 
+    box-shadow: 0 15px 35px rgba(255, 0, 60, 0.4); backdrop-filter: blur(15px); 
+    animation: toast-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255,255,255,0.2); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;
+}
+@keyframes toast-up { from { transform: translateY(100%) scale(0.8); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
