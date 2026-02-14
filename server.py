@@ -222,18 +222,22 @@ def creator_stats():
     email = data.get('email')
     
     conn = get_db_connection()
-    # Mocking some creator-specific stats for now, but linked to real user points
-    user = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()
     
-    # In a real app, you'd have a 'videos' table with views/stats
-    # For now we use real points to show the stack is working
-    points = user['points'] if user else 0
+    # Real stats from videos table
+    video_stats = conn.execute('SELECT COUNT(*) as count, SUM(views) as total_views FROM videos WHERE user_email = ?', (email,)).fetchone()
+    
+    total_videos = video_stats['count'] if video_stats['count'] else 0
+    total_views = video_stats['total_views'] if video_stats['total_views'] else 0
+    
+    # For now, subscribers are 0 as we haven't implemented subscription logic yet
+    # Watch time is estimated or 0
     
     conn.close()
     return jsonify({
-        'subscribers': points // 10, # Mocked ratio
-        'views': points * 25,
-        'watch_time': (points * 3) // 60
+        'subscribers': 0, 
+        'views': total_views,
+        'watch_time': 0,
+        'video_count': total_videos
     })
 
 @app.route('/api/admin/users', methods=['POST'])

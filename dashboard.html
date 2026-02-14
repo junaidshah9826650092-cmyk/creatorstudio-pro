@@ -163,21 +163,21 @@
                 <!-- Latest Video Performance -->
                 <div class="studio-card">
                     <div class="card-title">Latest video performance</div>
-                    <div
-                        style="background: #121212; height: 150px; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
+                    <div id="latest-video-preview"
+                        style="background: #121212; height: 150px; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                         <i class="fas fa-play-circle" style="font-size: 3rem; color: #333;"></i>
                     </div>
                     <div class="stat-row">
                         <span>Views</span>
-                        <span class="stat-value">1,245</span>
+                        <span class="stat-value" id="latest-video-views">0</span>
                     </div>
                     <div class="stat-row">
                         <span>Impression click-through rate</span>
-                        <span class="stat-value">8.4%</span>
+                        <span class="stat-value">0%</span>
                     </div>
                     <div class="stat-row">
                         <span>Average view duration</span>
-                        <span class="stat-value">3:12</span>
+                        <span class="stat-value">0:00</span>
                     </div>
                     <hr style="border: none; border-top: 1px solid var(--studio-border); margin: 16px 0;">
                     <a href="#" class="btn-blue">Go to video analytics</a>
@@ -187,12 +187,13 @@
                 <div class="studio-card">
                     <div class="card-title">Channel analytics</div>
                     <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 8px;">Current subscribers</div>
-                    <div style="font-size: 2rem; font-weight: 500; margin-bottom: 24px;">4,812</div>
+                    <div style="font-size: 2rem; font-weight: 500; margin-bottom: 24px;" id="total-subscribers">0</div>
 
                     <div style="padding: 12px 0; border-top: 1px solid var(--studio-border);">
-                        <div style="font-weight: 500; margin-bottom: 12px;">Summary (Last 28 days)</div>
-                        <div class="stat-row"><span>Views</span> <span class="stat-value">45.2K</span></div>
-                        <div class="stat-row"><span>Watch time (hours)</span> <span class="stat-value">1.1K</span></div>
+                        <div style="font-weight: 500; margin-bottom: 12px;">Summary (All time)</div>
+                        <div class="stat-row"><span>Views</span> <span class="stat-value"
+                                id="total-channel-views">0</span></div>
+                        <div class="stat-row"><span>Watch time (hours)</span> <span class="stat-value">0</span></div>
                     </div>
                     <a href="#" class="btn-blue">Go to channel analytics</a>
                 </div>
@@ -222,55 +223,82 @@
     <script>
         window.addEventListener('load', async () => {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (user) {
-                document.getElementById('studio-name').innerText = user.name;
-                const avatar = document.getElementById('studio-avatar');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Update Header Name/Avatar
+            if (document.getElementById('studio-name')) document.getElementById('studio-name').innerText = user.name;
+            const avatar = document.getElementById('studio-avatar');
+            if (avatar) {
                 avatar.innerText = user.name.charAt(0).toUpperCase();
                 if (user.picture) {
                     avatar.style.backgroundImage = `url(${user.picture})`;
                     avatar.style.backgroundSize = 'cover';
                     avatar.style.color = 'transparent';
                 }
+            }
 
-                // Fetch real stats from Full Stack Backend
-                try {
-                    const res = await fetch('/api/creator/stats', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: user.email })
-                    });
-                    const stats = await res.json();
+            try {
+                // 1. Fetch Overall Channel Stats
+                const statsRes = await fetch('/api/creator/stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email })
+                });
+                const stats = await statsRes.json();
 
-                    // Update UI with real database data
-                    document.querySelector('.stat-value').innerText = stats.views.toLocaleString();
-                    document.querySelectorAll('.stat-value')[3].innerText = stats.subscribers.toLocaleString();
-                    document.querySelectorAll('.stat-value')[4].innerText = stats.views.toLocaleString();
-                    document.querySelectorAll('.stat-value')[5].innerText = stats.watch_time.toLocaleString();
+                // Update specific elements by ID
+                if (document.getElementById('total-subscribers'))
+                    document.getElementById('total-subscribers').innerText = stats.subscribers.toLocaleString();
+                if (document.getElementById('total-channel-views'))
+                    document.getElementById('total-channel-views').innerText = stats.views.toLocaleString();
 
-                    // Fetch and display user videos
-                    const vidRes = await fetch(`/api/videos/${user.email}`);
-                    const videos = await vidRes.json();
+                // 2. Fetch User Videos (for Latest Video & List)
+                const vidRes = await fetch(`/api/videos/${user.email}`);
+                const videos = await vidRes.json();
 
-                    const videoList = document.getElementById('videos-list');
-                    if (videos.length > 0) {
-                        videoList.innerHTML = videos.map(vid => `
-                            <div style="background: #121212; border-radius: 8px; overflow: hidden; border: 1px solid var(--studio-border);">
-                                <div style="height: 120px; background: #333; position: relative;">
-                                    <video src="${vid.video_url}" style="width: 100%; height: 100%; object-fit: cover;"></video>
-                                    <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); padding: 2px 4px; font-size: 0.7rem; border-radius: 2px;">LIVE</div>
-                                </div>
-                                <div style="padding: 12px;">
-                                    <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${vid.title}</div>
-                                    <div style="font-size: 0.75rem; color: #aaa;">${vid.views} views • ${new Date(vid.timestamp).toLocaleDateString()}</div>
-                                </div>
-                            </div>
-                        `).join('');
+                // --- Latest Video Logic ---
+                if (videos.length > 0) {
+                    const latest = videos[0];
+                    if (document.getElementById('latest-video-views'))
+                        document.getElementById('latest-video-views').innerText = latest.views.toLocaleString();
+
+                    const previewContainer = document.getElementById('latest-video-preview');
+                    if (previewContainer) {
+                        previewContainer.innerHTML = `
+                            <video src="${latest.video_url}" style="width: 100%; height: 100%; object-fit: cover;" muted></video>
+                            <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; font-size: 0.7rem; border-radius: 4px;">Latest</div>
+                        `;
+                        // Auto-play on hover for effect
+                        const v = previewContainer.querySelector('video');
+                        previewContainer.addEventListener('mouseenter', () => v.play());
+                        previewContainer.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
                     }
-                } catch (e) {
-                    console.error("Dashboard Sync Failed", e);
                 }
-            } else {
-                window.location.href = 'login.html';
+
+                // --- Video List Logic ---
+                const videoList = document.getElementById('videos-list');
+                if (videos.length > 0) {
+                    videoList.innerHTML = videos.map(vid => `
+                        <div style="background: #121212; border-radius: 8px; overflow: hidden; border: 1px solid var(--studio-border);">
+                            <div style="height: 120px; background: #333; position: relative;">
+                                <video src="${vid.video_url}" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); padding: 2px 4px; font-size: 0.7rem; border-radius: 2px;">LIVE</div>
+                            </div>
+                            <div style="padding: 12px;">
+                                <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${vid.title}</div>
+                                <div style="font-size: 0.75rem; color: #aaa;">${vid.views} views • ${new Date(vid.timestamp).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    videoList.innerHTML = '<p style="color: #666; font-size: 0.9rem; padding: 20px;">No videos uploaded yet.</p>';
+                }
+
+            } catch (e) {
+                console.error("Dashboard Sync Failed", e);
             }
         });
     </script>
