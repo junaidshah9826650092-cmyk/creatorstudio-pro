@@ -638,8 +638,9 @@
                     statusMsg.innerText = "Processing complete. Saving metadata...";
 
                     // Save Metadata
+                    console.log("Saving metadata:", { email: user.email, title: title, video_url: videoUrl });
                     try {
-                        await fetch('/api/video/upload', {
+                        const res = await fetch('/api/video/upload', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -650,12 +651,19 @@
                                 thumbnail_url: ''
                             })
                         });
+                        const data = await res.json();
+                        console.log("Save response:", data);
 
-                        alert("Video Published Successfully!");
-                        window.location.href = 'dashboard.html';
+                        if (data.status === 'success') {
+                            alert("Video Published Successfully!");
+                            window.location.href = 'index.html'; // Go to Home to see video
+                        } else {
+                            alert("Database Save Failed: " + data.message);
+                        }
                     } catch (e) {
                         console.error("Backend Save Failed", e);
-                        statusMsg.innerText = "Saved to storage but database sync failed.";
+                        statusMsg.innerText = "Saved to storage but database sync failed: " + e.message;
+                        alert("Error: " + e.message);
                     }
                 } else {
                     statusMsg.style.color = "var(--error)";
