@@ -160,6 +160,9 @@
 
                 const grid = document.getElementById('main-video-grid');
                 const emptyState = document.getElementById('empty-state');
+                const skeleton = document.getElementById('loading-shimmer');
+
+                if (skeleton) skeleton.style.display = 'none';
 
                 if (videos.length === 0) {
                     emptyState.style.display = 'block';
