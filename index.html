@@ -31,10 +31,10 @@
         <div class="header-center">
             <div class="search-container">
                 <div class="search-box">
-                    <input type="text" placeholder="Search">
-                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                    <input type="text" id="search-input" placeholder="Search">
+                    <button class="search-btn" onclick="performSearch()"><i class="fas fa-search"></i></button>
                 </div>
-                <button class="icon-btn mic-btn"><i class="fas fa-microphone"></i></button>
+                <button class="icon-btn mic-btn" onclick="startVoiceSearch()"><i class="fas fa-microphone"></i></button>
             </div>
         </div>
 
@@ -87,18 +87,18 @@
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" onclick="loadVideos(); return false;"><i class="fas fa-home"></i>
                     <span>Home</span></a>
-                <a href="#" class="nav-item" onclick="alert('Shorts are coming soon in beta!'); return false;"><i
+                <a href="#" class="nav-item" onclick="showToast('Shorts coming soon!'); return false;"><i
                         class="fas fa-play-circle"></i> <span>Shorts</span></a>
-                <a href="#" class="nav-item" onclick="alert('Please login to manage subscriptions.'); return false;"><i
+                <a href="#" class="nav-item" onclick="showToast('Subscriptions feature coming soon'); return false;"><i
                         class="fas fa-layer-group"></i> <span>Subscriptions</span></a>
                 <hr>
-                <a href="#" class="nav-item" onclick="alert('Your library is empty.'); return false;"><i
+                <a href="#" class="nav-item" onclick="showToast('Library is empty'); return false;"><i
                         class="fas fa-video-slash"></i> <span>Library</span></a>
-                <a href="#" class="nav-item" onclick="alert('Watch history will be available soon.'); return false;"><i
+                <a href="#" class="nav-item" onclick="showToast('History coming soon'); return false;"><i
                         class="fas fa-history"></i> <span>History</span></a>
-                <a href="#" class="nav-item" onclick="alert('Watch later list is empty.'); return false;"><i
+                <a href="#" class="nav-item" onclick="showToast('Watch Later coming soon'); return false;"><i
                         class="fas fa-clock"></i> <span>Watch later</span></a>
-                <a href="#" class="nav-item" onclick="alert('No liked videos yet.'); return false;"><i
+                <a href="#" class="nav-item" onclick="showToast('Liked videos coming soon'); return false;"><i
                         class="fas fa-thumbs-up"></i> <span>Liked videos</span></a>
             </nav>
         </aside>
@@ -164,42 +164,55 @@
         </main>
     </div>
 
+    <div id="toast-container"></div>
     <script>
+        let allVideos = []; // Global for search
+
         async function loadVideos() {
+            const shimmer = document.getElementById('loading-shimmer');
+            if (shimmer) shimmer.style.display = 'grid';
+
             try {
                 const res = await fetch('/api/videos');
-                const videos = await res.json();
+                allVideos = await res.json();
+                renderVideos(allVideos);
+            } catch (e) { console.error(e); }
+            finally {
+                if (shimmer) shimmer.style.display = 'none';
+            }
+        }
 
-                const grid = document.getElementById('main-video-grid');
-                const emptyState = document.getElementById('empty-state');
+        function renderVideos(videosToRender) {
+            const grid = document.getElementById('main-video-grid');
+            const emptyState = document.getElementById('empty-state');
 
-                if (videos.length === 0) {
-                    if (emptyState) emptyState.style.display = 'block';
-                    if (grid) grid.style.display = 'none';
-                    return;
-                }
+            if (!videosToRender || videosToRender.length === 0) {
+                if (emptyState) emptyState.style.display = 'block';
+                if (grid) grid.style.display = 'none';
+                return;
+            }
 
-                if (emptyState) emptyState.style.display = 'none';
-                if (grid) {
-                    grid.style.display = 'grid';
-                    grid.innerHTML = '';
+            if (emptyState) emptyState.style.display = 'none';
+            if (grid) {
+                grid.style.display = 'grid';
+                grid.innerHTML = '';
 
-                    videos.forEach((vid, index) => {
-                        const card = document.createElement('div');
-                        card.className = 'video-card';
-                        card.style.animationDelay = `${index * 50}ms`;
+                videosToRender.forEach((vid, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'video-card';
+                    card.style.animationDelay = `${index * 50}ms`;
 
-                        card.onclick = () => playVideo(
-                            vid.video_url,
-                            vid.title || 'Untitled',
-                            vid.user_email,
-                            vid.views || 0,
-                            vid.timestamp,
-                            vid.description || '',
-                            vid.id
-                        );
+                    card.onclick = () => playVideo(
+                        vid.video_url,
+                        vid.title || 'Untitled',
+                        vid.user_email,
+                        vid.views || 0,
+                        vid.timestamp,
+                        vid.description || '',
+                        vid.id
+                    );
 
-                        card.innerHTML = `
+                    card.innerHTML = `
                             <div class="thumbnail-wrapper">
                                 <video src="${vid.video_url}" muted onmouseover="this.play()" onmouseout="this.pause()" style="width: 100%; height: 100%; object-fit: cover;"></video>
                             </div>
@@ -216,11 +229,53 @@
                                 </div>
                             </div>
                         `;
-                        grid.appendChild(card);
-                    });
-                }
+                    grid.appendChild(card);
+                });
+            }
+        }
 
-            } catch (e) { console.error(e); }
+        function performSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            if (!query) return renderVideos(allVideos);
+
+            const filtered = allVideos.filter(vid =>
+                (vid.title && vid.title.toLowerCase().includes(query)) ||
+                (vid.description && vid.description.toLowerCase().includes(query))
+            );
+            renderVideos(filtered);
+        }
+
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        function startVoiceSearch() {
+            if (!('webkitSpeechRecognition' in window)) {
+                showToast("Voice search not supported.");
+                return;
+            }
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            showToast("Listening...");
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('search-input').value = transcript;
+                performSearch();
+            };
+            recognition.onerror = () => showToast("Voice input failed.");
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            if (!container) return alert(msg);
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            toast.style.cssText = "background: #333; color: white; padding: 12px 24px; border-radius: 4px; margin-top: 10px;";
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
         async function playVideo(url, title, channel, initialViews, timestamp, description = "", videoId) {

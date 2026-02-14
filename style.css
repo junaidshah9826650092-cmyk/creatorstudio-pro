@@ -1,18 +1,18 @@
 :root {
-    --bg-main: #fff;
-    --bg-header: #fff;
-    --bg-sidebar: #fff;
-    --accent: #ff0000;
-    --accent-glow: rgba(255, 0, 0, 0.1);
-    --text-primary: #0f0f0f;
-    --text-secondary: #606060;
-    --border: #e5e5e5;
-    --glass: rgba(0, 0, 0, 0.02);
-    --hover: #f2f2f2;
-    --card-bg: #fff;
-    --chip-bg: rgba(0, 0, 0, 0.05);
-    --chip-active-bg: #0f0f0f;
-    --chip-active-text: #fff;
+    --bg-main: #0f0f0f;
+    --bg-header: rgba(15, 15, 15, 0.9);
+    --bg-sidebar: #0f0f0f;
+    --accent: #ff0055;
+    --accent-glow: rgba(255, 0, 85, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: #aaaaaa;
+    --border: rgba(255, 255, 255, 0.1);
+    --glass: rgba(255, 255, 255, 0.05);
+    --hover: rgba(255, 255, 255, 0.1);
+    --card-bg: transparent;
+    --chip-bg: #222;
+    --chip-active-bg: #f2f2f2;
+    --chip-active-text: #0f0f0f;
 }
 
 * {
@@ -24,7 +24,7 @@
 }
 
 body {
-    background-color: #fff;
+    background-color: var(--bg-main);
     color: var(--text-primary);
     overflow-x: hidden;
     letter-spacing: -0.01em;
@@ -262,34 +262,59 @@ button {
 }
 
 /* Header */
+/* Header */
 .top-bar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     height: 64px;
-    background: #fff;
+    background: var(--bg-header);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
     z-index: 2000;
-    border-bottom: 1px solid #e5e5e5;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--border);
 }
 
 .logo {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: white;
     text-decoration: none;
-    background: linear-gradient(90deg, #fff, #ff003c);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    transition: transform 0.2s;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #ff0055, #ff4d4d);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(255, 0, 85, 0.3);
+}
+
+.logo-text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+    font-family: 'Outfit', sans-serif;
+}
+
+.logo-text span {
+    color: #ff0055;
+}
+
+.logo:hover {
+    transform: scale(1.02);
 }
 
 .header-left {
@@ -396,12 +421,12 @@ button {
 /* Sidebar Overhaul */
 .sidebar {
     width: 240px;
-    background: #fff;
+    background: var(--bg-sidebar);
     padding: 12px 0;
     position: fixed;
     height: calc(100vh - 64px);
     overflow-y: auto;
-    border-right: 1px solid #e5e5e5;
+    border-right: none;
     transition: transform 0.3s;
 }
 
@@ -413,7 +438,7 @@ button {
     margin: 0 12px 4px 12px;
     border-radius: 10px;
     text-decoration: none;
-    color: #0f0f0f;
+    color: white;
     font-size: 0.875rem;
     font-weight: 400;
     transition: background 0.15s;
@@ -426,17 +451,17 @@ button {
 }
 
 .nav-item:hover {
-    background: #f2f2f2;
+    background: var(--hover);
 }
 
 .nav-item.active {
-    background: #f2f2f2;
-    font-weight: 500;
+    background: var(--hover);
+    font-weight: 600;
 }
 
 .sidebar hr {
     border: none;
-    border-top: 1px solid #e5e5e5;
+    border-top: 1px solid var(--border);
     margin: 12px 0;
 }
 
