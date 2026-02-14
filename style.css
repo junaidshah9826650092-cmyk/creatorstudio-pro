@@ -1,18 +1,18 @@
 :root {
-    --bg-main: #0a0a0a;
-    --bg-header: rgba(10, 10, 10, 0.95);
-    --bg-sidebar: #0f0f0f;
-    --accent: #ff003c;
-    --accent-glow: rgba(255, 0, 60, 0.3);
-    --text-primary: #ffffff;
-    --text-secondary: #aaaaaa;
-    --border: rgba(255, 255, 255, 0.08);
-    --glass: rgba(255, 255, 255, 0.05);
-    --hover: rgba(255, 255, 255, 0.1);
-    --card-bg: #161616;
-    --chip-bg: #222222;
-    --chip-active-bg: #ffffff;
-    --chip-active-text: #000000;
+    --bg-main: #fff;
+    --bg-header: #fff;
+    --bg-sidebar: #fff;
+    --accent: #ff0000;
+    --accent-glow: rgba(255, 0, 0, 0.1);
+    --text-primary: #0f0f0f;
+    --text-secondary: #606060;
+    --border: #e5e5e5;
+    --glass: rgba(0, 0, 0, 0.02);
+    --hover: #f2f2f2;
+    --card-bg: #fff;
+    --chip-bg: rgba(0, 0, 0, 0.05);
+    --chip-active-bg: #0f0f0f;
+    --chip-active-text: #fff;
 }
 
 * {
@@ -24,7 +24,7 @@
 }
 
 body {
-    background-color: #0f0f0f;
+    background-color: #fff;
     color: var(--text-primary);
     overflow-x: hidden;
     letter-spacing: -0.01em;
@@ -268,15 +268,14 @@ button {
     left: 0;
     right: 0;
     height: 64px;
-    background: rgba(10, 10, 10, 0.7);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
     z-index: 2000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid #e5e5e5;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .logo {
