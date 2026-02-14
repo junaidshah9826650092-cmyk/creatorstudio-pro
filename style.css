@@ -1,14 +1,15 @@
 :root {
-    --bg-main: #000000;
-    --bg-header: rgba(15, 15, 15, 0.85);
-    --bg-sidebar: #050505;
+    --bg-main: #0a0a0a;
+    --bg-header: rgba(10, 10, 10, 0.95);
+    --bg-sidebar: #0f0f0f;
     --accent: #ff003c;
+    --accent-glow: rgba(255, 0, 60, 0.3);
     --text-primary: #ffffff;
     --text-secondary: #aaaaaa;
-    --border: rgba(255, 255, 255, 0.1);
-    --glass: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.08);
+    --glass: rgba(255, 255, 255, 0.05);
     --hover: rgba(255, 255, 255, 0.1);
-    --card-bg: #111111;
+    --card-bg: #161616;
     --chip-bg: #222222;
 }
 
@@ -97,7 +98,91 @@ button {
 
 .icon-btn:hover {
     background: var(--hover);
-    transform: scale(1.1);
+}
+
+/* Create Button & Dropdown */
+.create-container {
+    position: relative;
+    margin-right: 8px;
+}
+
+.create-btn {
+    background: #272727;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.create-btn:hover {
+    background: #3f3f3f;
+}
+
+.create-dropdown {
+    display: none;
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: #282828;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 200px;
+    z-index: 4000;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.create-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+
+.create-dropdown a:hover {
+    background: var(--hover);
+}
+
+.create-dropdown i {
+    width: 20px;
+}
+
+/* Dropdown Menu (User) */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 56px;
+    right: 16px;
+    background: #282828;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 240px;
+    z-index: 3000;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.dropdown-menu a:hover {
+    background: var(--hover);
 }
 
 .action-btn {
