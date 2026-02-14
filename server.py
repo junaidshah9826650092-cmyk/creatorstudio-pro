@@ -167,20 +167,32 @@ def withdraw():
     conn.close()
     return jsonify({'status': status, 'message': message})
 
+# Ensure upload directory exists (absolute path)
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    try:
+        os.makedirs(UPLOAD_FOLDER)
+    except Exception as e:
+        print(f"Error creating uploads dir: {e}")
+
 @app.route('/api/video/upload-file', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-        
-    if file:
-        filename = f"{int(datetime.now().timestamp())}_{file.filename}"
-        filepath = os.path.join('uploads', filename)
-        file.save(filepath)
-        # Return URL relative to server root
-        return jsonify({'url': f"/uploads/{filename}"})
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+            
+        if file:
+            filename = f"{int(datetime.now().timestamp())}_{file.filename}"
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepath)
+            # Return URL relative to server root
+            return jsonify({'url': f"/uploads/{filename}"})
+    except Exception as e:
+        print(f"File Save Error: {e}")
+        return jsonify({'status': 'error', 'message': f"Failed to save file: {str(e)}"}), 500
 
 @app.route('/api/video/upload', methods=['POST'])
 def upload_video():
