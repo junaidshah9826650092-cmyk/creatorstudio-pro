@@ -15,6 +15,11 @@
             --accent: #ff003c;
             --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --primary-accent: #ff003c;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #ffffff;
+            --text-secondary: #aaaaaa;
         }
 
         body {
@@ -132,205 +137,204 @@
             transform: scale(1.05);
             box-shadow: 0 15px 40px rgba(255, 0, 60, 0.5);
         }
-    </style>
 
-    /* Input Fields */
-    .details-section {
-    display: none;
-    /* Hidden initially */
-    animation: fadeIn 0.4s;
-    }
+        /* Input Fields */
+        .details-section {
+            display: none;
+            /* Hidden initially */
+            animation: fadeIn 0.4s;
+        }
 
-    @keyframes fadeIn {
-    from {
-    opacity: 0;
-    transform: translateY(10px);
-    }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
 
-    to {
-    opacity: 1;
-    transform: translateY(0);
-    }
-    }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .section-title {
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin-bottom: 24px;
-    }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
 
-    .input-wrapper {
-    position: relative;
-    margin-bottom: 24px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background: var(--input-bg);
-    transition: border-color 0.2s;
-    }
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--input-bg);
+            transition: border-color 0.2s;
+        }
 
-    .input-wrapper:focus-within {
-    border-color: var(--primary-accent);
-    }
+        .input-wrapper:focus-within {
+            border-color: var(--primary-accent);
+        }
 
-    .input-wrapper label {
-    position: absolute;
-    top: 8px;
-    left: 12px;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    }
+        .input-wrapper label {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
 
-    .input-wrapper input,
-    .input-wrapper textarea {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--text-main);
-    padding: 28px 12px 10px 12px;
-    /* Top padding reserved for label */
-    font-size: 0.95rem;
-    resize: none;
-    outline: none;
-    }
+        .input-wrapper input,
+        .input-wrapper textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 28px 12px 10px 12px;
+            /* Top padding reserved for label */
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+        }
 
-    .ai-btn-wrapper {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    }
+        .ai-btn-wrapper {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
 
-    .btn-ai {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-main);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    }
+        .btn-ai {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    .btn-ai:hover {
-    background: rgba(62, 166, 255, 0.1);
-    color: var(--primary-accent);
-    border-color: var(--primary-accent);
-    }
+        .btn-ai:hover {
+            background: rgba(62, 166, 255, 0.1);
+            color: var(--primary-accent);
+            border-color: var(--primary-accent);
+        }
 
-    /* Video Preview Side */
-    .video-preview-sidebar {
-    width: 300px;
-    background: #1a1a1a;
-    border-left: 1px solid var(--border-color);
-    padding: 20px;
-    display: none;
-    /* Hidden initally */
-    flex-direction: column;
-    }
+        /* Video Preview Side */
+        .video-preview-sidebar {
+            width: 300px;
+            background: #1a1a1a;
+            border-left: 1px solid var(--border-color);
+            padding: 20px;
+            display: none;
+            /* Hidden initally */
+            flex-direction: column;
+        }
 
-    .preview-player {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: #000;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    border: 1px solid #333;
-    }
+        .preview-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
 
-    .preview-player video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    }
+        .preview-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
-    .file-info-item {
-    margin-bottom: 16px;
-    }
+        .file-info-item {
+            margin-bottom: 16px;
+        }
 
-    .file-info-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-    }
+        .file-info-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
 
-    .file-info-value {
-    font-size: 0.85rem;
-    word-break: break-all;
-    color: var(--primary-accent);
-    }
+        .file-info-value {
+            font-size: 0.85rem;
+            word-break: break-all;
+            color: var(--primary-accent);
+        }
 
-    /* Footer */
-    .upload-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    }
+        /* Footer */
+        .upload-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    .progress-section {
-    flex: 1;
-    margin-right: 20px;
-    display: none;
-    }
+        .progress-section {
+            flex: 1;
+            margin-right: 20px;
+            display: none;
+        }
 
-    .progress-bar-bg {
-    height: 4px;
-    background: #333;
-    border-radius: 2px;
-    overflow: hidden;
-    }
+        .progress-bar-bg {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
 
-    .progress-bar-fill {
-    height: 100%;
-    background: var(--primary-accent);
-    width: 0%;
-    transition: width 0.2s;
-    }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary-accent);
+            width: 0%;
+            transition: width 0.2s;
+        }
 
-    .status-text {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-top: 6px;
-    }
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
 
-    .btn-main {
-    background: var(--primary-accent);
-    color: #000;
-    border: none;
-    padding: 8px 18px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border-radius: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    }
+        .btn-main {
+            background: var(--primary-accent);
+            color: #000;
+            border: none;
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
 
-    .btn-main:disabled {
-    background: #555;
-    color: #888;
-    cursor: default;
-    }
+        .btn-main:disabled {
+            background: #555;
+            color: #888;
+            cursor: default;
+        }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-    width: 8px;
-    }
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    ::-webkit-scrollbar-track {
-    background: transparent;
-    }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-    ::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 4px;
-    }
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
 
-    ::-webkit-scrollbar-thumb:hover {
-    background: #777;
-    }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
     </style>
 </head>
 
@@ -440,25 +444,7 @@
         </footer>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-
     <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyA_RD90hU2ZnK-113AwEofge6BM56fd7LQ",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const storage = firebase.storage();
 
         // UI References
         const dropZone = document.getElementById('drop-zone');
@@ -576,9 +562,8 @@
             }
 
             // --- CLOUDINARY CONFIG (PERMANENT CLOUD STORAGE) ---
-            // These should be moved to a config file eventually
-            const cloudName = 'dvp0nd2ga'; // User's Cloud Name
-            const uploadPreset = 'vitox_preset'; // User's Unsigned Upload Preset
+            const cloudName = 'dybxv45hp'; // Updated with user's Cloud Name
+            const uploadPreset = 'vitox_preset'; // User needs to create this Unsigned Preset
 
             nextBtn.disabled = true;
             progressContainer.style.display = 'block';
