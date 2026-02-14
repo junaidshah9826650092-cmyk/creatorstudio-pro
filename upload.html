@@ -610,7 +610,7 @@
                 return;
             }
 
-            uploadBtn.disabled = true;
+            nextBtn.disabled = true;
             progressContainer.style.display = 'block';
             statusMsg.innerText = "Uploading to Server...";
 
@@ -660,14 +660,14 @@
                 } else {
                     statusMsg.style.color = "var(--error)";
                     statusMsg.innerText = "Upload failed: Server Error";
-                    uploadBtn.disabled = false;
+                    nextBtn.disabled = false;
                 }
             };
 
             xhr.onerror = () => {
                 statusMsg.style.color = "var(--error)";
                 statusMsg.innerText = "Upload failed: Network Error";
-                uploadBtn.disabled = false;
+                nextBtn.disabled = false;
             };
 
             xhr.send(formData);
