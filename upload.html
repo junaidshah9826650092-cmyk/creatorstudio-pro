@@ -610,89 +610,66 @@
                 return;
             }
 
+            // --- CLOUDINARY CONFIG (PERMANENT CLOUD STORAGE) ---
+            // These should be moved to a config file eventually
+            const cloudName = 'dvp0nd2ga'; // User's Cloud Name
+            const uploadPreset = 'vitox_preset'; // User's Unsigned Upload Preset
+
             nextBtn.disabled = true;
             progressContainer.style.display = 'block';
-            statusMsg.innerText = "Uploading to Server...";
+            statusMsg.innerText = "Connecting to Cloud (YouTube Style)...";
 
             const formData = new FormData();
             formData.append('file', selectedFile);
+            formData.append('upload_preset', uploadPreset);
 
-            // XHR for Progress Tracking
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/video/upload-file', true);
+            try {
+                // Upload directly to Cloudinary
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
 
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                    const percentComplete = (e.loaded / e.total) * 100;
-                    progressFill.style.width = percentComplete + '%';
-                    statusMsg.innerText = `Uploading ${Math.round(percentComplete)}% ...`;
-                }
-            };
-
-            xhr.onload = async () => {
-                let response;
-                try {
-                    if (xhr.status !== 200) {
-                        throw new Error(`Upload failed with status ${xhr.status}`);
-                    }
-                    response = JSON.parse(xhr.responseText);
-                } catch (e) {
-                    console.error("Upload Error:", xhr.responseText);
-                    statusMsg.style.color = "var(--error)";
-                    statusMsg.innerText = "Server Error: " + xhr.status;
-                    alert(`Upload failed! Server returned ${xhr.status}. \nIf you see this, the server might be updating. Please try again in 1 minute.\nDetails: ${e.message}`);
-                    nextBtn.disabled = false;
-                    return;
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.error.message || "Cloud Upload Failed");
                 }
 
-                const videoUrl = response.url; // URL from server
+                const data = await res.json();
+                const videoUrl = data.secure_url;
 
                 statusMsg.style.color = "var(--success)";
-                statusMsg.innerText = "Processing complete. Saving metadata...";
-                console.log("Saving metadata:", { email: user.email, title: title, video_url: videoUrl });
+                statusMsg.innerText = "Cloud storage ready. Linking to Dashboard...";
+                console.log("Cloud URL:", videoUrl);
 
-                // Save Metadata
-                try {
-                    const res = await fetch('/api/video/upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email: user.email,
-                            title: title,
-                            description: desc,
-                            video_url: videoUrl,
-                            thumbnail_url: ''
-                        })
-                    });
+                // Save Metadata to Python Backend
+                const dbRes = await fetch('/api/video/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email,
+                        title: title,
+                        description: desc,
+                        video_url: videoUrl,
+                        thumbnail_url: data.thumbnail_url || ''
+                    })
+                });
 
-                    if (!res.ok) {
-                        const text = await res.text();
-                        throw new Error(`Server Error ${res.status}: ${text.substring(0, 100)}`);
-                    }
-
-                    const data = await res.json();
-                    console.log("Save response:", data);
-
-                    if (data.status === 'success') {
-                        alert("Video Published Successfully!");
-                        window.location.href = 'index.html';
-                    } else {
-                        alert("Database Save Failed: " + data.message);
-                    }
-                } catch (e) {
-                    console.error("Backend Save Failed", e);
-                    statusMsg.innerText = "Error: " + e.message;
-                    alert("Error: " + e.message);
+                const dbData = await dbRes.json();
+                if (dbData.status === 'success') {
+                    alert("Video Published Successfully to Cloud!");
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Database Save Failed: " + dbData.message);
                 }
-            };
 
-            xhr.onerror = () => {
+            } catch (e) {
+                console.error("Cloud Error:", e);
                 statusMsg.style.color = "var(--error)";
-                statusMsg.innerText = "Upload failed: Network Error";
+                statusMsg.innerText = "Cloud Error: " + e.message;
+                alert("Cloudinary Error: " + e.message + "\n\nPlease ensure your Cloudinary Preset is set to 'Unsigned'.");
                 nextBtn.disabled = false;
-            };
-
-            xhr.send(formData);
+            }
         }
     </script>
 </body>
