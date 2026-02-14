@@ -103,6 +103,16 @@ def init_db():
         )
     ''')
 
+    # Video Views
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS video_views (
+            video_id INTEGER,
+            user_email TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (video_id, user_email)
+        )
+    ''')
+
     # Add columns if they don't exist (migrations)
     try:
         conn.execute('ALTER TABLE transactions ADD COLUMN status TEXT DEFAULT "completed"')
@@ -274,8 +284,23 @@ def get_transactions(email):
 
 @app.route('/api/video/view', methods=['POST'])
 def increment_view():
-    video_id = request.json.get('video_id')
+    data = request.json
+    video_id = data.get('video_id')
+    user_email = data.get('email')
+
     conn = get_db_connection()
+    
+    # Unique View Logic
+    if user_email:
+        # Check if user already viewed this video
+        existing = conn.execute('SELECT 1 FROM video_views WHERE video_id = ? AND user_email = ?', (video_id, user_email)).fetchone()
+        if existing:
+            conn.close()
+            return jsonify({'status': 'already_viewed'})
+        
+        # Record new view
+        conn.execute('INSERT INTO video_views (video_id, user_email) VALUES (?, ?)', (video_id, user_email))
+
     conn.execute('UPDATE videos SET views = views + 1 WHERE id = ?', (video_id,))
     conn.commit()
     conn.close()

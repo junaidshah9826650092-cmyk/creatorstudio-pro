@@ -237,11 +237,14 @@
             const isSelf = user && (user.email === safeChannel || user.email.toLowerCase() === safeChannel.toLowerCase());
 
             // Increment View Immediately (Only if not own video)
-            if (!isSelf) {
+            if (!isSelf && user) {
                 fetch('/api/video/view', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ video_id: safeId })
+                    body: JSON.stringify({
+                        video_id: safeId,
+                        email: user.email  // ✅ UNIQUE VIEW TRACKING
+                    })
                 }).catch(e => console.error("View increment failed:", e));
             }
 

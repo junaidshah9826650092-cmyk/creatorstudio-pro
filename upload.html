@@ -13,11 +13,6 @@
 </head>
 
 <body style="background: #000;">
-    <!-- VERIFICATION BANNER (User verification) -->
-    <div
-        style="background: #ff003c; color: white; padding: 5px; text-align: center; font-size: 0.7rem; font-weight: 800; letter-spacing: 2px;">
-        V8 - ELITE GLOBAL CLOUD ENGINE ACTIVATED (NO LOCAL STORAGE)
-    </div>
 
     <div class="upload-container">
         <header class="upload-header">
@@ -202,7 +197,8 @@
                 <div class="file-info-item">
                     <div class="file-info-label">Video link</div>
                     <div class="file-info-value" style="color: #3ea6ff; cursor: pointer;">https://vitox.ai/v/PnlbyZ6Z6KM
-                        <i class="far fa-copy" style="margin-left: 8px;"></i></div>
+                        <i class="far fa-copy" style="margin-left: 8px;"></i>
+                    </div>
                 </div>
                 <div class="file-info-item">
                     <div class="file-info-label">Filename</div>
@@ -378,7 +374,8 @@
                                     progressFill.style.width = p + '%';
                                     if (p >= 100) {
                                         clearInterval(sim);
-                                        saveToDB("https://res.cloudinary.com/demo/video/upload/dog.mp4", "https://res.cloudinary.com/demo/video/upload/dog.jpg");
+                                        // Neutral Placeholder instead of Dog Demo
+                                        saveToDB("https://res.cloudinary.com/demo/video/upload/c_scale,w_400/v1/sample.mp4", "");
                                     }
                                 }, 30);
                             }, 1000);
