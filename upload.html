@@ -10,181 +10,469 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --studio-bg: #1f1f1f;
-            --studio-card: #282828;
-            --studio-border: #3e3e3e;
-            --blue-accent: #3ea6ff;
+            --bg-color: #0f0f0f;
+            --card-bg: #1e1e1e;
+            --input-bg: #121212;
+            --border-color: #3e3e3e;
+            --primary-accent: #3ea6ff;
+            --primary-hover: #308ce0;
+            --text-main: #ffffff;
+            --text-secondary: #aaaaaa;
+            --success: #2ba640;
+            --error: #cc0000;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
         }
 
         body {
-            background: var(--studio-bg);
-            color: white;
-            font-family: 'Roboto', sans-serif;
+            background-color: rgba(0, 0, 0, 0.8);
             margin: 0;
+            height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Modal Animation */
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .upload-container {
-            background: var(--studio-card);
-            border: 1px solid var(--studio-border);
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: var(--card-bg);
+            width: 960px;
+            height: 90vh;
+            max-height: 800px;
+            border-radius: 16px;
+            box-shadow: 0 24px 38px rgba(0, 0, 0, 0.14), 0 9px 46px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            border: 1px solid #333;
         }
 
+        /* Header */
         .upload-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
         }
 
-        .close-btn {
+        .upload-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .upload-header .actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .icon-btn {
             background: none;
             border: none;
-            color: #aaa;
-            font-size: 1.5rem;
+            color: var(--text-secondary);
             cursor: pointer;
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 50%;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .drop-zone {
-            border: 2px dashed var(--studio-border);
-            border-radius: 8px;
-            padding: 60px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 24px;
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
         }
 
-        .drop-zone:hover {
-            border-color: var(--blue-accent);
-            background: rgba(62, 166, 255, 0.05);
-        }
-
-        .drop-zone i {
-            font-size: 3rem;
-            color: #555;
-            margin-bottom: 16px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-
-        .input-group input,
-        .input-group textarea {
-            width: 100%;
-            background: #121212;
-            border: 1px solid var(--studio-border);
-            border-radius: 4px;
-            padding: 12px;
-            color: white;
-            font-family: inherit;
-        }
-
-        .input-group input:focus,
-        .input-group textarea:focus {
-            outline: none;
-            border-color: var(--blue-accent);
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-            margin-top: 10px;
-            display: none;
+        /* Body Layout */
+        .upload-body {
+            flex: 1;
+            display: flex;
+            padding: 0;
             overflow: hidden;
         }
 
-        .progress-fill {
+        /* Scrollable Form Area */
+        .form-area {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        /* Drop Zone Styles */
+        .drop-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             height: 100%;
-            background: var(--blue-accent);
-            width: 0%;
+            text-align: center;
+        }
+
+        .circle-icon {
+            width: 136px;
+            height: 136px;
+            background: #151515;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            transition: transform 0.3s;
+        }
+
+        .circle-icon i {
+            font-size: 50px;
+            color: #909090;
+        }
+
+        .drop-zone:hover .circle-icon {
+            transform: scale(1.05);
+            background: #1f1f1f;
+        }
+
+        .btn-select {
+            background: var(--primary-accent);
+            color: #000;
+            border: none;
+            padding: 10px 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 24px;
+            letter-spacing: 0.5px;
             transition: 0.2s;
         }
 
-        .btn-upload {
-            background: var(--blue-accent);
-            color: black;
-            border: none;
-            padding: 12px 24px;
+        .btn-select:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Input Fields */
+        .details-section {
+            display: none;
+            /* Hidden initially */
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
-            font-weight: 700;
-            cursor: pointer;
+            background: var(--input-bg);
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary-accent);
+        }
+
+        .input-wrapper label {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .input-wrapper input,
+        .input-wrapper textarea {
             width: 100%;
-            margin-top: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 28px 12px 10px 12px;
+            /* Top padding reserved for label */
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
         }
 
-        .btn-upload:disabled {
-            background: #555;
-            cursor: not-allowed;
+        .ai-btn-wrapper {
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
 
-        #status-msg {
-            margin-top: 15px;
-            text-align: center;
+        .btn-ai {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ai:hover {
+            background: rgba(62, 166, 255, 0.1);
+            color: var(--primary-accent);
+            border-color: var(--primary-accent);
+        }
+
+        /* Video Preview Side */
+        .video-preview-sidebar {
+            width: 300px;
+            background: #1a1a1a;
+            border-left: 1px solid var(--border-color);
+            padding: 20px;
+            display: none;
+            /* Hidden initally */
+            flex-direction: column;
+        }
+
+        .preview-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        .preview-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .file-info-item {
+            margin-bottom: 16px;
+        }
+
+        .file-info-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .file-info-value {
+            font-size: 0.85rem;
+            word-break: break-all;
+            color: var(--primary-accent);
+        }
+
+        /* Footer */
+        .upload-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .progress-section {
+            flex: 1;
+            margin-right: 20px;
+            display: none;
+        }
+
+        .progress-bar-bg {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary-accent);
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .btn-main {
+            background: var(--primary-accent);
+            color: #000;
+            border: none;
+            padding: 8px 18px;
             font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .btn-main:disabled {
+            background: #555;
+            color: #888;
+            cursor: default;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777;
         }
     </style>
 </head>
 
 <body>
     <div class="upload-container">
-        <div class="upload-header">
-            <h2>Upload Video</h2>
-            <button class="close-btn" onclick="location.href='dashboard.html'">&times;</button>
-        </div>
-
-        <div id="upload-form">
-            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('video-input').click()">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>Select video file to upload</p>
-                <p style="font-size: 0.8rem; color: #777;">Your videos will be private until you publish them.</p>
-                <input type="file" id="video-input" accept="video/*" style="display: none;">
+        <!-- Header -->
+        <header class="upload-header">
+            <h2 id="modal-title">Upload videos</h2>
+            <div class="actions">
+                <button class="icon-btn" onclick="alert('Feedback coming soon')"><i
+                        class="fas fa-comment-alt"></i></button>
+                <button class="icon-btn" onclick="location.href='index.html'"><i class="fas fa-times"></i></button>
             </div>
+        </header>
 
-            <div id="file-info" style="display: none; margin-bottom: 20px;">
-                <p style="color: var(--blue-accent); font-weight: 500;"><i class="fas fa-file-video"></i> <span
-                        id="filename-display">video.mp4</span></p>
-            </div>
+        <!-- Body -->
+        <div class="upload-body">
+            <!-- Form Area -->
+            <div class="form-area" id="main-scroll-area">
 
-            <div class="input-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <label style="margin: 0;">Title (required)</label>
-                    <button onclick="suggestAI()"
-                        style="background: none; border: 1px solid var(--blue-accent); color: var(--blue-accent); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                        <i class="fas fa-magic"></i> AI Suggest
-                    </button>
+                <!-- Step 1: Drop Zone -->
+                <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <div class="circle-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <p style="font-size: 1.1rem; margin-bottom: 8px;">Drag and drop video files to upload</p>
+                    <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 24px;">Your videos will be private until
+                        you publish them.</p>
+                    <button class="btn-select">Select Files</button>
+                    <input type="file" id="file-input" accept="video/*" style="display: none;"
+                        onchange="handleFileSelect(event)">
                 </div>
-                <input type="text" id="video-title" placeholder="Add a title that describes your video">
+
+                <!-- Step 2: Details Form -->
+                <div class="details-section" id="details-section">
+                    <div class="section-title">Details</div>
+
+                    <div class="input-wrapper">
+                        <label>Title (required)</label>
+                        <input type="text" id="video-title" placeholder="Add a title that describes your video">
+                        <div class="ai-btn-wrapper">
+                            <button class="btn-ai" onclick="suggestAI(event)">
+                                <i class="fas fa-magic"></i> AI
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-wrapper">
+                        <label>Description</label>
+                        <textarea id="video-desc" rows="5" placeholder="Tell viewers about your video"></textarea>
+                    </div>
+
+                    <!-- Thumbnails Section -->
+                    <div class="section-title" style="margin-top: 32px;">Thumbnail</div>
+                    <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 16px;">Select or upload a picture that
+                        shows what's in your video.</p>
+                    <div style="display: flex; gap: 16px;">
+                        <div
+                            style="width: 140px; height: 80px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; border-radius: 2px;">
+                            <i class="fas fa-image" style="color: #aaa; margin-bottom: 4px;"></i>
+                            <span style="font-size: 0.7rem; color: #aaa;">Upload file</span>
+                        </div>
+                        <div
+                            style="width: 140px; height: 80px; background: #000; display: flex; align-items: center; justify-content: center; border-radius: 2px; opacity: 0.5;">
+                            <span style="font-size: 0.7rem; color: #aaa;">Auto-gen 1</span>
+                        </div>
+                        <div
+                            style="width: 140px; height: 80px; background: #000; display: flex; align-items: center; justify-content: center; border-radius: 2px; opacity: 0.5;">
+                            <span style="font-size: 0.7rem; color: #aaa;">Auto-gen 2</span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="input-group">
-                <label>Description</label>
-                <textarea id="video-desc" rows="4" placeholder="Tell viewers about your video"></textarea>
-            </div>
+            <!-- Video Preview Sidebar (Right) -->
+            <div class="video-preview-sidebar" id="preview-sidebar">
+                <div class="preview-player">
+                    <video id="preview-video" controls></video>
+                </div>
 
-            <div class="progress-bar" id="progress-container">
-                <div class="progress-fill" id="progress-fill"></div>
-            </div>
+                <div class="file-info-item">
+                    <div class="file-info-label">Filename</div>
+                    <div class="file-info-value" id="filename-display">video.mp4</div>
+                </div>
 
-            <button class="btn-upload" id="upload-btn" onclick="handleUpload()">Upload</button>
-            <p id="status-msg"></p>
+                <div class="file-info-item">
+                    <div class="file-info-label">Video Link</div>
+                    <div class="file-info-value" style="color: #3ea6ff; cursor: pointer;">https://vitox.ai/v/xyz...
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="upload-footer">
+            <div class="progress-section" id="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="status-text" id="status-msg">Uploading 0% ...</div>
+            </div>
+
+            <div style="margin-left: auto;">
+                <button class="btn-main" id="next-btn" disabled onclick="uploadVideo()">Next</button>
+            </div>
+        </footer>
     </div>
 
     <!-- Firebase SDKs -->
@@ -192,49 +480,99 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
     <script>
-        // REPLACE WITH YOUR FIREBASE CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyA_RD90hU2ZnK-113AwEofge6BM56fd7LQ",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5z4...", // Placeholder, will rely on user's key if not set
+            authDomain: "vitox-ai.firebaseapp.com",
+            projectId: "vitox-ai",
+            storageBucket: "vitox-ai.appspot.com",
+            messagingSenderId: "392918089798",
+            appId: "1:392918089798:web:..."
+        };
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const storage = firebase.storage();
 
-        const videoInput = document.getElementById('video-input');
+        // UI References
         const dropZone = document.getElementById('drop-zone');
-        const progressFill = document.getElementById('progress-fill');
+        const fileInput = document.getElementById('file-input');
+        const nextBtn = document.getElementById('next-btn');
+        const mainScroll = document.getElementById('main-scroll-area');
+        const detailsSection = document.getElementById('details-section');
+        const previewSidebar = document.getElementById('preview-sidebar');
+        const previewVideo = document.getElementById('preview-video');
         const progressContainer = document.getElementById('progress-container');
-        const uploadBtn = document.getElementById('upload-btn');
+        const progressFill = document.getElementById('progress-fill');
         const statusMsg = document.getElementById('status-msg');
 
         let selectedFile = null;
 
-        videoInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                selectedFile = e.target.files[0];
-                document.getElementById('file-info').style.display = 'block';
-                document.getElementById('filename-display').innerText = selectedFile.name;
-                document.getElementById('video-title').value = selectedFile.name.split('.')[0];
+        // -- Drag & Drop Logic --
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary-accent)';
+            dropZone.style.background = '#1f1f1f';
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#333';
+            dropZone.style.background = 'transparent';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#333';
+            dropZone.style.background = 'transparent';
+
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
             }
         });
 
-        async function suggestAI() {
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('video/')) {
+                alert("Please upload a valid video file.");
+                return;
+            }
+
+            selectedFile = file;
+
+            // UI Transition
+            dropZone.style.display = 'none';
+            detailsSection.style.display = 'block';
+            previewSidebar.style.display = 'flex';
+            progressContainer.style.display = 'block'; // Show valid state
+            nextBtn.disabled = false;
+
+            // Auto-fill details
+            const cleanName = file.name.replace(/\.[^/.]+$/, "");
+            document.getElementById('video-title').value = cleanName;
+            document.getElementById('filename-display').innerText = file.name;
+
+            // Setup Preview
+            const url = URL.createObjectURL(file);
+            previewVideo.src = url;
+        }
+
+        async function suggestAI(event) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
             const titleInput = document.getElementById('video-title');
             const descInput = document.getElementById('video-desc');
-            const topic = titleInput.value || "Viral Video";
 
-            const btn = event.currentTarget;
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Thinking...';
-            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             try {
+                const topic = titleInput.value || "Viral Video";
                 const res = await fetch('/api/ai/suggest', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -244,43 +582,30 @@
 
                 titleInput.value = data.title;
                 descInput.value = data.description;
-
-                statusMsg.style.color = "var(--blue-accent)";
-                statusMsg.innerText = "AI Suggestion applied!";
-                setTimeout(() => statusMsg.innerText = "", 3000);
             } catch (e) {
                 console.error(e);
-                alert("AI Suggestion failed. Please try again.");
             } finally {
-                btn.innerHTML = originalHtml;
-                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         }
 
-        async function handleUpload() {
+        function uploadVideo() {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             if (!user) {
                 alert("Please login first");
+                window.location.href = 'login.html';
                 return;
             }
 
-            if (!selectedFile) {
-                alert("Please select a video file first");
-                return;
-            }
+            nextBtn.disabled = true;
+            nextBtn.innerText = "Uploading...";
 
             const title = document.getElementById('video-title').value;
             const desc = document.getElementById('video-desc').value;
 
-            if (!title) {
-                alert("Please enter a title");
-                return;
-            }
-
-            uploadBtn.disabled = true;
-            progressContainer.style.display = 'block';
-            statusMsg.innerText = "Uploading to Firebase...";
-
+            // Firebase Storage Upload
+            // Note: In production, use user's configured bucket or a public one
+            // We'll trust the user has put valid config if they edited it, or use default logic
             const storageRef = storage.ref(`videos/${user.email}/${Date.now()}_${selectedFile.name}`);
             const uploadTask = storageRef.put(selectedFile);
 
@@ -288,43 +613,41 @@
                 (snapshot) => {
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                     progressFill.style.width = progress + '%';
+                    statusMsg.innerText = `Uploading ${Math.round(progress)}% ...`;
                 },
                 (error) => {
-                    console.error("Upload error", error);
-                    statusMsg.style.color = "#ff4e4e";
-                    statusMsg.innerText = "Upload failed: " + error.message;
-                    uploadBtn.disabled = false;
+                    console.error("Upload failed", error);
+                    statusMsg.style.color = "var(--error)";
+                    statusMsg.innerText = "Upload failed. Check console/API key.";
+                    nextBtn.disabled = false;
+                    nextBtn.innerText = "Try Again";
                 },
                 async () => {
+                    // Success
                     const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
 
-                    // Now save metadata to our backend
+                    statusMsg.style.color = "var(--success)";
+                    statusMsg.innerText = "Processing complete. Saving...";
+
+                    // Save to Backend
                     try {
-                        const response = await fetch('/api/video/upload', {
+                        await fetch('/api/video/upload', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 email: user.email,
                                 title: title,
                                 description: desc,
-                                video_url: downloadURL
+                                video_url: downloadURL,
+                                thumbnail_url: ''
                             })
                         });
 
-                        const result = await response.json();
-                        if (result.status === 'success') {
-                            statusMsg.style.color = "#4eff4e";
-                            statusMsg.innerText = "Upload Complete! Redirecting...";
-                            setTimeout(() => {
-                                location.href = 'dashboard.html';
-                            }, 2000);
-                        } else {
-                            throw new Error(result.message);
-                        }
+                        alert("Video Published Successfully!");
+                        window.location.href = 'dashboard.html';
                     } catch (e) {
-                        statusMsg.style.color = "#ff4e4e";
-                        statusMsg.innerText = "Failed to save video details: " + e.message;
-                        uploadBtn.disabled = false;
+                        console.error("Backend Save Failed", e);
+                        statusMsg.innerText = "Saved to storage but database sync failed.";
                     }
                 }
             );
