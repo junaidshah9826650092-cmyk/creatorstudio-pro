@@ -4,6 +4,14 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
 
+# Load .env manually for local development
+if os.path.exists('.env'):
+    with open('.env') as f:
+        for line in f:
+            if '=' in line:
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
@@ -37,6 +45,20 @@ def init_db():
             type TEXT,
             description TEXT,
             status TEXT DEFAULT 'completed',
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_email) REFERENCES users (email)
+        )
+    ''')
+    # Videos table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS videos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email TEXT,
+            title TEXT NOT NULL,
+            description TEXT,
+            video_url TEXT NOT NULL,
+            thumbnail_url TEXT,
+            views INTEGER DEFAULT 0,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_email) REFERENCES users (email)
         )
@@ -132,6 +154,40 @@ def withdraw():
     conn.close()
     return jsonify({'status': status, 'message': message})
 
+@app.route('/api/video/upload', methods=['POST'])
+def upload_video():
+    data = request.json
+    email = data.get('email')
+    title = data.get('title')
+    desc = data.get('description', '')
+    video_url = data.get('video_url')
+    thumb_url = data.get('thumbnail_url', '')
+    
+    if not email or not title or not video_url:
+        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+        
+    conn = get_db_connection()
+    conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url) VALUES (?, ?, ?, ?, ?)', 
+                 (email, title, desc, video_url, thumb_url))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'status': 'success'})
+
+@app.route('/api/videos', methods=['GET'])
+def get_all_videos():
+    conn = get_db_connection()
+    videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
+    conn.close()
+    return jsonify([dict(v) for v in videos])
+
+@app.route('/api/videos/<email>', methods=['GET'])
+def get_user_videos(email):
+    conn = get_db_connection()
+    videos = conn.execute('SELECT * FROM videos WHERE user_email = ? ORDER BY timestamp DESC', (email,)).fetchall()
+    conn.close()
+    return jsonify([dict(v) for v in videos])
+
 @app.route('/api/transactions/<email>', methods=['GET'])
 def get_transactions(email):
     conn = get_db_connection()
@@ -219,6 +275,40 @@ def update_transaction():
     conn.commit()
     conn.close()
     return jsonify({'status': 'success'})
+
+@app.route('/api/ai/suggest', methods=['POST'])
+def ai_suggest():
+    data = request.json
+    topic = data.get('topic', 'General Gaming')
+    api_key = os.environ.get('GOOGLE_API_KEY')
+    
+    if not api_key:
+        return jsonify({'error': 'AI API Key not configured'}), 500
+        
+    try:
+        import requests
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        payload = {
+            "contents": [{
+                "parts": [{"text": f"Suggest a catchy YouTube title and a 2-sentence description for a video about: {topic}. Return JSON format with 'title' and 'description' keys. Do not include markdown formatting indicators."}]
+            }]
+        }
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, json=payload, headers=headers)
+        result = response.json()
+        
+        # Parse the response (Gemini returns a specific nested structure)
+        text = result['candidates'][0]['content']['parts'][0]['text']
+        # Clean up JSON if LLM added markdown
+        import json
+        import re
+        clean_text = re.sub(r'```json\n?|\n?```', '', text).strip()
+        suggestion = json.loads(clean_text)
+        
+        return jsonify(suggestion)
+    except Exception as e:
+        print(f"AI Error: {e}")
+        return jsonify({'title': f'Cool {topic} Video', 'description': f'An amazing video exploring {topic}. Check it out!'})
 
 if __name__ == '__main__':
     init_db()

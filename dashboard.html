@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitox AI | Creator Studio Dashboard</title>
+    <title>Vitox AI | Creator Dashboard - Manage Your Videos</title>
+    <meta name="description" content="Manage your video uploads, track analytics, and grow your channel on Vitox AI.">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -196,13 +197,22 @@
                     <a href="#" class="btn-blue">Go to channel analytics</a>
                 </div>
 
+                <!-- Your Content Section -->
+                <div class="studio-card" style="grid-column: 1 / -1; margin-top: 24px;">
+                    <div class="card-title">Your Content</div>
+                    <div id="videos-list"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+                        <p style="color: #666; font-size: 0.9rem;">No videos uploaded yet.</p>
+                    </div>
+                </div>
+
                 <!-- Upload Card -->
                 <div class="studio-card" style="grid-column: span 1.5;">
                     <div class="card-title">Quick Actions</div>
                     <div class="upload-section">
                         <div class="upload-icon"><i class="fas fa-upload"></i></div>
                         <p style="color: #aaa; margin-bottom: 16px;">Ready to share your next masterpiece?</p>
-                        <button class="btn-login" onclick="location.href='index.html'"
+                        <button class="btn-login" onclick="location.href='upload.html'"
                             style="width: auto; padding: 10px 24px; background: #3ea6ff;">Go to Upload</button>
                     </div>
                 </div>
@@ -236,6 +246,26 @@
                     document.querySelectorAll('.stat-value')[3].innerText = stats.subscribers.toLocaleString();
                     document.querySelectorAll('.stat-value')[4].innerText = stats.views.toLocaleString();
                     document.querySelectorAll('.stat-value')[5].innerText = stats.watch_time.toLocaleString();
+
+                    // Fetch and display user videos
+                    const vidRes = await fetch(`/api/videos/${user.email}`);
+                    const videos = await vidRes.json();
+
+                    const videoList = document.getElementById('videos-list');
+                    if (videos.length > 0) {
+                        videoList.innerHTML = videos.map(vid => `
+                            <div style="background: #121212; border-radius: 8px; overflow: hidden; border: 1px solid var(--studio-border);">
+                                <div style="height: 120px; background: #333; position: relative;">
+                                    <video src="${vid.video_url}" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                    <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); padding: 2px 4px; font-size: 0.7rem; border-radius: 2px;">LIVE</div>
+                                </div>
+                                <div style="padding: 12px;">
+                                    <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${vid.title}</div>
+                                    <div style="font-size: 0.75rem; color: #aaa;">${vid.views} views • ${new Date(vid.timestamp).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
                 } catch (e) {
                     console.error("Dashboard Sync Failed", e);
                 }

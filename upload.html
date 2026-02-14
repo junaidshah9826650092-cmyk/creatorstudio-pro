@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video | Vitox AI Hosting</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --studio-bg: #1f1f1f;
+            --studio-card: #282828;
+            --studio-border: #3e3e3e;
+            --blue-accent: #3ea6ff;
+        }
+
+        body {
+            background: var(--studio-bg);
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .upload-container {
+            background: var(--studio-card);
+            border: 1px solid var(--studio-border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--studio-border);
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 24px;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--blue-accent);
+            background: rgba(62, 166, 255, 0.05);
+        }
+
+        .drop-zone i {
+            font-size: 3rem;
+            color: #555;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            background: #121212;
+            border: 1px solid var(--studio-border);
+            border-radius: 4px;
+            padding: 12px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--blue-accent);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            margin-top: 10px;
+            display: none;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--blue-accent);
+            width: 0%;
+            transition: 0.2s;
+        }
+
+        .btn-upload {
+            background: var(--blue-accent);
+            color: black;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-upload:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        #status-msg {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="upload-container">
+        <div class="upload-header">
+            <h2>Upload Video</h2>
+            <button class="close-btn" onclick="location.href='dashboard.html'">&times;</button>
+        </div>
+
+        <div id="upload-form">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('video-input').click()">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Select video file to upload</p>
+                <p style="font-size: 0.8rem; color: #777;">Your videos will be private until you publish them.</p>
+                <input type="file" id="video-input" accept="video/*" style="display: none;">
+            </div>
+
+            <div id="file-info" style="display: none; margin-bottom: 20px;">
+                <p style="color: var(--blue-accent); font-weight: 500;"><i class="fas fa-file-video"></i> <span
+                        id="filename-display">video.mp4</span></p>
+            </div>
+
+            <div class="input-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="margin: 0;">Title (required)</label>
+                    <button onclick="suggestAI()"
+                        style="background: none; border: 1px solid var(--blue-accent); color: var(--blue-accent); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-magic"></i> AI Suggest
+                    </button>
+                </div>
+                <input type="text" id="video-title" placeholder="Add a title that describes your video">
+            </div>
+
+            <div class="input-group">
+                <label>Description</label>
+                <textarea id="video-desc" rows="4" placeholder="Tell viewers about your video"></textarea>
+            </div>
+
+            <div class="progress-bar" id="progress-container">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <button class="btn-upload" id="upload-btn" onclick="handleUpload()">Upload</button>
+            <p id="status-msg"></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <script>
+        // REPLACE WITH YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_RD90hU2ZnK-113AwEofge6BM56fd7LQ",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+
+        const videoInput = document.getElementById('video-input');
+        const dropZone = document.getElementById('drop-zone');
+        const progressFill = document.getElementById('progress-fill');
+        const progressContainer = document.getElementById('progress-container');
+        const uploadBtn = document.getElementById('upload-btn');
+        const statusMsg = document.getElementById('status-msg');
+
+        let selectedFile = null;
+
+        videoInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                document.getElementById('file-info').style.display = 'block';
+                document.getElementById('filename-display').innerText = selectedFile.name;
+                document.getElementById('video-title').value = selectedFile.name.split('.')[0];
+            }
+        });
+
+        async function suggestAI() {
+            const titleInput = document.getElementById('video-title');
+            const descInput = document.getElementById('video-desc');
+            const topic = titleInput.value || "Viral Video";
+
+            const btn = event.currentTarget;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Thinking...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/ai/suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: topic })
+                });
+                const data = await res.json();
+
+                titleInput.value = data.title;
+                descInput.value = data.description;
+
+                statusMsg.style.color = "var(--blue-accent)";
+                statusMsg.innerText = "AI Suggestion applied!";
+                setTimeout(() => statusMsg.innerText = "", 3000);
+            } catch (e) {
+                console.error(e);
+                alert("AI Suggestion failed. Please try again.");
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        async function handleUpload() {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) {
+                alert("Please login first");
+                return;
+            }
+
+            if (!selectedFile) {
+                alert("Please select a video file first");
+                return;
+            }
+
+            const title = document.getElementById('video-title').value;
+            const desc = document.getElementById('video-desc').value;
+
+            if (!title) {
+                alert("Please enter a title");
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            statusMsg.innerText = "Uploading to Firebase...";
+
+            const storageRef = storage.ref(`videos/${user.email}/${Date.now()}_${selectedFile.name}`);
+            const uploadTask = storageRef.put(selectedFile);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    progressFill.style.width = progress + '%';
+                },
+                (error) => {
+                    console.error("Upload error", error);
+                    statusMsg.style.color = "#ff4e4e";
+                    statusMsg.innerText = "Upload failed: " + error.message;
+                    uploadBtn.disabled = false;
+                },
+                async () => {
+                    const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+
+                    // Now save metadata to our backend
+                    try {
+                        const response = await fetch('/api/video/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: user.email,
+                                title: title,
+                                description: desc,
+                                video_url: downloadURL
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.status === 'success') {
+                            statusMsg.style.color = "#4eff4e";
+                            statusMsg.innerText = "Upload Complete! Redirecting...";
+                            setTimeout(() => {
+                                location.href = 'dashboard.html';
+                            }, 2000);
+                        } else {
+                            throw new Error(result.message);
+                        }
+                    } catch (e) {
+                        statusMsg.style.color = "#ff4e4e";
+                        statusMsg.innerText = "Failed to save video details: " + e.message;
+                        uploadBtn.disabled = false;
+                    }
+                }
+            );
+        }
+    </script>
+</body>
+
+</html>
