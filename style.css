@@ -843,3 +843,17 @@ button {
          }  
  }  
  
+/* Sidebar Toggle State (Collapsed) */
+.sidebar.active { width: 72px; }
+.sidebar.active .nav-item span, .sidebar.active .nav-section-title { display: none; }
+.sidebar.active .nav-item { justify-content: center; padding: 16px 0; flex-direction: column; gap: 4px; margin: 0 4px 4px 4px; }
+.sidebar.active .nav-item i { margin-bottom: 0; font-size: 1.4rem; }
+.sidebar.active + .content { margin-left: 72px; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); width: 240px; }
+  .sidebar.active { transform: translateX(0); width: 240px; }
+  .sidebar.active .nav-item { flex-direction: row; justify-content: flex-start; padding: 10px 12px; }
+  .sidebar.active .nav-item span { display: inline; }
+  .content { margin-left: 0 !important; }
+}

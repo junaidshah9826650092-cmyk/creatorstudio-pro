@@ -102,8 +102,8 @@
                     <span>Home</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Shorts'); return false;"><i
                         class="fas fa-play-circle"></i> <span>Shorts</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Subscriptions'); return false;"><i
-                        class="fas fa-layer-group"></i> <span>Subscriptions</span></a>
+                <a href="#" class="nav-item" onclick="loadView('Squad'); return false;"><i
+                        class="fas fa-layer-group"></i> <span>Squad</span></a>
                 <hr>
 
                 <!-- You Section -->
@@ -454,7 +454,7 @@
                                     ${isSelf ? '' : `
                                     <button id="sub-btn" onclick="toggleSubscribe('${safeChannel}', ${safeId})" 
                                         style="background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; margin-left: 10px; transition: all 0.2s; font-size: 0.9rem;">
-                                        Subscribe
+                                        Join Squad
                                     </button>
                                     `}
                                 </div>
@@ -597,7 +597,7 @@
 
                 document.getElementById('view-count').innerText = stats.views.toLocaleString();
                 document.getElementById('like-count').innerText = stats.likes.toLocaleString();
-                document.getElementById('sub-count').innerText = `${stats.subscribers} subscribers`;
+                document.getElementById('sub-count').innerText = `${stats.subscribers} Squad members`;
                 document.getElementById('comment-total').innerText = stats.comment_count.toLocaleString();
 
                 const likeBtn = document.getElementById('like-btn');
@@ -605,7 +605,7 @@
 
                 const subBtn = document.getElementById('sub-btn');
                 if (subBtn) {
-                    subBtn.innerHTML = stats.subbed ? 'Subscribed' : 'Subscribe';
+                    subBtn.innerHTML = stats.subbed ? 'In Squad' : 'Join Squad';
                     subBtn.style.background = stats.subbed ? 'rgba(255,255,255,0.1)' : '#fff';
                     subBtn.style.color = stats.subbed ? '#fff' : '#000';
                     subBtn.style.border = stats.subbed ? '1px solid rgba(255,255,255,0.1)' : 'none';
@@ -720,7 +720,7 @@
                     body: JSON.stringify({ subscriber: user.email, channel: channelEmail })
                 });
                 const data = await res.json();
-                showToast(data.status === 'subscribed' ? "Subscribed!" : "Unsubscribed");
+                showToast(data.status === 'subscribed' ? "Added to Squad!" : "Left the Squad");
                 loadEngagementStats(videoId, channelEmail);
             } catch (e) { console.error(e); }
         }
