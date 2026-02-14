@@ -3,6 +3,8 @@ import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 # Local disk storage disabled (Cloud Only)
 
@@ -21,6 +23,18 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
 ADMIN_EMAIL = "junaidshah78634@gmail.com" 
 
+# PostgreSQL or SQLite
+DATABASE_URL = os.environ.get('DATABASE_URL')
+USE_POSTGRES = DATABASE_URL is not None
+
+if USE_POSTGRES:
+    # Fix Render's postgres:// to postgresql://
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    print(f"Using PostgreSQL: {DATABASE_URL[:30]}...")
+else:
+    print(f"Using SQLite: {DB_FILE}")
+
 _db_ready = False
 
 def get_db_connection():
@@ -28,9 +42,14 @@ def get_db_connection():
     if not _db_ready:
         init_db()
         _db_ready = True
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    
+    if USE_POSTGRES:
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        return conn
+    else:
+        conn = sqlite3.connect(DB_FILE)
+        conn.row_factory = sqlite3.Row
+        return conn
 
 def init_db():
     print(f"--- INITIALIZING DATABASE AT {DB_FILE} ---")
