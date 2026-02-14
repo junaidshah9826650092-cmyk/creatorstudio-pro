@@ -1,29 +1,29 @@
 :root {
-    --bg-main: #0f0f0f;
-    --bg-header: #0f0f0f;
-    --bg-sidebar: #0f0f0f;
+    --bg-main: #000000;
+    --bg-header: rgba(15, 15, 15, 0.85);
+    --bg-sidebar: #050505;
+    --accent: #ff003c;
     --text-primary: #ffffff;
     --text-secondary: #aaaaaa;
-    --yt-red: #ff0000;
-    --hover-bg: #272727;
-    --border-color: #3f3f3f;
-    --search-bg: #121212;
-    --chip-bg: #272727;
-    --chip-active-bg: #ffffff;
-    --chip-active-text: #0f0f0f;
+    --border: rgba(255, 255, 255, 0.1);
+    --glass: rgba(255, 255, 255, 0.03);
+    --hover: rgba(255, 255, 255, 0.1);
+    --card-bg: #111111;
+    --chip-bg: #222222;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Outfit', 'Inter', 'Roboto', sans-serif;
 }
 
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     overflow-x: hidden;
+    letter-spacing: -0.01em;
 }
 
 /* Scrollbar */
@@ -96,7 +96,37 @@ button {
 }
 
 .icon-btn:hover {
-    background: var(--hover-bg);
+    background: var(--hover);
+    transform: scale(1.1);
+}
+
+.action-btn {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.action-btn:hover {
+    background: var(--hover);
+    border-color: var(--accent);
+}
+
+.action-btn.primary {
+    background: var(--accent);
+    border: none;
+    box-shadow: 0 4px 15px rgba(255, 0, 60, 0.3);
+}
+
+.action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 0, 60, 0.5);
 }
 
 /* Header */
@@ -105,13 +135,30 @@ button {
     top: 0;
     left: 0;
     right: 0;
-    height: 56px;
+    height: 64px;
     background: var(--bg-header);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 24px;
     z-index: 2000;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    text-decoration: none;
+    background: linear-gradient(90deg, #fff, #ff003c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .header-left {
@@ -153,31 +200,39 @@ button {
 .search-box {
     display: flex;
     flex: 1;
-    background: var(--search-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 40px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 12px;
     overflow: hidden;
     margin-left: 32px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-box:focus-within {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.2);
 }
 
 .search-box input {
     flex: 1;
     background: transparent;
     border: none;
-    padding: 8px 20px;
+    padding: 10px 20px;
     color: white;
-    font-size: 1rem;
+    font-size: 0.95rem;
     outline: none;
 }
 
 .search-btn {
-    background: #222;
+    background: transparent;
     padding: 0 20px;
-    border-left: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    transition: color 0.2s;
 }
 
-.mic-btn {
-    background: #181818;
+.search-btn:hover {
+    color: white;
 }
 
 .header-right {
@@ -205,47 +260,50 @@ button {
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* Sidebar Overhaul */
 .sidebar {
     width: 240px;
     background: var(--bg-sidebar);
-    padding: 12px;
+    padding: 24px 12px;
     position: fixed;
-    height: calc(100vh - 56px);
+    height: calc(100vh - 64px);
     overflow-y: auto;
+    border-right: 1px solid var(--border);
+    transition: transform 0.3s ease;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 24px;
-    padding: 10px 12px;
-    border-radius: 10px;
+    gap: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
     text-decoration: none;
-    color: var(--text-primary);
+    color: var(--text-secondary);
     font-size: 0.95rem;
-    transition: background 0.2s;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: 4px;
 }
 
 .nav-item i {
-    font-size: 1.2rem;
-    width: 24px;
-    text-align: center;
+    font-size: 1.25rem;
+    transition: transform 0.2s;
 }
 
 .nav-item:hover {
-    background: var(--hover-bg);
+    background: var(--hover);
+    color: white;
+}
+
+.nav-item:hover i {
+    transform: scale(1.1);
 }
 
 .nav-item.active {
-    background: var(--hover-bg);
-    font-weight: 500;
-}
-
-hr {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 12px 0;
+    background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
+    color: var(--accent);
+    border-left: 3px solid var(--accent);
 }
 
 /* Content */
@@ -298,25 +356,38 @@ hr {
     gap: 40px 16px;
 }
 
+/* Video Card Overhaul */
 .video-card {
-    cursor: pointer;
-    transition: transform 0.2s;
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.video-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .thumbnail-wrapper {
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    background: #222;
+    background: #1a1a1a;
+    transition: transform 0.5s ease;
 }
 
-.thumbnail-wrapper img {
+.video-card:hover .thumbnail-wrapper video {
+    transform: scale(1.05);
+}
+
+.thumbnail-wrapper video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: inherit;
 }
 
 .duration {
@@ -333,7 +404,7 @@ hr {
 .video-info {
     display: flex;
     gap: 12px;
-    position: relative;
+    padding: 16px;
 }
 
 .channel-avatar {
