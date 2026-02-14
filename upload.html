@@ -4,20 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitox Upload | Premium V3</title>
-    <!-- DEBUG: V3 - 10:50 AM -->
-    <link rel="stylesheet" href="style.css?v=1.1">
+    <title>Vitox Upload | Premium V4</title>
+    <link rel="stylesheet" href="style.css?v=1.3">
+    <link rel="stylesheet" href="upload.css?v=1.3">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="upload.css?v=1.1">
 </head>
 
 <body>
     <div class="upload-container">
-        <!-- Header -->
         <header class="upload-header">
-            <h2 id="modal-title">Upload videos</h2>
+            <h2 id="modal-title">Upload Videos</h2>
             <div class="actions">
                 <button class="icon-btn" onclick="alert('Feedback coming soon')"><i
                         class="fas fa-comment-alt"></i></button>
@@ -25,20 +23,18 @@
             </div>
         </header>
 
-        <!-- Body -->
         <div class="upload-body">
-            <!-- Form Area -->
             <div class="form-area" id="main-scroll-area">
-
                 <!-- Step 1: Drop Zone -->
                 <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
                     <div class="circle-icon">
                         <i class="fas fa-upload"></i>
                     </div>
-                    <p style="font-size: 1.1rem; margin-bottom: 8px;">Drag and drop video files to upload</p>
+                    <p style="font-size: 1.1rem; margin-bottom: 8px; font-weight: 600;">Drag and drop video files to
+                        upload</p>
                     <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 24px;">Your videos will be private until
                         you publish them.</p>
-                    <button class="btn-select">Select Files</button>
+                    <button class="btn-upload" style="margin-top:0;">Select Files</button>
                     <input type="file" id="file-input" accept="video/*" style="display: none;"
                         onchange="handleFileSelect(event)">
                 </div>
@@ -46,23 +42,17 @@
                 <!-- Step 2: Details Form -->
                 <div class="details-section" id="details-section">
                     <div class="section-title">Details</div>
-
                     <div class="input-wrapper">
                         <label>Title (required)</label>
                         <input type="text" id="video-title" placeholder="Add a title that describes your video">
                         <div class="ai-btn-wrapper">
-                            <button class="btn-ai" onclick="suggestAI(event)">
-                                <i class="fas fa-magic"></i> AI
-                            </button>
+                            <button class="btn-ai" onclick="suggestAI(event)"><i class="fas fa-magic"></i> AI</button>
                         </div>
                     </div>
-
                     <div class="input-wrapper">
                         <label>Description</label>
                         <textarea id="video-desc" rows="5" placeholder="Tell viewers about your video"></textarea>
                     </div>
-
-                    <!-- Thumbnails Section -->
                     <div class="section-title" style="margin-top: 32px;">Thumbnail</div>
                     <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 16px;">Select or upload a picture that
                         shows what's in your video.</p>
@@ -73,46 +63,35 @@
                             <span style="font-size: 0.7rem; color: #aaa;">Upload file</span>
                         </div>
                         <div
-                            style="width: 140px; height: 80px; background: #000; display: flex; align-items: center; justify-content: center; border-radius: 2px; opacity: 0.5;">
-                            <span style="font-size: 0.7rem; color: #aaa;">Auto-gen 1</span>
-                        </div>
-                        <div
-                            style="width: 140px; height: 80px; background: #000; display: flex; align-items: center; justify-content: center; border-radius: 2px; opacity: 0.5;">
-                            <span style="font-size: 0.7rem; color: #aaa;">Auto-gen 2</span>
+                            style="width: 140px; height: 80px; background: #222; display: flex; align-items: center; justify-content: center; border-radius: 2px; opacity: 0.5;">
+                            <span style="font-size: 0.7rem; color: #777;">Auto-gen 1</span>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <!-- Video Preview Sidebar (Right) -->
-            <div class="video-preview-sidebar" id="preview-sidebar">
+            <aside class="video-preview-sidebar" id="preview-sidebar">
                 <div class="preview-player">
                     <video id="preview-video" controls></video>
                 </div>
-
                 <div class="file-info-item">
                     <div class="file-info-label">Filename</div>
                     <div class="file-info-value" id="filename-display">video.mp4</div>
                 </div>
-
                 <div class="file-info-item">
                     <div class="file-info-label">Video Link</div>
-                    <div class="file-info-value" style="color: #3ea6ff; cursor: pointer;">https://vitox.ai/v/xyz...
-                    </div>
+                    <div class="file-info-value" style="color: #3ea6ff; cursor: pointer;">Processing...</div>
                 </div>
-            </div>
+            </aside>
         </div>
 
-        <!-- Footer -->
         <footer class="upload-footer">
             <div class="progress-section" id="progress-container">
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progress-fill"></div>
                 </div>
-                <div class="status-text" id="status-msg">Uploading 0% ...</div>
+                <div class="status-text" id="status-msg">Ready to upload</div>
             </div>
-
             <div style="margin-left: auto;">
                 <button class="btn-main" id="next-btn" disabled onclick="handleUpload()">Next</button>
             </div>
@@ -120,12 +99,9 @@
     </div>
 
     <script>
-
-        // UI References
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         const nextBtn = document.getElementById('next-btn');
-        const mainScroll = document.getElementById('main-scroll-area');
         const detailsSection = document.getElementById('details-section');
         const previewSidebar = document.getElementById('preview-sidebar');
         const previewVideo = document.getElementById('preview-video');
@@ -135,168 +111,116 @@
 
         let selectedFile = null;
 
-        // -- Drag & Drop Logic --
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = 'var(--primary-accent)';
-            dropZone.style.background = '#1f1f1f';
-        });
-
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#333';
-            dropZone.style.background = 'transparent';
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#333';
-            dropZone.style.background = 'transparent';
-
-            if (e.dataTransfer.files.length > 0) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-
-        function handleFileSelect(e) {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
-        }
+        function handleFileSelect(e) { if (e.target.files.length > 0) handleFile(e.target.files[0]); }
 
         function handleFile(file) {
-            if (!file.type.startsWith('video/')) {
-                alert("Please upload a valid video file.");
-                return;
-            }
-
+            if (!file.type.startsWith('video/')) { alert("Please upload a video."); return; }
             selectedFile = file;
-
-            // UI Transition
             dropZone.style.display = 'none';
             detailsSection.style.display = 'block';
             previewSidebar.style.display = 'flex';
-            progressContainer.style.display = 'block'; // Show valid state
             nextBtn.disabled = false;
-
-            // Auto-fill details
-            const cleanName = file.name.replace(/\.[^/.]+$/, "");
-            document.getElementById('video-title').value = cleanName;
+            document.getElementById('video-title').value = file.name.replace(/\.[^/.]+$/, "");
             document.getElementById('filename-display').innerText = file.name;
-
-            // Setup Preview
-            const url = URL.createObjectURL(file);
-            previewVideo.src = url;
+            previewVideo.src = URL.createObjectURL(file);
         }
 
         async function suggestAI(event) {
             const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            const titleInput = document.getElementById('video-title');
-            const descInput = document.getElementById('video-desc');
-
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
             try {
-                const topic = titleInput.value || "Viral Video";
+                const topic = document.getElementById('video-title').value || "Viral Video";
                 const res = await fetch('/api/ai/suggest', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ topic: topic })
                 });
                 const data = await res.json();
-
-                titleInput.value = data.title;
-                descInput.value = data.description;
-            } catch (e) {
-                console.error(e);
-            } finally {
-                btn.innerHTML = originalText;
-            }
+                document.getElementById('video-title').value = data.title;
+                document.getElementById('video-desc').value = data.description;
+            } catch (e) { console.error(e); } finally { btn.innerHTML = '<i class="fas fa-magic"></i> AI'; }
         }
 
         async function handleUpload() {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) {
-                alert("Please login first");
-                window.location.href = 'login.html';
-                return;
-            }
-
-            if (!selectedFile) {
-                alert("Please select a video file first");
-                return;
-            }
+            if (!user) { alert("Login first"); location.href = 'login.html'; return; }
 
             const title = document.getElementById('video-title').value;
-            const desc = document.getElementById('video-desc').value;
+            if (!title) { alert("Title is required"); return; }
 
-            if (!title) {
-                alert("Please enter a title");
-                return;
-            }
-
-            // --- CLOUDINARY CONFIG (PERMANENT CLOUD STORAGE) ---
-            const cloudName = 'dybxv45hp'; // Updated with user's Cloud Name
-            const uploadPreset = 'vitox_preset'; // User needs to create this Unsigned Preset
+            const cloudName = 'dybxv45hp';
+            const uploadPreset = 'vitox_preset';
 
             nextBtn.disabled = true;
             progressContainer.style.display = 'block';
-            statusMsg.innerText = "Connecting to Cloud (YouTube Style)...";
-
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('upload_preset', uploadPreset);
+            statusMsg.innerText = "Attempting Cloud Upload...";
+            statusMsg.style.color = "#ff003c";
 
             try {
-                // Upload directly to Cloudinary
+                // --- TRY CLOUDINARY FIRST ---
+                const cloudFormData = new FormData();
+                cloudFormData.append('file', selectedFile);
+                cloudFormData.append('upload_preset', uploadPreset);
+
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
                     method: 'POST',
-                    body: formData
+                    body: cloudFormData
                 });
 
-                if (!res.ok) {
-                    const errData = await res.json();
-                    let errMsg = errData.error.message || "Cloud Upload Failed";
-                    if (errMsg.includes("Unknown API key") || errMsg.includes("Invalid cloud name")) {
-                        errMsg = "CRITICAL: Cloudinary Config Missing! Please update 'cloudName' in upload.html code with your actual Cloudinary name (Settings > Cloud Name).";
-                    }
-                    throw new Error(errMsg);
+                let videoUrl = "";
+                let thumbUrl = "";
+
+                if (res.ok) {
+                    const data = await res.json();
+                    videoUrl = data.secure_url;
+                    thumbUrl = data.thumbnail_url || '';
+                    statusMsg.innerText = "Cloud Upload Success!";
+                } else {
+                    // --- FALLBACK TO LOCAL SERVER ---
+                    console.warn("Cloudinary failed, trying local fallback...");
+                    statusMsg.innerText = "Cloud preset missing. Using Local Storage fallback...";
+
+                    const localFormData = new FormData();
+                    localFormData.append('file', selectedFile);
+
+                    const localRes = await fetch('/api/video/upload-file', {
+                        method: 'POST',
+                        body: localFormData
+                    });
+
+                    if (!localRes.ok) throw new Error("Both Cloud and Local upload failed.");
+
+                    const localData = await localRes.json();
+                    videoUrl = localData.url;
                 }
 
-                const data = await res.json();
-                const videoUrl = data.secure_url;
-
-                statusMsg.style.color = "var(--success)";
-                statusMsg.innerText = "Cloud storage ready. Linking to Dashboard...";
-                console.log("Cloud URL:", videoUrl);
-
-                // Save Metadata to Python Backend
+                // Final Step: Save to Database
+                statusMsg.innerText = "Saving to database...";
                 const dbRes = await fetch('/api/video/upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         email: user.email,
                         title: title,
-                        description: desc,
+                        description: document.getElementById('video-desc').value,
                         video_url: videoUrl,
-                        thumbnail_url: data.thumbnail_url || ''
+                        thumbnail_url: thumbUrl
                     })
                 });
 
                 const dbData = await dbRes.json();
                 if (dbData.status === 'success') {
-                    alert("Video Published Successfully to Cloud!");
-                    window.location.href = 'index.html';
+                    alert("Video Published Successfully!");
+                    location.href = 'index.html';
                 } else {
-                    alert("Database Save Failed: " + dbData.message);
+                    throw new Error(dbData.message);
                 }
 
             } catch (e) {
-                console.error("Cloud Error:", e);
-                statusMsg.style.color = "var(--error)";
-                statusMsg.innerText = "Cloud Error: " + e.message;
-                alert("Cloudinary Error: " + e.message + "\n\nPlease ensure your Cloudinary Preset is set to 'Unsigned'.");
+                console.error(e);
+                statusMsg.innerText = "Error: " + e.message;
+                statusMsg.style.color = "#ff4e4e";
+                alert("Upload failed: " + e.message);
                 nextBtn.disabled = false;
             }
         }
@@ -304,4 +228,3 @@
 </body>
 
 </html>
-```
