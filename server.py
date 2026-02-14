@@ -174,24 +174,32 @@ def upload_file():
         return jsonify({'url': f"/uploads/{filename}"})
 
 @app.route('/api/video/upload', methods=['POST'])
+@app.route('/api/video/upload', methods=['POST'])
 def upload_video():
-    data = request.json
-    email = data.get('email')
-    title = data.get('title')
-    desc = data.get('description', '')
-    video_url = data.get('video_url')
-    thumb_url = data.get('thumbnail_url', '')
-    
-    if not email or not title or not video_url:
-        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'status': 'error', 'message': 'Invalid JSON'}), 400
+            
+        email = data.get('email')
+        title = data.get('title')
+        desc = data.get('description', '')
+        video_url = data.get('video_url')
+        thumb_url = data.get('thumbnail_url', '')
         
-    conn = get_db_connection()
-    conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url) VALUES (?, ?, ?, ?, ?)', 
-                 (email, title, desc, video_url, thumb_url))
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'status': 'success'})
+        if not email or not title or not video_url:
+            return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+            
+        conn = get_db_connection()
+        conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url) VALUES (?, ?, ?, ?, ?)', 
+                     (email, title, desc, video_url, thumb_url))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        print(f"Upload Error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/videos', methods=['GET'])
 def get_all_videos():
