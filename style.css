@@ -262,7 +262,6 @@ button {
 }
 
 /* Header */
-/* Header */
 .top-bar {
     position: fixed;
     top: 0;
@@ -331,13 +330,6 @@ button {
     font-weight: 700;
     letter-spacing: -0.5px;
     animation: logo-glow 4s ease-in-out infinite;
-}
-
-.country-code {
-    font-size: 0.65rem;
-    color: var(--text-secondary);
-    align-self: flex-start;
-    margin-top: 4px;
 }
 
 .header-center {
@@ -427,7 +419,8 @@ button {
     height: calc(100vh - 64px);
     overflow-y: auto;
     border-right: none;
-    transition: transform 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
 }
 
 .nav-item {
@@ -465,11 +458,12 @@ button {
     margin: 12px 0;
 }
 
-/* Content */
+/* Content Area */
 .content {
     flex: 1;
     margin-left: 240px;
     padding: 12px 24px;
+    transition: margin-left 0.3s;
 }
 
 /* Categories Bar */
@@ -528,9 +522,7 @@ button {
 .video-card:hover {
     transform: translateY(-10px) scale(1.02);
     border-color: rgba(255, 0, 60, 0.3);
-    box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.6),
-        0 0 20px rgba(255, 0, 60, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 0, 60, 0.1);
 }
 
 .thumbnail-wrapper {
@@ -552,17 +544,6 @@ button {
     transition: inherit;
 }
 
-.duration {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
 .video-info {
     display: flex;
     gap: 12px;
@@ -576,16 +557,10 @@ button {
     overflow: hidden;
     flex-shrink: 0;
     background: #333;
-}
-
-.channel-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.text-info {
-    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
 
 .video-title {
@@ -614,129 +589,7 @@ button {
     margin-top: 2px;
 }
 
-/* Empty State */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 50vh;
-    color: var(--text-secondary);
-    gap: 16px;
-}
-
-.empty-state i {
-    font-size: 4rem;
-    opacity: 0.3;
-}
-
-
-
-.mv-delete {
-    position: absolute;
-    top: 0;
-    right: -10px;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.video-card:hover .mv-delete {
-    opacity: 1;
-}
-
-.icon-btn-small {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5) !important;
-    color: white !important;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-    .sidebar {
-        width: 72px;
-        padding: 12px 4px;
-    }
-
-    .nav-item span,
-    hr {
-        display: none;
-    }
-
-    .content {
-        margin-left: 72px;
-    }
-
-    .nav-item {
-        justify-content: center;
-        padding: 12px 0;
-    }
-}
-
-@media (max-width: 768px) {
-    .header-center {
-        display: none;
-    }
-
-    .sidebar {
-        display: none;
-    }
-
-    .content {
-        margin-left: 0;
-    }
-}
-
-/* Skeleton Loading Screen */
-.skeleton {
-    background: #222;
-    background: linear-gradient(110deg, #181818 8%, #252525 18%, #181818 33%);
-    border-radius: 5px;
-    background-size: 200% 100%;
-    animation: shimmer 1.5s linear infinite;
-}
-
-@keyframes shimmer {
-    to {
-        background-position-x: -200%;
-    }
-}
-
-.skeleton-thumbnail {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border-radius: 12px;
-}
-
-.skeleton-text {
-    height: 15px;
-    margin-top: 10px;
-    width: 80%;
-}
-
-.skeleton-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-}
-
-#loading-shimmer {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 40px 16px;
-    padding: 20px;
-}
-
-/* Force Hide Mavo Framework UI */
-[mv-app] .mv-bar,
-[mv-app] .mv-status,
-[mv-app] .mv-message,
-.mv-ui.mv-bar {
-    display: none !important;
-}
-
-/* Global Transitions */
+/* Transitions */
 @keyframes fade-up {
     from {
         opacity: 0;
@@ -746,6 +599,49 @@ button {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Sidebar Toggle Logic */
+.sidebar.active {
+    width: 72px;
+}
+
+.sidebar.active .nav-item span,
+.sidebar.active .nav-section-title {
+    display: none;
+}
+
+.sidebar.active .nav-item {
+    justify-content: center;
+    padding: 16px 0;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 4px 4px 4px;
+}
+
+.sidebar.active .nav-item i {
+    margin-bottom: 0;
+    font-size: 1.4rem;
+}
+
+.sidebar.active+.content {
+    margin-left: 72px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 240px;
+        z-index: 2000;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .content {
+        margin-left: 0 !important;
     }
 }
 
@@ -770,10 +666,6 @@ button {
     box-shadow: 0 15px 35px rgba(255, 0, 60, 0.4);
     backdrop-filter: blur(15px);
     animation: toast-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
 }
 
 @keyframes toast-up {
@@ -786,74 +678,4 @@ button {
         transform: translateY(0) scale(1);
         opacity: 1;
     }
-}/ *   S i d e b a r   T o g g l e   S t a t e   ( C o l l a p s e d )   * /  
- . s i d e b a r . a c t i v e   {  
-         w i d t h :   7 2 p x ;  
- }  
-  
- . s i d e b a r . a c t i v e   . n a v - i t e m   s p a n ,  
- . s i d e b a r . a c t i v e   . n a v - s e c t i o n - t i t l e   {  
-         d i s p l a y :   n o n e ;  
- }  
-  
- . s i d e b a r . a c t i v e   . n a v - i t e m   {  
-         j u s t i f y - c o n t e n t :   c e n t e r ;  
-         p a d d i n g :   1 6 p x   0 ;  
-         f l e x - d i r e c t i o n :   c o l u m n ;  
-         g a p :   4 p x ;  
- }  
-  
- . s i d e b a r . a c t i v e   . n a v - i t e m   i   {  
-         m a r g i n - b o t t o m :   4 p x ;  
-         f o n t - s i z e :   1 . 2 r e m ;  
- }  
-  
- / *   A d j u s t   C o n t e n t   M a r g i n   w h e n   s i d e b a r   i s   c o l l a p s e d   * /  
- . s i d e b a r . a c t i v e + . c o n t e n t   {  
-         m a r g i n - l e f t :   7 2 p x ;  
- }  
-  
- / *   M o b i l e :   S i d e b a r   o v e r l a y   b e h a v i o r   n e e d e d ?    
-       C u r r e n t l y   s t i c k i n g   t o   d e s k t o p - f i r s t   a p p r o a c h   a s   p e r   u s e r   c o n t e x t    
-       b u t   a d d i n g   b a s i c   m e d i a   q u e r y   f o r   s m a l l   s c r e e n s    
- * /  
- @ m e d i a   ( m a x - w i d t h :   7 6 8 p x )   {  
-         . s i d e b a r   {  
-                 t r a n s f o r m :   t r a n s l a t e X ( - 1 0 0 % ) ;  
-                 w i d t h :   2 4 0 p x ;  
-                 z - i n d e x :   1 0 0 0 ;  
-         }  
-  
-         . s i d e b a r . a c t i v e   {  
-                 t r a n s f o r m :   t r a n s l a t e X ( 0 ) ;  
-                 w i d t h :   2 4 0 p x ;  
-         }  
-  
-         . s i d e b a r . a c t i v e   . n a v - i t e m   {  
-                 f l e x - d i r e c t i o n :   r o w ;  
-                 j u s t i f y - c o n t e n t :   f l e x - s t a r t ;  
-         }  
-  
-         . s i d e b a r . a c t i v e   . n a v - i t e m   s p a n   {  
-                 d i s p l a y :   i n l i n e ;  
-         }  
-  
-         . c o n t e n t   {  
-                 m a r g i n - l e f t :   0   ! i m p o r t a n t ;  
-         }  
- }  
- 
-/* Sidebar Toggle State (Collapsed) */
-.sidebar.active { width: 72px; }
-.sidebar.active .nav-item span, .sidebar.active .nav-section-title { display: none; }
-.sidebar.active .nav-item { justify-content: center; padding: 16px 0; flex-direction: column; gap: 4px; margin: 0 4px 4px 4px; }
-.sidebar.active .nav-item i { margin-bottom: 0; font-size: 1.4rem; }
-.sidebar.active + .content { margin-left: 72px; }
-
-@media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); width: 240px; }
-  .sidebar.active { transform: translateX(0); width: 240px; }
-  .sidebar.active .nav-item { flex-direction: row; justify-content: flex-start; padding: 10px 12px; }
-  .sidebar.active .nav-item span { display: inline; }
-  .content { margin-left: 0 !important; }
 }

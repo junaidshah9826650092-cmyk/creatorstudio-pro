@@ -622,6 +622,16 @@ def ai_suggest():
         print(f"AI Error: {e}")
         return jsonify({'title': f'Cool {topic} Video', 'description': f'An amazing video exploring {topic}. Check it out!'})
 
+@app.route('/style.css')
+def serve_css():
+    from flask import make_response
+    with open(os.path.join(BASE_DIR, 'style.css'), 'r', encoding='utf-8') as f:
+        content = f.read()
+    response = make_response(content)
+    response.headers['Content-Type'] = 'text/css'
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return response
+
 @app.route('/')
 @app.route('/index.html')
 def serve_index():
