@@ -385,21 +385,11 @@
                         statusMsg.innerText = "CLOUD REJECTED: " + (err.error.message || "Unknown error");
 
                         if (err.error.message && err.error.message.includes("preset")) {
-                            statusMsg.innerHTML = '<span style="color: #ff9800;">PRESET ERROR. ACTIVATING SIMULATION...</span>';
-                            setTimeout(() => {
-                                statusMsg.innerText = "SIMULATING GLOBAL DEPLOYMENT...";
-                                let p = 0;
-                                const sim = setInterval(() => {
-                                    p += 2;
-                                    progressFill.style.width = p + '%';
-                                    if (p >= 100) {
-                                        clearInterval(sim);
-                                        // Neutral Placeholder instead of Dog Demo
-                                        saveToDB("https://res.cloudinary.com/demo/video/upload/c_scale,w_400/v1/sample.mp4", "");
-                                    }
-                                }, 30);
-                            }, 1000);
+                            statusMsg.innerHTML = '<span style="color: #ff9800;">CONFIG ERROR: Upload Preset Invalid.</span>';
+                            alert("Upload Failed: Cloudinary Preset 'vitox_preset' is invalid. Please check your Cloudinary Settings.");
+                            nextBtn.disabled = false;
                         } else {
+                            statusMsg.innerText = "UPLOAD FAILED: " + err.error.message;
                             nextBtn.disabled = false;
                         }
                     }

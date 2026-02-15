@@ -196,17 +196,32 @@ def sync_user():
     picture = data.get('picture', '')
     
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+        user = cursor.fetchone()
+    else:
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
     
     if not user:
         role = 'admin' if email == ADMIN_EMAIL else 'user'
-        conn.execute('INSERT INTO users (email, name, picture, points, role) VALUES (?, ?, ?, ?, ?)', 
-                     (email, name, picture, 0, role))
+        if USE_POSTGRES:
+             cursor = conn.cursor()
+             cursor.execute('INSERT INTO users (email, name, picture, points, role) VALUES (%s, %s, %s, %s, %s)', 
+                      (email, name, picture, 0, role))
+        else:
+             conn.execute('INSERT INTO users (email, name, picture, points, role) VALUES (?, ?, ?, ?, ?)', 
+                      (email, name, picture, 0, role))
         conn.commit()
     else:
         # Update name/picture on login
-        conn.execute('UPDATE users SET name = ?, picture = ?, last_login = CURRENT_TIMESTAMP WHERE email = ?', 
-                     (name, picture, email))
+        if USE_POSTGRES:
+             cursor = conn.cursor()
+             cursor.execute('UPDATE users SET name = %s, picture = %s, last_login = CURRENT_TIMESTAMP WHERE email = %s', 
+                      (name, picture, email))
+        else:
+             conn.execute('UPDATE users SET name = ?, picture = ?, last_login = CURRENT_TIMESTAMP WHERE email = ?', 
+                      (name, picture, email))
         conn.commit()
     
     # Fetch updated user
@@ -225,9 +240,15 @@ def add_points():
     desc = data.get('description', 'Task Completion')
     
     conn = get_db_connection()
-    conn.execute('UPDATE users SET points = points + ? WHERE email = ?', (amount, email))
-    conn.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (?, ?, ?, ?, ?)', 
-                 (email, amount, 'earn', desc, 'completed'))
+    if USE_POSTGRES:
+         cursor = conn.cursor()
+         cursor.execute('UPDATE users SET points = points + %s WHERE email = %s', (amount, email))
+         cursor.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (%s, %s, %s, %s, %s)', 
+                  (email, amount, 'earn', desc, 'completed'))
+    else:
+         conn.execute('UPDATE users SET points = points + ? WHERE email = ?', (amount, email))
+         conn.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (?, ?, ?, ?, ?)', 
+                  (email, amount, 'earn', desc, 'completed'))
     conn.commit()
     
     new_points = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()['points']
@@ -243,12 +264,24 @@ def withdraw():
     upi_id = data.get('upi_id')
     
     conn = get_db_connection()
-    user = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT points FROM users WHERE email = %s', (email,))
+        user = cursor.fetchone()
+    else:
+        user = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()
     
     if user and user['points'] >= amount_points:
-        conn.execute('UPDATE users SET points = points - ? WHERE email = ?', (amount_points, email))
-        conn.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (?, ?, ?, ?, ?)', 
-                     (email, -amount_points, 'withdraw', f'Withdrawal to {upi_id}', 'pending'))
+    if user and user['points'] >= amount_points:
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('UPDATE users SET points = points - %s WHERE email = %s', (amount_points, email))
+            cursor.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (%s, %s, %s, %s, %s)', 
+                         (email, -amount_points, 'withdraw', f'Withdrawal to {upi_id}', 'pending'))
+        else:
+            conn.execute('UPDATE users SET points = points - ? WHERE email = ?', (amount_points, email))
+            conn.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (?, ?, ?, ?, ?)', 
+                         (email, -amount_points, 'withdraw', f'Withdrawal to {upi_id}', 'pending'))
         conn.commit()
         status = 'success'
         message = 'Withdrawal request submitted'
@@ -290,8 +323,13 @@ def upload_video():
             print("Fallback: Table 'videos' missing in route. Re-init...")
             init_db()
 
-        conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type) VALUES (?, ?, ?, ?, ?, ?)', 
-                     (email, title, desc, video_url, thumb_url, video_type))
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type) VALUES (%s, %s, %s, %s, %s, %s)', 
+                         (email, title, desc, video_url, thumb_url, video_type))
+        else:
+            conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type) VALUES (?, ?, ?, ?, ?, ?)', 
+                         (email, title, desc, video_url, thumb_url, video_type))
         conn.commit()
         conn.close()
         
@@ -306,13 +344,23 @@ def get_all_videos():
     conn = get_db_connection()
     
     if video_type:
-        videos = conn.execute('SELECT * FROM videos WHERE type = ? ORDER BY timestamp DESC', (video_type,)).fetchall()
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT * FROM videos WHERE type = %s ORDER BY timestamp DESC', (video_type,))
+            videos = cursor.fetchall()
+        else:
+            videos = conn.execute('SELECT * FROM videos WHERE type = ? ORDER BY timestamp DESC', (video_type,)).fetchall()
     else:
         # Default to show both if not specified, or just videos? Let's check logic.
         # Ideally, main feed shows only 'video' and shorts tab shows 'short'
         # But for backward compatibility if type not passed, maybe show all or just video?
         # Let's show all for now, but client will filter. Or better, update client.
-        videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT * FROM videos ORDER BY timestamp DESC')
+            videos = cursor.fetchall()
+        else:
+            videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
         
     conn.close()
     return jsonify([dict(v) for v in videos])
@@ -320,7 +368,12 @@ def get_all_videos():
 @app.route('/api/videos/<email>', methods=['GET'])
 def get_user_videos(email):
     conn = get_db_connection()
-    videos = conn.execute('SELECT * FROM videos WHERE user_email = ? ORDER BY timestamp DESC', (email,)).fetchall()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM videos WHERE user_email = %s ORDER BY timestamp DESC', (email,))
+        videos = cursor.fetchall()
+    else:
+        videos = conn.execute('SELECT * FROM videos WHERE user_email = ? ORDER BY timestamp DESC', (email,)).fetchall()
     conn.close()
     return jsonify([dict(v) for v in videos])
 
@@ -481,22 +534,40 @@ def get_video_stats(video_id):
 
 @app.route('/api/admin/stats', methods=['POST'])
 def admin_stats():
-    data = request.json
-    email = data.get('email')
-    if email != ADMIN_EMAIL:
-        return jsonify({'error': 'Unauthorized'}), 403
+    try:
+        data = request.json
+        if data.get('email') != ADMIN_EMAIL:
+            return jsonify({'error': 'Unauthorized'}), 403
+            
+        conn = get_db_connection()
         
-    conn = get_db_connection()
-    total_users = conn.execute('SELECT COUNT(*) FROM users').fetchone()[0]
-    total_points = conn.execute('SELECT SUM(points) FROM users').fetchone()[0] or 0
-    pending_withdrawals = conn.execute('SELECT COUNT(*) FROM transactions WHERE type="withdraw" AND status="pending"').fetchone()[0]
-    
-    conn.close()
-    return jsonify({
-        'total_users': total_users,
-        'total_points': total_points,
-        'pending_withdrawals': pending_withdrawals
-    })
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('SELECT COUNT(*) FROM users')
+            total_users = cursor.fetchone()[0]
+            
+            cursor.execute('SELECT SUM(points) FROM users')
+            row = cursor.fetchone()
+            total_points = row[0] if row and row[0] else 0
+            
+            cursor.execute("SELECT COUNT(*) FROM transactions WHERE type='withdraw' AND status='pending'")
+            pending_withdrawals = cursor.fetchone()[0]
+        else:
+            total_users = conn.execute('SELECT COUNT(*) FROM users').fetchone()[0]
+            total_points = conn.execute('SELECT SUM(points) FROM users').fetchone()[0] or 0
+            pending_withdrawals = conn.execute("SELECT COUNT(*) FROM transactions WHERE type='withdraw' AND status='pending'").fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify({
+            'total_users': total_users,
+            'total_points': total_points,
+            'pending_withdrawals': pending_withdrawals,
+            'db_type': 'PostgreSQL (Secure Cloud)' if USE_POSTGRES else 'SQLite (Local/Ephemeral)'
+        })
+    except Exception as e:
+        print(f"Stats Error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/creator/stats', methods=['POST'])
 def creator_stats():

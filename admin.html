@@ -219,9 +219,9 @@
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
 
-            <div
-                style="display: flex; align-items: center; gap: 8px; color: #00ff88; font-size: 0.85rem; font-weight: 600; background: rgba(0,255,136,0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(0,255,136,0.2);">
-                <i class="fas fa-database"></i> <span>Secure Cloud Database: ACTIVE</span>
+            <div id="db-status-badge"
+                style="display: flex; align-items: center; gap: 8px; color: #aaa; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">
+                <i class="fas fa-database"></i> <span id="db-status-text">Checking DB...</span>
             </div>
             <button onclick="location.href='index.html'"
                 style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i
@@ -312,6 +312,21 @@
                 document.getElementById('total-users').innerText = stats.total_users;
                 document.getElementById('total-points').innerText = stats.total_points.toLocaleString();
                 document.getElementById('pending-withdrawals').innerText = stats.pending_withdrawals;
+
+                // Update DB Status Badge
+                const dbBadge = document.getElementById('db-status-badge');
+                const dbText = document.getElementById('db-status-text');
+                if (stats.db_type && stats.db_type.includes("PostgreSQL")) {
+                    dbBadge.style.color = "#00ff88";
+                    dbBadge.style.background = "rgba(0,255,136,0.1)";
+                    dbBadge.style.borderColor = "rgba(0,255,136,0.2)";
+                    dbText.innerText = stats.db_type;
+                } else {
+                    dbBadge.style.color = "#ff9800";
+                    dbBadge.style.background = "rgba(255,152,0,0.1)";
+                    dbBadge.style.borderColor = "rgba(255,152,0,0.2)";
+                    dbText.innerText = stats.db_type || "Unknown DB";
+                }
 
                 // Load Users
                 const usersRes = await fetch(`${API_URL}/admin/users`, {
