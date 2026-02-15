@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn - Vitox Studio</title>
+    <link rel="stylesheet" href="style.css?v=6.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --studio-bg: #0a0a0a;
+            --sidebar-bg: rgba(15, 15, 15, 0.8);
+            --header-bg: rgba(10, 10, 10, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-dim: #aaa;
+            --accent: #2ba640;
+            /* Green for Money */
+            --card-glass: rgba(255, 255, 255, 0.03);
+        }
+
+        body {
+            background: var(--studio-bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            margin-left: 256px;
+            margin-top: 64px;
+            padding: 40px;
+            max-width: 1000px;
+        }
+
+        .earn-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .earn-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .earn-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .criterias {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .criteria-card {
+            background: var(--card-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .ring-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 24px;
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .count-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .current-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .target-val {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .apply-section {
+            background: rgba(43, 166, 64, 0.05);
+            border: 1px solid rgba(43, 166, 64, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .notify-btn {
+            background: #2ba640;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 20px rgba(43, 166, 64, 0.3);
+        }
+
+        .notify-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(43, 166, 64, 0.5);
+        }
+
+        .notify-btn:disabled {
+            background: #333;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Sidebar & Header Match */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(10, 10, 10, 0.9);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            width: 256px;
+            height: 100vh;
+            background: rgba(15, 15, 15, 0.8);
+            border-right: 1px solid var(--border);
+            padding: 12px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 24px;
+            color: var(--text-dim);
+            text-decoration: none;
+            border-radius: 12px;
+            margin: 2px 12px;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(43, 166, 64, 0.1);
+            color: #2ba640;
+            border-left: 4px solid #2ba640;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <i class="fas fa-bars" style="font-size: 1.2rem; cursor: pointer; color: #fff;"></i>
+            <a href="index.html"
+                style="text-decoration: none; display: flex; align-items: center; gap: 8px; color: white; font-weight: 700; font-size: 1.2rem;">
+                <span style="font-family: 'Outfit';">Vitox Studio</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="sidebar">
+        <div style="padding: 24px; text-align: center;">
+            <div id="side-avatar"
+                style="width: 80px; height: 80px; border-radius: 50%; background: #222; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; border: 2px solid #2ba640;">
+                ?</div>
+            <div id="side-name" style="font-weight: 700;">Channel</div>
+        </div>
+        <nav>
+            <a href="dashboard_overview.html" class="nav-item"><i class="fas fa-th-large"></i> Command Center</a>
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-play-rectangle"></i> Content</a>
+            <a href="analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+            <a href="earn.html" class="nav-item active"><i class="fas fa-dollar-sign"></i> Earn</a>
+            <a href="community.html" class="nav-item"><i class="fas fa-comment-dots"></i> Community</a>
+        </nav>
+    </div>
+
+    <div class="main-container">
+        <div class="earn-header">
+            <h1 class="earn-title">Become a Partner</h1>
+            <p class="earn-subtitle">Join the Vitox Partner Program to earn money, get creator support, and more.</p>
+        </div>
+
+        <div class="criterias">
+            <!-- Subs Card -->
+            <div class="criteria-card">
+                <h3 style="margin-bottom: 24px;">Reach requirements to apply</h3>
+                <div class="ring-container">
+                    <svg class="progress-ring" width="160" height="160">
+                        <circle class="progress-ring__circle" stroke="#333" stroke-width="12" fill="transparent" r="70"
+                            cx="80" cy="80" />
+                        <circle id="sub-ring" class="progress-ring__circle" stroke="#2ba640" stroke-width="12"
+                            fill="transparent" r="70" cx="80" cy="80" stroke-dasharray="439.8"
+                            stroke-dashoffset="439.8" />
+                    </svg>
+                    <div class="count-text">
+                        <span class="current-val" id="sub-count">0</span>
+                        <span class="target-val">/ 1,000 subscribers</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; color: #aaa;">Required for eligibility</p>
+            </div>
+
+            <!-- Public Watch Hours (Mocked via Views) -->
+            <div class="criteria-card">
+                <h3 style="margin-bottom: 24px;">Public watch hours</h3>
+                <div class="ring-container">
+                    <svg class="progress-ring" width="160" height="160">
+                        <circle class="progress-ring__circle" stroke="#333" stroke-width="12" fill="transparent" r="70"
+                            cx="80" cy="80" />
+                        <circle id="watch-ring" class="progress-ring__circle" stroke="#2ba640" stroke-width="12"
+                            fill="transparent" r="70" cx="80" cy="80" stroke-dasharray="439.8"
+                            stroke-dashoffset="439.8" />
+                    </svg>
+                    <div class="count-text">
+                        <span class="current-val" id="watch-count">0</span>
+                        <span class="target-val">/ 4,000 public hours</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; color: #aaa;">Based on long-form video views</p>
+            </div>
+        </div>
+
+        <div class="apply-section">
+            <h2 style="margin-bottom: 12px;">Want to be notified when you're eligible?</h2>
+            <p style="color: #aaa; margin-bottom: 32px;">We'll drop you an email when you reach these requirements.</p>
+            <button class="notify-btn" id="notify-btn" onclick="requestReview()">Email me</button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', async () => {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) return;
+
+            document.getElementById('side-name').innerText = user.name;
+            document.getElementById('side-avatar').innerText = user.name.charAt(0).toUpperCase();
+
+            // Fetch Data
+            try {
+                const res = await fetch('/api/creator/stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email })
+                });
+                const stats = await res.json();
+
+                // Update UI
+                updateRing('sub-ring', 'sub-count', stats.subscribers, 1000);
+                updateRing('watch-ring', 'watch-count', stats.watch_time || (stats.views * 0.1).toFixed(1), 4000); // Mock watch status if missing
+
+                // Check eligibility
+                if (stats.subscribers >= 1000 && (stats.watch_time || stats.views * 0.1) >= 4000) {
+                    const btn = document.getElementById('notify-btn');
+                    btn.innerText = "Apply Now";
+                    btn.style.background = "#fff";
+                    btn.style.color = "#000";
+                    btn.onclick = () => alert("Application Submitted! Review takes 1-2 days.");
+                }
+
+            } catch (e) { console.error(e); }
+        });
+
+        function updateRing(ringId, textId, current, target) {
+            const circle = document.getElementById(ringId);
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+
+            const percent = Math.min((current / target) * 100, 100);
+            const offset = circumference - (percent / 100) * circumference;
+
+            circle.style.strokeDashoffset = offset;
+            document.getElementById(textId).innerText = Math.floor(current).toLocaleString();
+        }
+
+        function requestReview() {
+            alert("We will notify you at " + JSON.parse(localStorage.getItem('vitox_user')).email + " when eligible!");
+        }
+    </script>
+</body>
+
+</html>
