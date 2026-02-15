@@ -677,7 +677,14 @@ def serve_index():
     response.headers['Expires'] = '0'
     return response
 
+
 # Deploy ID: 1739556800
+# Initial DB Setup on Start
+try:
+    init_db()
+except Exception as e:
+    print(f"Startup DB Init Failed (Non-Fatal): {e}")
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
