@@ -427,16 +427,26 @@ def increment_view():
     
     # Unique View Logic
     if user_email:
-        # Check if user already viewed this video
-        existing = conn.execute('SELECT 1 FROM video_views WHERE video_id = ? AND user_email = ?', (video_id, user_email)).fetchone()
-        if existing:
-            conn.close()
-            return jsonify({'status': 'already_viewed'})
-        
-        # Record new view
-        conn.execute('INSERT INTO video_views (video_id, user_email) VALUES (?, ?)', (video_id, user_email))
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('SELECT 1 FROM video_views WHERE video_id = %s AND user_email = %s', (video_id, user_email))
+            existing = cursor.fetchone()
+            if existing:
+                conn.close()
+                return jsonify({'status': 'already_viewed'})
+            cursor.execute('INSERT INTO video_views (video_id, user_email) VALUES (%s, %s)', (video_id, user_email))
+        else:
+            existing = conn.execute('SELECT 1 FROM video_views WHERE video_id = ? AND user_email = ?', (video_id, user_email)).fetchone()
+            if existing:
+                conn.close()
+                return jsonify({'status': 'already_viewed'})
+            conn.execute('INSERT INTO video_views (video_id, user_email) VALUES (?, ?)', (video_id, user_email))
 
-    conn.execute('UPDATE videos SET views = views + 1 WHERE id = ?', (video_id,))
+    if USE_POSTGRES:
+        cursor = conn.cursor() if 'cursor' not in locals() else cursor
+        cursor.execute('UPDATE videos SET views = views + 1 WHERE id = %s', (video_id,))
+    else:
+        conn.execute('UPDATE videos SET views = views + 1 WHERE id = ?', (video_id,))
     conn.commit()
     conn.close()
     return jsonify({'status': 'success'})
@@ -448,19 +458,35 @@ def like_video():
     email = data.get('email')
     
     conn = get_db_connection()
-    already_liked = conn.execute('SELECT 1 FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id)).fetchone()
-    
-    if already_liked:
-        conn.execute('DELETE FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id))
-        conn.execute('UPDATE videos SET likes = likes - 1 WHERE id = ?', (video_id,))
-        status = 'unliked'
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT 1 FROM video_likes WHERE user_email = %s AND video_id = %s', (email, video_id))
+        already_liked = cursor.fetchone()
+        
+        if already_liked:
+            cursor.execute('DELETE FROM video_likes WHERE user_email = %s AND video_id = %s', (email, video_id))
+            cursor.execute('UPDATE videos SET likes = likes - 1 WHERE id = %s', (video_id,))
+            status = 'unliked'
+        else:
+            cursor.execute('INSERT INTO video_likes (user_email, video_id) VALUES (%s, %s)', (email, video_id))
+            cursor.execute('UPDATE videos SET likes = likes + 1 WHERE id = %s', (video_id,))
+            status = 'liked'
+        conn.commit()
+        cursor.execute('SELECT likes FROM videos WHERE id = %s', (video_id,))
+        likes = cursor.fetchone()['likes']
     else:
-        conn.execute('INSERT INTO video_likes (user_email, video_id) VALUES (?, ?)', (email, video_id))
-        conn.execute('UPDATE videos SET likes = likes + 1 WHERE id = ?', (video_id,))
-        status = 'liked'
-    
-    conn.commit()
-    likes = conn.execute('SELECT likes FROM videos WHERE id = ?', (video_id,)).fetchone()['likes']
+        already_liked = conn.execute('SELECT 1 FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id)).fetchone()
+        
+        if already_liked:
+            conn.execute('DELETE FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id))
+            conn.execute('UPDATE videos SET likes = likes - 1 WHERE id = ?', (video_id,))
+            status = 'unliked'
+        else:
+            conn.execute('INSERT INTO video_likes (user_email, video_id) VALUES (?, ?)', (email, video_id))
+            conn.execute('UPDATE videos SET likes = likes + 1 WHERE id = ?', (video_id,))
+            status = 'liked'
+        conn.commit()
+        likes = conn.execute('SELECT likes FROM videos WHERE id = ?', (video_id,)).fetchone()['likes']
     conn.close()
     return jsonify({'status': status, 'likes': likes})
 
@@ -471,17 +497,31 @@ def subscribe():
     channel = data.get('channel')
     
     conn = get_db_connection()
-    already_subbed = conn.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (subscriber, channel)).fetchone()
-    
-    if already_subbed:
-        conn.execute('DELETE FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (subscriber, channel))
-        status = 'unsubscribed'
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = %s AND channel_email = %s', (subscriber, channel))
+        already_subbed = cursor.fetchone()
+        
+        if already_subbed:
+            cursor.execute('DELETE FROM subscriptions WHERE subscriber_email = %s AND channel_email = %s', (subscriber, channel))
+            status = 'unsubscribed'
+        else:
+            cursor.execute('INSERT INTO subscriptions (subscriber_email, channel_email) VALUES (%s, %s)', (subscriber, channel))
+            status = 'subscribed'
+        conn.commit()
+        cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (channel,))
+        count = cursor.fetchone()[0]
     else:
-        conn.execute('INSERT INTO subscriptions (subscriber_email, channel_email) VALUES (?, ?)', (subscriber, channel))
-        status = 'subscribed'
-    
-    conn.commit()
-    count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (channel,)).fetchone()[0]
+        already_subbed = conn.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (subscriber, channel)).fetchone()
+        
+        if already_subbed:
+            conn.execute('DELETE FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (subscriber, channel))
+            status = 'unsubscribed'
+        else:
+            conn.execute('INSERT INTO subscriptions (subscriber_email, channel_email) VALUES (?, ?)', (subscriber, channel))
+            status = 'subscribed'
+        conn.commit()
+        count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (channel,)).fetchone()[0]
     conn.close()
     return jsonify({'status': status, 'subscribers': count})
 
@@ -493,7 +533,11 @@ def add_comment():
     content = data.get('content')
     
     conn = get_db_connection()
-    conn.execute('INSERT INTO comments (video_id, user_email, content) VALUES (?, ?, ?)', (video_id, email, content))
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO comments (video_id, user_email, content) VALUES (%s, %s, %s)', (video_id, email, content))
+    else:
+        conn.execute('INSERT INTO comments (video_id, user_email, content) VALUES (?, ?, ?)', (video_id, email, content))
     conn.commit()
     conn.close()
     return jsonify({'status': 'success'})
@@ -501,7 +545,12 @@ def add_comment():
 @app.route('/api/video/comments/<video_id>', methods=['GET'])
 def get_comments(video_id):
     conn = get_db_connection()
-    comments = conn.execute('SELECT * FROM comments WHERE video_id = ? ORDER BY timestamp DESC', (video_id,)).fetchall()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM comments WHERE video_id = %s ORDER BY timestamp DESC', (video_id,))
+        comments = cursor.fetchall()
+    else:
+        comments = conn.execute('SELECT * FROM comments WHERE video_id = ? ORDER BY timestamp DESC', (video_id,)).fetchall()
     conn.close()
     return jsonify([dict(c) for c in comments])
 
@@ -509,17 +558,43 @@ def get_comments(video_id):
 def get_video_stats(video_id):
     email = request.json.get('email', '')
     conn = get_db_connection()
-    vid = conn.execute('SELECT views, likes FROM videos WHERE id = ?', (video_id,)).fetchone()
-    liked = conn.execute('SELECT 1 FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id)).fetchone()
     subbed = False
-    if email:
-        channel_email = conn.execute('SELECT user_email FROM videos WHERE id = ?', (video_id,)).fetchone()['user_email']
-        subbed = conn.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (email, channel_email)).fetchone() is not None
-        subs_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (channel_email,)).fetchone()[0]
+    
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT views, likes FROM videos WHERE id = %s', (video_id,))
+        vid = cursor.fetchone()
+        cursor.execute('SELECT 1 FROM video_likes WHERE user_email = %s AND video_id = %s', (email, video_id))
+        liked = cursor.fetchone()
+        
+        if email:
+            cursor.execute('SELECT user_email FROM videos WHERE id = %s', (video_id,))
+            row = cursor.fetchone()
+            if row:
+                channel_email = row['user_email']
+                cursor.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = %s AND channel_email = %s', (email, channel_email))
+                subbed = cursor.fetchone() is not None
+                cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (channel_email,))
+                subs_count = cursor.fetchone()[0]
+            else:
+                subs_count = 0
+        else:
+            subs_count = 0
+        
+        cursor.execute('SELECT COUNT(*) FROM comments WHERE video_id = %s', (video_id,))
+        comment_count = cursor.fetchone()[0]
+        
     else:
-        subs_count = 0
+        vid = conn.execute('SELECT views, likes FROM videos WHERE id = ?', (video_id,)).fetchone()
+        liked = conn.execute('SELECT 1 FROM video_likes WHERE user_email = ? AND video_id = ?', (email, video_id)).fetchone()
+        if email:
+            channel_email = conn.execute('SELECT user_email FROM videos WHERE id = ?', (video_id,)).fetchone()['user_email']
+            subbed = conn.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (email, channel_email)).fetchone() is not None
+            subs_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (channel_email,)).fetchone()[0]
+        else:
+            subs_count = 0
+        comment_count = conn.execute('SELECT COUNT(*) FROM comments WHERE video_id = ?', (video_id,)).fetchone()[0]
 
-    comment_count = conn.execute('SELECT COUNT(*) FROM comments WHERE video_id = ?', (video_id,)).fetchone()[0]
     conn.close()
     return jsonify({
         'views': vid['views'],
@@ -575,10 +650,19 @@ def creator_stats():
     email = data.get('email')
     
     conn = get_db_connection()
-    video_stats = conn.execute('SELECT COUNT(*) as count, SUM(views) as total_views FROM videos WHERE user_email = ?', (email,)).fetchone()
-    total_videos = video_stats['count'] if video_stats['count'] else 0
-    total_views = video_stats['total_views'] if video_stats['total_views'] else 0
-    subs_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (email,)).fetchone()[0]
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT COUNT(*) as count, SUM(views) as total_views FROM videos WHERE user_email = %s', (email,))
+        video_stats = cursor.fetchone()
+        total_videos = video_stats['count'] if video_stats['count'] else 0
+        total_views = video_stats['total_views'] if video_stats['total_views'] else 0
+        cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (email,))
+        subs_count = cursor.fetchone()[0]
+    else:
+        video_stats = conn.execute('SELECT COUNT(*) as count, SUM(views) as total_views FROM videos WHERE user_email = ?', (email,)).fetchone()
+        total_videos = video_stats['count'] if video_stats['count'] else 0
+        total_views = video_stats['total_views'] if video_stats['total_views'] else 0
+        subs_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (email,)).fetchone()[0]
     
     conn.close()
     return jsonify({
