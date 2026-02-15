@@ -858,3 +858,102 @@ button {
         display: none !important;
     }
 }
+
+/* Shorts / V-Snaps Styles */
+.snap-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 0;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+.snap-card {
+    min-width: 340px;
+    max-width: 400px;
+    height: 75vh;
+    min-height: 600px;
+    background: #000;
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    scroll-snap-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.snap-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.snap-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    pointer-events: none;
+}
+
+.snap-actions {
+    position: absolute;
+    right: 16px;
+    bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+    z-index: 10;
+}
+
+.action-item {
+    text-align: center;
+    cursor: pointer;
+    color: white;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s;
+}
+
+.action-item:active {
+    transform: scale(0.9);
+}
+
+.action-item i {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.action-item span {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Mobile Adjustments for Shorts */
+@media (max-width: 768px) {
+    .snap-container {
+        padding: 0;
+        height: calc(100vh - 56px);
+        /* Mobile header height */
+        background: black;
+    }
+
+    .snap-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        height: 100%;
+        border-radius: 0;
+        margin-bottom: 0;
+        border: none;
+    }
+}

@@ -131,6 +131,10 @@
                         class="fas fa-video"></i> <span>Creator Hub</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Vault'); return false;"><i class="fas fa-download"></i>
                     <span>Vault</span></a>
+                <hr>
+                <a href="#" class="nav-item" onclick="showPagesModal(); return false;"><i
+                        class="fas fa-info-circle"></i>
+                    <span>About & Privacy</span></a>
             </nav>
         </aside>
 
@@ -246,7 +250,7 @@
             const emptyState = document.getElementById('empty-state');
             if (!grid) return;
 
-            // Update UI
+            // Update UI Interface
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             const snapLink = Array.from(document.querySelectorAll('.nav-item')).find(a => a.innerText.includes('V-Snaps'));
             if (snapLink) snapLink.classList.add('active');
@@ -255,6 +259,9 @@
                 const res = await fetch('/api/videos');
                 const vids = await res.json();
 
+                // Shuffle for random feed
+                vids.sort(() => Math.random() - 0.5);
+
                 if (!vids || vids.length === 0) {
                     loadView('V-Snaps');
                     return;
@@ -262,79 +269,116 @@
 
                 if (emptyState) emptyState.style.display = 'none';
 
-                // Set Vertical Snap Layout
-                grid.style.display = 'flex';
-                grid.style.flexDirection = 'column';
-                grid.style.alignItems = 'center';
-                grid.style.gap = '24px';
-                grid.style.padding = '20px 0';
-                grid.style.height = '85vh';
-                grid.style.overflowY = 'auto';
-                grid.style.scrollSnapType = 'y mandatory';
-                grid.style.scrollBehavior = 'smooth';
-                grid.innerHTML = '';
+                // Transformation to Shorts Mode
+                grid.style.display = 'block'; // Block to allow container inside
+                grid.innerHTML = '<div class="snap-container" id="snap-scroller"></div>';
+                const container = document.getElementById('snap-scroller');
 
                 vids.forEach((vid, index) => {
                     const snap = document.createElement('div');
-                    snap.style.cssText = `
-                        min-width: 340px;
-                        max-width: 380px;
-                        height: 600px;
-                        min-height: 600px;
-                        background: #000;
-                        border-radius: 20px;
-                        overflow: hidden;
-                        position: relative;
-                        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-                        scroll-snap-align: center;
-                        border: 1px solid rgba(255,255,255,0.1);
-                        transition: transform 0.3s;
-                    `;
+                    snap.className = 'snap-card';
+
+                    // Ad Injection Logic (Every 5th video)
+                    if (index > 0 && index % 5 === 0) {
+                        const adSnap = document.createElement('div');
+                        adSnap.className = 'snap-card';
+                        adSnap.style.background = '#222';
+                        adSnap.style.display = 'flex';
+                        adSnap.style.alignItems = 'center';
+                        adSnap.style.justifyContent = 'center';
+                        adSnap.innerHTML = `
+                            <div style="text-align: center; color: #aaa;">
+                                <i class="fas fa-ad" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                                <p>Sponsored Content</p>
+                                <div id="ad-slot-${index}"></div>
+                            </div>
+                        `;
+                        container.appendChild(adSnap);
+                        // Initialize ad dynamically if needed
+                    }
 
                     snap.innerHTML = `
-                        <video src="${vid.video_url}" loop style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"></video>
+                        <video src="${vid.video_url}" class="snap-video" loop muted playsinline></video>
                         
-                        <!-- Overlay Content -->
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 24px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); color: white; pointer-events: none;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #ff0055; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white;">
+                        <div class="snap-overlay">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer;">
+                                <div class="channel-avatar" style="border: 2px solid white;">
                                     ${(vid.user_email || '?').charAt(0).toUpperCase()}
                                 </div>
-                                <span style="font-weight: 700; font-size: 0.95rem;">@${vid.user_email.split('@')[0]}</span>
-                                <button style="background: white; color: black; border: none; padding: 5px 12px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; pointer-events: auto;">Join</button>
+                                <span style="font-weight: 700; font-size: 1rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">@${vid.user_email.split('@')[0]}</span>
+                                <button class="btn-primary" style="padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; border: none; margin-left: auto;">Follow</button>
                             </div>
-                            <h3 style="margin: 0; font-size: 1rem; font-weight: 500; line-height: 1.4;">${vid.title}</h3>
+                            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 500; line-height: 1.4; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${vid.title || 'Vitox Snap'}</h3>
+                            <p style="margin: 6px 0 0 0; font-size: 0.9rem; opacity: 0.9;">${vid.description || '#Vitox #Shorts'}</p>
                         </div>
 
-                        <!-- Interaction Bar -->
-                        <div style="position: absolute; right: 12px; bottom: 100px; display: flex; flex-direction: column; gap: 24px; align-items: center; color: white;">
-                            <div style="text-align: center; cursor: pointer;"><i class="fas fa-heart" style="font-size: 1.6rem;"></i><div style="font-size: 0.75rem; font-weight: 600; margin-top: 4px;">${vid.likes || 0}</div></div>
-                            <div style="text-align: center; cursor: pointer;"><i class="fas fa-comment-dots" style="font-size: 1.6rem;"></i><div style="font-size: 0.75rem; font-weight: 600; margin-top: 4px;">${vid.comment_count || 0}</div></div>
-                            <div style="text-align: center; cursor: pointer;"><i class="fas fa-share" style="font-size: 1.6rem;"></i><div style="font-size: 0.75rem; font-weight: 600; margin-top: 4px;">Share</div></div>
+                        <div class="snap-actions">
+                            <div class="action-item" onclick="toggleLike(${vid.id}, '${vid.user_email}')">
+                                <i class="fas fa-heart"></i>
+                                <span>${vid.likes || 0}</span>
+                            </div>
+                            <div class="action-item" onclick="alert('Comments coming soon!')">
+                                <i class="fas fa-comment-dots"></i>
+                                <span>${vid.comment_count || 0}</span>
+                            </div>
+                            <div class="action-item" onclick="alert('Share feature coming soon!')">
+                                <i class="fas fa-share"></i>
+                                <span>Share</span>
+                            </div>
+                             <div class="action-item" onclick="alert('Remix this Snap!')">
+                                <i class="fas fa-record-vinyl fa-spin" style="animation-duration: 4s;"></i>
+                            </div>
                         </div>
                     `;
 
                     const video = snap.querySelector('video');
-                    snap.onclick = () => {
+
+                    // Click to Play/Pause
+                    snap.onclick = (e) => {
+                        if (e.target.closest('.action-item') || e.target.closest('button')) return;
                         if (video.paused) {
-                            // Pause all other videos first
-                            grid.querySelectorAll('video').forEach(v => v.pause());
+                            // Pause others
+                            container.querySelectorAll('video').forEach(v => {
+                                if (v !== video) {
+                                    v.pause();
+                                    v.currentTime = 0; // Reset for better UX
+                                }
+                            });
                             video.play();
+                            video.muted = false; // Unmute on interaction
                         } else {
                             video.pause();
                         }
                     };
 
-                    grid.appendChild(snap);
+                    container.appendChild(snap);
                 });
 
-                // Auto-play the first video
-                setTimeout(() => {
-                    const firstVideo = grid.querySelector('video');
-                    if (firstVideo) firstVideo.play();
-                }, 500);
+                // Intersection Observer for Auto-Play on Scroll
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        const vid = entry.target.querySelector('video');
+                        if (!vid) return;
 
-            } catch (e) { console.error(e); }
+                        if (entry.isIntersecting) {
+                            // Pause all others first to save resources & mobile battery
+                            container.querySelectorAll('video').forEach(v => {
+                                if (v !== vid) v.pause();
+                            });
+
+                            vid.play().catch(e => console.log("Auto-play prevented (interaction needed)"));
+                            vid.muted = false;
+                        } else {
+                            vid.pause();
+                        }
+                    });
+                }, { threshold: 0.6 }); // 60% visibility triggers play
+
+                document.querySelectorAll('.snap-card').forEach(card => observer.observe(card));
+
+            } catch (e) {
+                console.error("Snap Load Error:", e);
+            }
         }
 
         async function loadLikedVideosView() {
@@ -986,17 +1030,63 @@
 
         // Close menus on outside click
         window.addEventListener('click', (e) => {
-            if (!e.target.closest('.user-avatar') && !e.target.closest('#user-menu')) {
-                document.getElementById('user-menu').style.display = 'none';
+            const userMenu = document.getElementById('user-menu');
+            const createMenu = document.getElementById('create-dropdown');
+
+            if (userMenu && !e.target.closest('.user-avatar') && !e.target.closest('#user-menu')) {
+                userMenu.style.display = 'none';
             }
-            if (!e.target.closest('.create-container')) {
-                document.getElementById('create-dropdown').style.display = 'none';
+            if (createMenu && !e.target.closest('.create-container')) {
+                createMenu.style.display = 'none';
             }
         });
 
         function logout() {
             localStorage.removeItem('vitox_user');
             location.reload();
+        }
+
+        // Privacy & Terms Modal
+        function showPagesModal() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); z-index: 5000;
+                display: flex; align-items: center; justify-content: center;
+                backdrop-filter: blur(5px);
+            `;
+
+            modal.innerHTML = `
+                <div style="background: #1e1e1e; width: 90%; max-width: 600px; max-height: 80vh; border-radius: 16px; overflow-y: auto; padding: 24px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+                    <button onclick="this.closest('div').parentNode.remove()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: white; font-size: 1.5rem;"><i class="fas fa-times"></i></button>
+                    
+                    <h2 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-shield-halved" style="color: #ff0055;"></i> Privacy & Terms
+                    </h2>
+                    
+                    <div style="margin-top: 20px; line-height: 1.6; color: #ccc; font-size: 0.95rem;">
+                        <h3 style="color: white; margin-bottom: 8px;">1. Privacy Policy</h3>
+                        <p>At Vitox, we prioritize your data privacy. We collect minimal data (email, name, picture) solely for authentication via Google. We do not sell your personal data to third parties.</p>
+                        
+                        <h3 style="color: white; margin: 20px 0 8px;">2. Content Policy</h3>
+                        <p>Users are responsible for the content they upload. <strong>Strictly prohibited:</strong> Nudity, hate speech, violence, and copyright infringement.</p>
+                        
+                        <h3 style="color: white; margin: 20px 0 8px;">3. Monetization (1050 Rule)</h3>
+                        <p>Creators are eligible for monetization after reaching 1,000 subscribers and 50,000 views. Revenue is shared 70/30 (Creator/Platform).</p>
+
+                        <h3 style="color: white; margin: 20px 0 8px;">4. User Data & Deletion</h3>
+                        <p>You can request full data deletion by contacting <a href="mailto:support@vitox.ai" style="color: #ff0055;">support@vitox.ai</a> or using the 'Delete Account' option in settings.</p>
+                        
+                        <div style="margin-top: 30px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.85rem;">
+                            <strong>Contact Us:</strong><br>
+                            Vitox Media Pvt Ltd.<br>
+                            Email: contact@vitox.ai
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
         }
     </script>
 </body>
