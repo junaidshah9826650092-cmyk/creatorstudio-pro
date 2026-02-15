@@ -16,8 +16,12 @@ if os.path.exists('.env'):
                 key, value = line.strip().split('=', 1)
                 os.environ[key] = value
 
+from flask_talisman import Talisman
+
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
+# Force HTTPS and Security Headers
+Talisman(app, content_security_policy=None, force_https=True)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
