@@ -226,6 +226,10 @@
             <button onclick="location.href='index.html'"
                 style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i
                     class="fas fa-eye"></i> View Site</button>
+            <button onclick="downloadBackup()"
+                style="background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-download"></i> Backup Data
+            </button>
             <button onclick="refreshData()"
                 style="background: #ff0000; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i
                     class="fas fa-sync"></i> Sync Database</button>
@@ -390,6 +394,35 @@
             const result = await res.json();
             if (result.status === 'success') {
                 refreshData();
+            }
+        }
+
+        async function downloadBackup() {
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                const res = await fetch(`${API_URL}/admin/backup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: savedUser.email })
+                });
+
+                if (res.status === 200) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `vitox_full_backup_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    alert("Backup downloaded successfully! Store this file safely.");
+                } else {
+                    alert("Backup Failed: Unauthorized or Server Error");
+                }
+            } catch (e) {
+                alert("Backup Error: " + e.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
         }
 

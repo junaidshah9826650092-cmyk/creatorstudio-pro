@@ -2,7 +2,7 @@ import sqlite3
 import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from datetime import datetime
+from datetime import datetime, date
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
@@ -654,6 +654,67 @@ def ai_suggest():
     except Exception as e:
         print(f"AI Error: {e}")
         return jsonify({'title': f'Cool {topic} Video', 'description': f'An amazing video exploring {topic}. Check it out!'})
+
+@app.route('/api/admin/backup', methods=['POST'])
+def admin_backup():
+    try:
+        data = request.json
+        req_email = data.get('email')
+        
+        if not req_email or req_email != ADMIN_EMAIL:
+            return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+        conn = get_db_connection()
+        backup_data = {}
+        
+        # Tables to backup - using a try-except block for each ensures partial backups if a table is missing
+        tables = ['users', 'videos', 'transactions', 'subscriptions', 'video_likes', 'comments']
+        
+        # Helper to convert row to dict
+        def row_to_dict(row):
+            d = dict(row)
+            # Pre-process datetimes to strings
+            for k, v in d.items():
+                if isinstance(v, (datetime, date)):
+                    d[k] = v.isoformat()
+            return d
+
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=RealDictCursor) # Ensure RealDictCursor is used
+            for table in tables:
+                try:
+                    cursor.execute(f'SELECT * FROM {table}')
+                    rows = cursor.fetchall()
+                    backup_data[table] = [row_to_dict(row) for row in rows]
+                except Exception as e:
+                    print(f"Backup skip table {table}: {e}")
+                    conn.rollback() # Important for Postgres transaction errors
+                    continue
+        else:
+            for table in tables:
+                try:
+                    rows = conn.execute(f'SELECT * FROM {table}').fetchall()
+                    backup_data[table] = [row_to_dict(row) for row in rows]
+                except Exception as e:
+                    print(f"Backup skip table {table}: {e}")
+                    continue
+
+        conn.close()
+        
+        # Return as downloadable file
+        import json
+        json_str = json.dumps(backup_data, indent=2)
+        
+        from flask import make_response
+        response = make_response(json_str)
+        response.headers['Content-Type'] = 'application/json'
+        filename = f'vitox_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
+
+    except Exception as e:
+        print(f"Backup Error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/style.css')
 def serve_css():
