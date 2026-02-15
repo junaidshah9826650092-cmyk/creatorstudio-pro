@@ -141,12 +141,21 @@ def init_db():
         )
     ''')
 
+
     if not USE_POSTGRES:
         # SQLite migrations
         try: cursor.execute('ALTER TABLE transactions ADD COLUMN status TEXT DEFAULT "completed"')
         except: pass
         try: cursor.execute('ALTER TABLE videos ADD COLUMN likes INTEGER DEFAULT 0')
         except: pass
+        try: cursor.execute('ALTER TABLE videos ADD COLUMN type TEXT DEFAULT "video"')
+        except: pass
+    else:
+        # Postgres migrations
+        try: 
+            cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS type TEXT DEFAULT \'video\'')
+            conn.commit()
+        except: conn.rollback()
 
     conn.commit()
     conn.close()
@@ -268,6 +277,11 @@ def upload_video():
         if not email or not title or not video_url:
             return jsonify({'status': 'error', 'message': 'Missing data'}), 400
             
+        if not email or not title or not video_url:
+            return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+            
+        video_type = data.get('type', 'video') # 'video' or 'short'
+
         conn = get_db_connection()
         # Double check if table exists as fallback
         try:
@@ -276,8 +290,8 @@ def upload_video():
             print("Fallback: Table 'videos' missing in route. Re-init...")
             init_db()
 
-        conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url) VALUES (?, ?, ?, ?, ?)', 
-                     (email, title, desc, video_url, thumb_url))
+        conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type) VALUES (?, ?, ?, ?, ?, ?)', 
+                     (email, title, desc, video_url, thumb_url, video_type))
         conn.commit()
         conn.close()
         
@@ -288,8 +302,18 @@ def upload_video():
 
 @app.route('/api/videos', methods=['GET'])
 def get_all_videos():
+    video_type = request.args.get('type')
     conn = get_db_connection()
-    videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
+    
+    if video_type:
+        videos = conn.execute('SELECT * FROM videos WHERE type = ? ORDER BY timestamp DESC', (video_type,)).fetchall()
+    else:
+        # Default to show both if not specified, or just videos? Let's check logic.
+        # Ideally, main feed shows only 'video' and shorts tab shows 'short'
+        # But for backward compatibility if type not passed, maybe show all or just video?
+        # Let's show all for now, but client will filter. Or better, update client.
+        videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
+        
     conn.close()
     return jsonify([dict(v) for v in videos])
 

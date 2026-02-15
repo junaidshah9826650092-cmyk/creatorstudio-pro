@@ -173,7 +173,8 @@
 
         async function loadVideos() {
             try {
-                const res = await fetch('/api/videos');
+                // Fetch only VIDEOS (Long form)
+                const res = await fetch('/api/videos?type=video');
                 allVideos = await res.json();
                 renderVideos(allVideos);
             } catch (e) { console.error(e); }
@@ -256,7 +257,8 @@
             if (snapLink) snapLink.classList.add('active');
 
             try {
-                const res = await fetch('/api/videos');
+                // Fetch only SHORTS (V-Snaps)
+                const res = await fetch('/api/videos?type=short');
                 const vids = await res.json();
 
                 // Shuffle for random feed

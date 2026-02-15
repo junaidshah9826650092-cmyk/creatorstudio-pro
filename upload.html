@@ -58,6 +58,24 @@
                                     AI</button>
                             </div>
                         </div>
+
+                        <!-- Video Type Selector -->
+                        <div class="input-wrapper" style="margin-top: 24px;">
+                            <label>Video Type</label>
+                            <div
+                                style="display: flex; gap: 20px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white;">
+                                    <input type="radio" name="video_type" value="video" checked>
+                                    <span>Regular Video (Long form)</span>
+                                </label>
+                                <label
+                                    style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white;">
+                                    <input type="radio" name="video_type" value="short">
+                                    <span>V-Snap (Short &lt; 60s)</span>
+                                </label>
+                            </div>
+                        </div>
                         <div class="input-wrapper" style="margin-top: 32px;">
                             <label>Description <i class="far fa-question-circle"></i></label>
                             <textarea id="video-desc" rows="5"
@@ -402,6 +420,8 @@
             const desc = document.getElementById('video-desc').value;
             statusMsg.innerText = "SYNCING WITH DASHBOARD...";
 
+            const videoType = document.querySelector('input[name="video_type"]:checked').value; // Get selected type
+
             const dbRes = await fetch('/api/video/upload', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -410,7 +430,8 @@
                     title: title,
                     description: desc,
                     video_url: videoUrl,
-                    thumbnail_url: thumbUrl
+                    thumbnail_url: thumbUrl,
+                    type: videoType // Pass type to backend
                 })
             });
 
