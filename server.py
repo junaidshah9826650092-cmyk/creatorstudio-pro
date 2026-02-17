@@ -93,6 +93,7 @@ def init_db():
             picture TEXT,
             points INTEGER DEFAULT 0,
             role TEXT DEFAULT 'user',
+            status TEXT DEFAULT 'active',
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -175,11 +176,14 @@ def init_db():
         except: pass
         try: cursor.execute('ALTER TABLE videos ADD COLUMN type TEXT DEFAULT "video"')
         except: pass
+        try: cursor.execute('ALTER TABLE users ADD COLUMN status TEXT DEFAULT "active"')
+        except: pass
     else:
         # Postgres migrations
         try: 
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS type TEXT DEFAULT \'video\'')
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS category TEXT DEFAULT \'All\'')
+            cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT DEFAULT \'active\'')
             conn.commit()
         except: conn.rollback()
 
@@ -946,7 +950,13 @@ def delete_video():
         conn = get_db_connection()
         if USE_POSTGRES:
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM videos WHERE id = %s', (video_id,))
+            # Handle both numeric and Cloudinary string IDs
+            if str(video_id).isdigit():
+                cursor.execute('DELETE FROM videos WHERE id = %s', (video_id,))
+            else:
+                # If it's a Cloudinary ID, we can't delete from DB if not synced, 
+                # but maybe it was synced with that specific string as ID (if we ever do that)
+                cursor.execute('DELETE FROM videos WHERE id::text = %s', (str(video_id),))
         else:
             conn.execute('DELETE FROM videos WHERE id = ?', (video_id,))
         conn.commit()
@@ -954,6 +964,26 @@ def delete_video():
         return jsonify({'status': 'success'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/admin/toggle-user-status', methods=['POST'])
+def toggle_user_status():
+    data = request.json
+    admin_email = data.get('admin_email')
+    target_email = data.get('user_email')
+    new_status = data.get('status') # 'active' or 'blocked'
+
+    if admin_email != ADMIN_EMAIL:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET status = %s WHERE email = %s', (new_status, target_email))
+    else:
+        conn.execute('UPDATE users SET status = ? WHERE email = ?', (new_status, target_email))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
 
 @app.route('/api/video/delete', methods=['POST'])
 def creator_delete_video():

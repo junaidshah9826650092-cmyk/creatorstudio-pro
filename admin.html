@@ -277,6 +277,8 @@
                     <th>Email</th>
                     <th>Points</th>
                     <th>Last Active</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -360,13 +362,25 @@
                     body: JSON.stringify({ email: savedUser.email })
                 });
                 const users = await usersRes.json();
+                console.log("Admin Users Data:", users);
                 const userTbody = document.querySelector('#user-table tbody');
                 userTbody.innerHTML = users.map(u => `
                     <tr>
                         <td>${u.name}</td>
                         <td style="color: var(--text-dim);">${u.email}</td>
-                        <td style="font-weight: 700;">${u.points.toLocaleString()}</td>
-                        <td style="font-size: 0.8rem; color: var(--text-dim);">${new Date(u.last_login).toLocaleString()}</td>
+                        <td style="font-weight: 700;">${(u.points || 0).toLocaleString()}</td>
+                        <td style="font-size: 0.8rem; color: var(--text-dim);">${u.last_login ? new Date(u.last_login).toLocaleString() : 'Never'}</td>
+                        <td>
+                            <span style="color: ${u.status === 'blocked' ? '#ff3c00' : '#00ff88'}">
+                                ${u.status ? u.status.toUpperCase() : 'ACTIVE'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-action ${u.status === 'blocked' ? 'btn-approve' : 'btn-reject'}" 
+                                onclick="toggleUserStatus('${u.email}', '${u.status === 'blocked' ? 'active' : 'blocked'}')">
+                                ${u.status === 'blocked' ? 'Unblock' : 'Block'}
+                            </button>
+                        </td>
                     </tr>
                 `).join('');
 
@@ -384,9 +398,9 @@
                         </td>
                         <td style="font-size: 0.85rem; color: var(--text-dim);">${v.user_email}</td>
                         <td style="font-weight: 700;">${v.views || 0}</td>
-                        <td style="font-size: 0.75rem; color: var(--text-dim);">${new Date(v.timestamp).toLocaleDateString()}</td>
+                        <td style="font-size: 0.75rem; color: var(--text-dim);">${v.timestamp ? new Date(v.timestamp).toLocaleDateString() : 'N/A'}</td>
                         <td>
-                            <button class="btn-action btn-reject" onclick="deleteVideo(${v.id})">Delete</button>
+                            <button class="btn-action btn-reject" onclick="deleteVideo('${v.id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -417,6 +431,29 @@
                 }
             } catch (e) {
                 alert("Error deleting video: " + e.message);
+            }
+        }
+
+        async function toggleUserStatus(targetEmail, targetStatus) {
+            if (!confirm(`Are you sure you want to ${targetStatus} this user?`)) return;
+            try {
+                const res = await fetch(`${API_URL}/admin/toggle-user-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_email: savedUser.email,
+                        user_email: targetEmail,
+                        status: targetStatus
+                    })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    refreshData();
+                } else {
+                    alert("Update Failed: " + result.message);
+                }
+            } catch (e) {
+                alert("Error toggling status: " + e.message);
             }
         }
 
