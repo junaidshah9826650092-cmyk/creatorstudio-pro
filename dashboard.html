@@ -656,9 +656,9 @@
             <a href="analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Realtime Insights</a>
             <a href="community.html" class="nav-item"><i class="fas fa-comment-dots"></i> Squad Community</a>
             <a href="#" class="nav-item"><i class="fas fa-closed-captioning"></i> Captions</a>
-            <a href="#" class="nav-item"><i class="fas fa-copyright"></i> Legal Rights</a>
+            <a href="copyright.html" class="nav-item"><i class="fas fa-copyright"></i> Legal Rights</a>
             <a href="earn.html" class="nav-item"><i class="fas fa-dollar-sign"></i> Earn</a>
-            <a href="#" class="nav-item"><i class="fas fa-music"></i> V-Sounds</a>
+            <a href="sounds.html" class="nav-item"><i class="fas fa-music"></i> V-Sounds</a>
             <hr style="border: none; border-top: 1px solid var(--border); margin: 8px 0;">
             <a href="#"><i class="fas fa-cog"></i> Settings</a>
             <a href="#"><i class="fas fa-comment-alt"></i> Send feedback</a>
@@ -714,20 +714,50 @@
         </div>
     </main>
 
-    <!-- Ask Studio AI UI (From Screenshot) -->
+    <!-- Ask Studio AI UI -->
     <div class="ai-bubble" id="ai-bubble">
         <div class="ai-header">
             <i class="fas fa-wand-magic-sparkles"></i>
-            Ask Studio: A creative partner
+            Ask Studio: AI Partner
         </div>
-        <div class="ai-text">
-            Try a new experimental feature to ask about comments, channel analytics and video ideas.
+        <div class="ai-text" id="ai-response">
+            Ask me for video ideas, title suggestions, or channel growth tips!
         </div>
-        <button class="ai-close" onclick="document.getElementById('ai-bubble').remove()">Close</button>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <input type="text" id="ai-input" placeholder="Ask AI..."
+                style="flex: 1; background: #333; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; outline: none; font-size: 0.8rem;">
+            <button onclick="askStudioAI()"
+                style="background: var(--accent); border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;"><i
+                    class="fas fa-paper-plane"></i></button>
+        </div>
+        <button class="ai-close" onclick="document.getElementById('ai-bubble').remove()"
+            style="margin-top: 10px; opacity: 0.6; font-size: 0.7rem; background: transparent; color: white; border: none; cursor: pointer;">Dismiss</button>
     </div>
 
     <script>
         window.addEventListener('contentLoaded', () => { lucide.createIcons(); });
+
+        async function askStudioAI() {
+            const input = document.getElementById('ai-input');
+            const responseDiv = document.getElementById('ai-response');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+
+            responseDiv.innerText = "Thinking...";
+            input.value = "";
+
+            try {
+                const res = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                responseDiv.innerText = data.answer || "Sorry, I couldn't process that.";
+            } catch (e) {
+                responseDiv.innerText = "Error connecting to AI service.";
+            }
+        }
 
         async function initDashboard() {
             const user = JSON.parse(localStorage.getItem('vitox_user'));

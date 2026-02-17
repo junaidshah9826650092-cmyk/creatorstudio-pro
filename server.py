@@ -1086,6 +1086,41 @@ def ai_suggest():
         print(f"AI Error: {e}")
         return jsonify({'title': f'Cool {topic} Video', 'description': f'An amazing video exploring {topic}. Check it out!'})
 
+@app.route('/api/ai/chat', methods=['POST'])
+def ai_chat():
+    data = request.json
+    prompt = data.get('prompt', '')
+    if not prompt:
+        return jsonify({'error': 'No prompt provided'}), 400
+        
+    api_key = os.environ.get('OPENROUTER_API_KEY', '').strip()
+    if not api_key:
+        return jsonify({'error': 'AI configuration missing'}), 500
+
+    try:
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://vitox.ai", # Optional
+                "X-Title": "Vitox AI", # Optional
+            },
+            data=json.dumps({
+                "model": "meta-llama/llama-3-8b-instruct:free",
+                "messages": [
+                    {"role": "system", "content": "You are Vitox AI, a helpful assistant for creators on the Vitox video platform. Keep responses concise and professional."},
+                    {"role": "user", "content": prompt}
+                ]
+            })
+        )
+        result = response.json()
+        answer = result['choices'][0]['message']['content']
+        return jsonify({'answer': answer})
+    except Exception as e:
+        print(f"OpenRouter Error: {e}")
+        return jsonify({'answer': "I'm having trouble connecting to my brain right now. Please try again later!"})
+
 @app.route('/api/admin/backup', methods=['POST'])
 def admin_backup():
     try:

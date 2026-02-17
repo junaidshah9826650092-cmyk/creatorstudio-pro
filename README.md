@@ -1,18 +1,31 @@
-# SwiftCash AI - Earning App
-A premium web-based earning platform where users can earn points and redeem them for real money.
+# Vitox Creator Studio - Pro
+The ultimate video platform ecosystem. Features a web-based Creator Studio and a Flutter mobile application.
 
-## Economic Model
-- **Point Earning:** 10 to 100 points per task.
-- **Conversion Rate:** 500 Points = ₹10 Rupees.
-- **Minimum Withdrawal:** ₹50.
+## 🚀 Web Architecture
+- **Backend**: Flask (Python) with PostgreSQL.
+- **Frontend**: Vanilla HTML5, CSS3 (Premium Glassmorphism), JavaScript.
+- **AI Integration**: OpenRouter (Llama 3) & Google Gemini.
+- **Storage**: Cloudinary for high-speed video delivery.
 
-## Tech Stack
-- **Frontend:** Vanilla HTML5, CSS3 (Glassmorphism), JavaScript.
-- **Icons:** Lucide Icons.
-- **Fonts:** Outfit (Google Fonts).
+## 📱 Vitox Mobile (Flutter App)
+A professional Flutter application source is provided in the `/mobile_app` folder. It is designed to connect directly to the Vitox Web Backend.
 
-## Features
-- Dynamic Balance Update.
-- Simulated Ad Viewing with Countdown.
-- Task Rewards System.
-- Responsive Mobile-First Design.
+### How to Run:
+1. **Install Flutter**: Make sure you have the [Flutter SDK](https://docs.flutter.dev/get-started/install) installed.
+2. **Setup URL**: Open `mobile_app/lib/main.dart` and update the `baseUrl` with your Render/Live URL.
+3. **Navigate**: `cd mobile_app`
+4. **Get Packages**: `flutter pub get`
+5. **Run**:
+   - For Android: `flutter run`
+   - For iOS: `flutter run` (Requires macOS & Xcode)
+
+### Features:
+- **Premium UI**: Dark mode with Outfit typography.
+- **Live Feed**: Fetches videos directly from the web server.
+- **V-Snaps**: Vertical scroll interface for short videos, synced with the backend.
+- **Studio Hub**: Mobile dashboard for channel management.
+
+## 🛠 Tech Stack
+- **Database**: PostgreSQL (Render) / SQLite (Local).
+- **APIs**: RESTful endpoints in `server.py`.
+- **Styling**: Modern CSS with CSS Variables and Animations.

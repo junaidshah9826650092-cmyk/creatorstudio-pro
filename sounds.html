@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-Sounds - Audio Library</title>
+    <link rel="stylesheet" href="style.css?v=15.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --studio-bg: #0f0f0f;
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-dim: #aaa;
+            --accent: #3ea6ff;
+        }
+
+        body {
+            background: var(--studio-bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 256px;
+            height: 100vh;
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            position: fixed;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 24px;
+            color: var(--text-dim);
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            border-right: 3px solid var(--accent);
+            color: var(--accent);
+            background: rgba(62, 166, 255, 0.05);
+        }
+
+        main {
+            margin-left: 256px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        .search-bar {
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .audio-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            transition: 0.2s;
+        }
+
+        .audio-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .play-btn:hover {
+            background: var(--accent);
+            color: black;
+        }
+
+        .track-info {
+            flex: 1;
+        }
+
+        .track-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .track-meta {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        .download-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .download-btn:hover {
+            background: white;
+            color: black;
+            border-color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div style="padding: 0 24px 30px;">
+            <a href="index.html" style="text-decoration:none; color:white; font-weight:900; font-size:1.5rem;">VITOX</a>
+        </div>
+        <nav>
+            <a href="dashboard_overview.html" class="nav-item"><i class="fas fa-th-large"></i> Command Center</a>
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-clapperboard"></i> Creator Studio</a>
+            <a href="copyright.html" class="nav-item"><i class="fas fa-copyright"></i> Legal Rights</a>
+            <a href="earn.html" class="nav-item"><i class="fas fa-dollar-sign"></i> Earn</a>
+            <a href="sounds.html" class="nav-item active"><i class="fas fa-music"></i> V-Sounds</a>
+        </nav>
+    </aside>
+
+    <main>
+        <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;">Audio Library</h1>
+        <p style="color: var(--text-dim); margin-bottom: 30px;">Get royalty-free music and sound effects to use in your
+            videos.</p>
+
+        <div class="search-bar">
+            <i class="fas fa-search" style="color: #666;"></i>
+            <input type="text" placeholder="Search music or sound effects">
+        </div>
+
+        <div class="library-container"
+            style="background: #1a1a1a; border-radius: 12px; border: 1px solid var(--border); overflow: hidden;">
+            <div
+                style="padding: 15px 15px; display: flex; font-size: 0.8rem; color: var(--text-dim); border-bottom: 1px solid var(--border);">
+                <div style="width: 60px;">PLAY</div>
+                <div style="flex: 1;">TRACK TITLE</div>
+                <div style="width: 150px;">GENRE</div>
+                <div style="width: 100px;">DURATION</div>
+                <div style="width: 100px;">LICENSE</div>
+            </div>
+
+            <!-- Fake Data -->
+            <div class="audio-item">
+                <div class="play-btn"><i class="fas fa-play"></i></div>
+                <div class="track-info">
+                    <div class="track-title">Cybernetic Dreams</div>
+                    <div class="track-meta">Electronic • Vitox Originals</div>
+                </div>
+                <div style="width: 150px; font-size: 0.9rem;">Synthwave</div>
+                <div style="width: 100px; font-size: 0.9rem;">2:45</div>
+                <div style="width: 100px; color: var(--accent);"><i class="fas fa-certificate"></i> Free</div>
+                <button class="download-btn"><i class="fas fa-download"></i></button>
+            </div>
+
+            <div class="audio-item">
+                <div class="play-btn"><i class="fas fa-play"></i></div>
+                <div class="track-info">
+                    <div class="track-title">Phonk Master</div>
+                    <div class="track-meta">Sigma • Bass Boosted</div>
+                </div>
+                <div style="width: 150px; font-size: 0.9rem;">Phonk</div>
+                <div style="width: 100px; font-size: 0.9rem;">1:30</div>
+                <div style="width: 100px; color: var(--accent);"><i class="fas fa-certificate"></i> Free</div>
+                <button class="download-btn"><i class="fas fa-download"></i></button>
+            </div>
+
+            <div class="audio-item">
+                <div class="play-btn"><i class="fas fa-play"></i></div>
+                <div class="track-info">
+                    <div class="track-title">Ocean Breeze</div>
+                    <div class="track-meta">Lofi • Chill</div>
+                </div>
+                <div style="width: 150px; font-size: 0.9rem;">Lofi</div>
+                <div style="width: 100px; font-size: 0.9rem;">4:12</div>
+                <div style="width: 100px; color: var(--accent);"><i class="fas fa-certificate"></i> Free</div>
+                <button class="download-btn"><i class="fas fa-download"></i></button>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

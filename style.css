@@ -906,11 +906,11 @@ button {
 
 .snap-actions {
     position: absolute;
-    right: 16px;
-    bottom: 100px;
+    right: 12px;
+    bottom: 80px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
     align-items: center;
     z-index: 10;
 }
@@ -919,8 +919,12 @@ button {
     text-align: center;
     cursor: pointer;
     color: white;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.action-item:hover {
+    transform: scale(1.1);
 }
 
 .action-item:active {
@@ -928,14 +932,33 @@ button {
 }
 
 .action-item i {
-    font-size: 1.8rem;
+    font-size: 2rem;
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .action-item span {
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 1);
+}
+
+.snap-follow-btn {
+    background: white;
+    color: black;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.snap-follow-btn:hover {
+    transform: scale(1.05);
+    background: #f0f0f0;
 }
 
 /* Mobile Adjustments for Shorts */
