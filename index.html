@@ -135,11 +135,17 @@
                 <a href="#" class="nav-item" onclick="loadView('Vault'); return false;"><i class="fas fa-download"></i>
                     <span>Vault</span></a>
                 <hr>
+                <a href="#" class="nav-item" onclick="openAdminChat(); return false;" style="color: #ffd700;">
+                    <i class="fas fa-crown"></i> <span>Official Support</span></a>
+                <div id="admin-sidebar-link" style="display:none;">
+                    <a href="#" class="nav-item" onclick="loadView('Admin Panel'); return false;"
+                        style="color: #ff4d4d; border: 1px solid rgba(255,77,77,0.2); margin-top: 5px; background: rgba(255,77,77,0.05);">
+                        <i class="fas fa-shield-halved"></i> <span>Admin Panel</span></a>
+                </div>
+                <hr>
                 <a href="#" class="nav-item" onclick="showPagesModal(); return false;"><i
                         class="fas fa-info-circle"></i>
                     <span>About & Privacy</span></a>
-                <a href="#" class="nav-item" onclick="openAdminChat(); return false;" style="color: #ffd700;">
-                    <i class="fas fa-crown"></i> <span>Official Support</span></a>
             </nav>
         </aside>
 
@@ -1119,21 +1125,36 @@
                 const admin = JSON.parse(localStorage.getItem('vitox_user'));
                 if (!admin) { showToast("Login required"); return; }
 
+                const isPlatformAdmin = admin.email === 'junaidshah78634@gmail.com';
+
                 // If not admin, target is admin by default (Support Line)
-                if (admin.email !== 'junaidshah78634@gmail.com') {
+                if (!isPlatformAdmin) {
                     targetUserEmail = 'junaidshah78634@gmail.com';
+                }
+
+                // If platform admin clicks sidebar link without target
+                if (isPlatformAdmin && !targetUserEmail) {
+                    showToast("Loading Admin Panel...");
+                    loadView('Admin Panel');
+                    return;
+                }
+
+                if (!targetUserEmail) {
+                    showToast("Support line unavailable");
+                    return;
                 }
 
                 const drawer = document.getElementById('admin-chat-drawer');
                 if (drawer) drawer.style.right = '0';
 
                 const targetDisplay = targetUserEmail === 'junaidshah78634@gmail.com' ? "Official Support" : `@${targetUserEmail.split('@')[0]}`;
-                document.getElementById('admin-chat-target').innerText = `Direct Line to: ${targetDisplay}`;
+                const targetEl = document.getElementById('admin-chat-target');
+                if (targetEl) targetEl.innerText = `Direct Line to: ${targetDisplay}`;
 
                 loadAdminHistory(targetUserEmail);
 
                 const sendBtn = document.getElementById('admin-chat-send');
-                sendBtn.onclick = () => sendAdminMsg(targetUserEmail);
+                if (sendBtn) sendBtn.onclick = () => sendAdminMsg(targetUserEmail);
 
                 if (adminChatPoller) clearInterval(adminChatPoller);
                 adminChatPoller = setInterval(() => loadAdminHistory(targetUserEmail, true), 3000);
@@ -1579,9 +1600,13 @@
                             avatar.style.color = 'transparent';
                         }
 
-                        // Show Admin Button if authorized
+                        // Show Admin Button and Link if authorized
                         if (user.email === 'junaidshah78634@gmail.com') {
                             const headerRight = document.querySelector('.header-right');
+                            const adminSidebarLink = document.getElementById('admin-sidebar-link');
+
+                            if (adminSidebarLink) adminSidebarLink.style.display = 'block';
+
                             if (!document.getElementById('admin-link-btn')) {
                                 const adminBtn = document.createElement('button');
                                 adminBtn.id = 'admin-link-btn';
