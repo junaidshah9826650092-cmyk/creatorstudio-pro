@@ -639,7 +639,7 @@
                                         <div style="width: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>
                                         <button class="action-btn" style="padding: 10px 18px; color: #fff; background: transparent; border: none; cursor: pointer; transition: all 0.2s;"><i class="fas fa-thumbs-down"></i></button>
                                     </div>
-                                    <button class="action-btn secondary" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                                    <button class="action-btn secondary" onclick="shareVideo('${url}')" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
                                         <i class="fas fa-share"></i> Share
                                     </button>
                                 </div>
@@ -1100,6 +1100,21 @@
             `;
 
             document.body.appendChild(modal);
+        }
+        function shareVideo(url) {
+            const shareUrl = url || window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Watch this on Vitox',
+                    url: shareUrl
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showToast("Link copied to clipboard!");
+                }).catch(() => {
+                    showToast("Failed to copy link.");
+                });
+            }
         }
     </script>
 </body>
