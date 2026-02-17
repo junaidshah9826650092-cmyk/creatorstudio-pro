@@ -22,8 +22,9 @@ from flask_talisman import Talisman
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
-# Force HTTPS and Security Headers
-Talisman(app, content_security_policy=None, force_https=True)
+# Force HTTPS (Only on Render) and Security Headers
+is_prod = os.environ.get('RENDER') == 'true'
+Talisman(app, content_security_policy=None, force_https=is_prod)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
