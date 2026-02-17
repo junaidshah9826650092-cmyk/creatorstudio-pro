@@ -4,13 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitox - Video Platform</title>
+    <title>Vitox - The Ultimate Video Platform</title>
     <!-- Vitox V Favicon -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path fill='%23ff0055' d='M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z'/></svg>">
     <meta name="description"
-        content="Vitox is India's next-gen video platform. Upload, share, and discover amazing videos. Join the community of creators today.">
-    <meta name="keywords" content="video platform, video sharing, indian youtube alternative, vitox, video">
+        content="Vitox is the ultimate video platform for creators. Join the revolution, monetize your content, and connect with a global audience.">
+    <meta name="keywords" content="vitox, video sharing, creator platform, youtube alternative, earn money, video">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <link rel="stylesheet" href="style.css?v=20.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -168,7 +171,14 @@
     </div>
 
     <div id="toast-container"></div>
+    <div id="toast-container"></div>
     <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            easing: 'ease-out-cubic'
+        });
+
         let allVideos = []; // Global for search
 
         async function loadVideos() {
@@ -208,7 +218,8 @@
                 videosToRender.forEach((vid, index) => {
                     const card = document.createElement('div');
                     card.className = 'video-card';
-                    card.style.animationDelay = `${index * 50}ms`;
+                    card.setAttribute('data-aos', 'fade-up');
+                    card.setAttribute('data-aos-delay', index * 50);
 
                     card.onclick = () => playVideo(
                         vid.video_url,
