@@ -193,7 +193,24 @@ def init_db():
 
 # Run DB Init
 _db_ready = True # Prevent recursion in get_db_connection during init
-init_db()
+try:
+    init_db()
+except Exception as e:
+    print("\n" + "!"*60)
+    print("CRITICAL DATABASE CONNECTION ERROR")
+    print("!"*60)
+    print(f"Details: {e}")
+    print("\nEXPLANATION:")
+    print("You are likely trying to connect to a Render Internal Database URL")
+    print("from your local computer. Internal URLs (dpg-...) ONLY work inside Render.")
+    print("\nFIX:")
+    print("1. Go to your Render Dashboard > PostgreSQL")
+    print("2. Copy the 'EXTERNAL DATABASE URL'")
+    print("3. Paste it into your local .env file.")
+    print("\nFalling back to potentially unstable state...")
+    print("!"*60 + "\n")
+    USE_POSTGRES = False # Emergency fallback to SQLite if Postgres fails at startup
+    init_db() # Try initializing SQLite instead so server can at least start
 
 # --- Serve Static Files ---
 @app.route('/')
