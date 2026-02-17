@@ -125,6 +125,7 @@ def init_db():
             likes INTEGER DEFAULT 0,
             type TEXT DEFAULT 'video',
             category TEXT DEFAULT 'All',
+            moderation_status TEXT DEFAULT 'safe',
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -384,11 +385,11 @@ def upload_video():
 
         if USE_POSTGRES:
             cursor = conn.cursor()
-            cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category) VALUES (%s, %s, %s, %s, %s, %s, %s)', 
-                         (email, title, desc, video_url, thumb_url, video_type, category))
+            cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', 
+                         (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
         else:
-            conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-                         (email, title, desc, video_url, thumb_url, video_type, category))
+            conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+                         (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
         conn.commit()
         conn.close()
         
@@ -1085,6 +1086,57 @@ def ai_suggest():
     except Exception as e:
         print(f"AI Error: {e}")
         return jsonify({'title': f'Cool {topic} Video', 'description': f'An amazing video exploring {topic}. Check it out!'})
+
+@app.route('/api/video/moderate', methods=['POST'])
+def moderate_video():
+    data = request.json
+    title = data.get('title', '')
+    desc = data.get('description', '')
+    api_key = os.environ.get('GOOGLE_API_KEY', '').strip()
+    
+    if not api_key:
+        return jsonify({'status': 'safe', 'message': 'Safety check skipped'})
+
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        prompt = f"""
+        Act as a strict content moderator for Vitox Video Platform. 
+        Analyze the following video details and determine if it violates our 18+ policy (nudity, sexual content, extreme violence, or hate speech).
+        
+        Title: {title}
+        Description: {desc}
+        
+        Return ONLY a JSON object with two keys:
+        'status': 'safe' or 'flagged'
+        'reason': a short explanation if flagged, otherwise empty.
+        """
+        
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "safetySettings": [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_LOW_AND_ABOVE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_LOW_AND_ABOVE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_LOW_AND_ABOVE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_LOW_AND_ABOVE"}
+            ]
+        }
+        
+        response = requests.post(url, json=payload)
+        result = response.json()
+        
+        # If Gemini's own safety filter blocks it, flag it immediately
+        if 'promptFeedback' in result and result['promptFeedback'].get('blockReason'):
+            return jsonify({'status': 'flagged', 'reason': 'Google Safety Filter Triggered'})
+
+        text = result['candidates'][0]['content']['parts'][0]['text']
+        import json, re
+        clean_text = re.sub(r'```json\n?|\n?```', '', text).strip()
+        mod_result = json.loads(clean_text)
+        return jsonify(mod_result)
+        
+    except Exception as e:
+        print(f"Moderation Error: {e}")
+        return jsonify({'status': 'safe', 'message': 'Auto-approved (Error in Check)'})
 
 @app.route('/api/ai/chat', methods=['POST'])
 def ai_chat():
