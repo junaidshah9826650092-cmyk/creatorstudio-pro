@@ -327,18 +327,18 @@
 
                         <div class="snap-actions">
                             <div class="action-item" onclick="toggleLike(${vid.id}, '${vid.user_email}')">
-                                <i class="fas fa-heart"></i>
-                                <span>${vid.likes || 0}</span>
+                                <i class="fas fa-heart" id="snap-like-icon-${vid.id}"></i>
+                                <span id="snap-like-count-${vid.id}">${vid.likes || 0}</span>
                             </div>
-                            <div class="action-item" onclick="alert('Comments coming soon!')">
+                            <div class="action-item" onclick="openSnapComments(${vid.id})">
                                 <i class="fas fa-comment-dots"></i>
-                                <span>${vid.comment_count || 0}</span>
+                                <span id="snap-comm-count-${vid.id}">${vid.comment_count || 0}</span>
                             </div>
-                            <div class="action-item" onclick="alert('Share feature coming soon!')">
+                            <div class="action-item" onclick="shareVideo('${vid.video_url}')">
                                 <i class="fas fa-share"></i>
                                 <span>Share</span>
                             </div>
-                             <div class="action-item" onclick="alert('Remix this Snap!')">
+                             <div class="action-item" onclick="showToast('Remix feature coming soon!')">
                                 <i class="fas fa-record-vinyl fa-spin" style="animation-duration: 4s;"></i>
                             </div>
                         </div>
@@ -769,13 +769,23 @@
                 });
                 const stats = await res.json();
 
-                document.getElementById('view-count').innerText = stats.views.toLocaleString();
-                document.getElementById('like-count').innerText = stats.likes.toLocaleString();
-                document.getElementById('sub-count').innerText = `${stats.subscribers} Squad members`;
-                document.getElementById('comment-total').innerText = stats.comment_count.toLocaleString();
+                const likeCountEl = document.getElementById('like-count');
+                if (likeCountEl) likeCountEl.innerText = stats.likes.toLocaleString();
+
+                const subCountEl = document.getElementById('sub-count');
+                if (subCountEl) subCountEl.innerText = `${stats.subscribers} Squad members`;
+
+                const commCountEl = document.getElementById('comment-total');
+                if (commCountEl) commCountEl.innerText = stats.comment_count.toLocaleString();
 
                 const likeBtn = document.getElementById('like-btn');
-                if (stats.liked) likeBtn.style.color = '#ff003c';
+                if (likeBtn) likeBtn.style.color = stats.liked ? '#ff003c' : '#fff';
+
+                // Sync Snap UI if it exists
+                const snapLikeCount = document.getElementById(`snap-like-count-${videoId}`);
+                if (snapLikeCount) snapLikeCount.innerText = stats.likes;
+                const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
+                if (snapLikeIcon) snapLikeIcon.style.color = stats.liked ? '#ff003c' : '#fff';
 
                 const subBtn = document.getElementById('sub-btn');
                 if (subBtn) {
@@ -840,8 +850,18 @@
                 loadComments(videoId);
                 // Increment visual total
                 const total = document.getElementById('comment-total');
-                total.innerText = (parseInt(total.innerText.replace(/,/g, '')) + 1).toLocaleString();
+                if (total) total.innerText = (parseInt(total.innerText.replace(/,/g, '')) + 1).toLocaleString();
+
+                const snapTotal = document.getElementById(`snap-comm-count-${videoId}`);
+                if (snapTotal) snapTotal.innerText = parseInt(snapTotal.innerText) + 1;
             } catch (e) { console.error(e); }
+        }
+
+        function openSnapComments(videoId) {
+            // For Snaps, we reuse the playVideo modal but focus on comments
+            // Or better, just show a toast for now to avoid breaking the scroll
+            showToast("Opening Snap comments...");
+            // In a future update, we'll add a side-drawer for Snap comments.
         }
 
         // Toast Engine
