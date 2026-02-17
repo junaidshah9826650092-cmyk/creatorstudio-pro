@@ -183,18 +183,32 @@
 
         async function loadVideos() {
             try {
-                // Fetch only VIDEOS (Long form)
-                const res = await fetch('/api/videos?type=video');
-                allVideos = await res.json();
-                renderVideos(allVideos);
-
-                // Auto-play if shared via URL (?v=ID)
                 const urlParams = new URLSearchParams(window.location.search);
                 const sharedVidId = urlParams.get('v');
+
+                // If shared a video, fetch ALL (video + shorts) to find a match
+                const res = await fetch(sharedVidId ? '/api/videos' : '/api/videos?type=video');
+                allVideos = await res.json();
+
+                // Only render long videos on main feed
+                renderVideos(allVideos.filter(v => v.type === 'video' || !v.type));
+
+                // Auto-play if shared via URL (?v=ID or URL)
                 if (sharedVidId) {
-                    const vid = allVideos.find(v => String(v.id) === String(sharedVidId));
+                    const vid = allVideos.find(v =>
+                        String(v.id) === String(sharedVidId) ||
+                        String(v.video_url) === String(sharedVidId)
+                    );
+
                     if (vid) {
-                        playVideo(vid.video_url, vid.title, vid.user_email, vid.views, vid.timestamp, vid.description, vid.id);
+                        if (vid.type === 'short') {
+                            loadView('V-Snaps'); // Auto-switch to Snaps view
+                        } else {
+                            playVideo(vid.video_url, vid.title, vid.user_email, vid.views, vid.timestamp, vid.description, vid.id);
+                        }
+                    } else if (sharedVidId.startsWith('http')) {
+                        // LAST RESORT: Try to play it as a direct URL if it's a valid link
+                        playVideo(sharedVidId, "Shared Discovery", "Vitox Guest", 0, "Shared", "Linked directly via URL.", "direct-url");
                     }
                 }
             } catch (e) { console.error(e); }
@@ -329,26 +343,26 @@
                                     ${(vid.user_email || '?').charAt(0).toUpperCase()}
                                 </div>
                                 <span style="font-weight: 700; font-size: 1rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">@${vid.user_email.split('@')[0]}</span>
-                                <button class="btn-primary" style="padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; border: none; margin-left: auto;">Follow</button>
+                                <button class="snap-follow-btn" id="snap-sub-btn-${vid.id}" style="margin-left: auto;" onclick="toggleSubscribe('${vid.user_email}', '${vid.id}')">Squad</button>
                             </div>
                             <h3 style="margin: 0; font-size: 1.1rem; font-weight: 500; line-height: 1.4; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${vid.title || 'Vitox Snap'}</h3>
                             <p style="margin: 6px 0 0 0; font-size: 0.9rem; opacity: 0.9;">${vid.description || '#Vitox #Shorts'}</p>
                         </div>
 
                         <div class="snap-actions">
-                            <div class="action-item" onclick="toggleLike(${vid.id}, '${vid.user_email}')">
+                            <div class="action-item" onclick="toggleLike('${vid.id}', '${vid.user_email}')">
                                 <i class="fas fa-heart" id="snap-like-icon-${vid.id}"></i>
                                 <span id="snap-like-count-${vid.id}">${vid.likes || 0}</span>
                             </div>
-                            <div class="action-item" onclick="openSnapComments(${vid.id})">
+                            <div class="action-item" onclick="openSnapComments('${vid.id}')">
                                 <i class="fas fa-comment-dots"></i>
                                 <span id="snap-comm-count-${vid.id}">${vid.comment_count || 0}</span>
                             </div>
-                            <div class="action-item" onclick="shareVideo('${vid.video_url}')">
+                            <div class="action-item" onclick="shareVideo('${vid.id}')">
                                 <i class="fas fa-share"></i>
                                 <span>Share</span>
                             </div>
-                             <div class="action-item" onclick="showToast('Remix feature coming soon!')">
+                             <div class="action-item" onclick="showToast('Vitox Audio: ' + (document.querySelector('h3').innerText))">
                                 <i class="fas fa-record-vinyl fa-spin" style="animation-duration: 4s;"></i>
                             </div>
                         </div>
@@ -871,10 +885,9 @@
         }
 
         function openSnapComments(videoId) {
-            // For Snaps, we reuse the playVideo modal but focus on comments
-            // Or better, just show a toast for now to avoid breaking the scroll
-            showToast("Opening Snap comments...");
-            // In a future update, we'll add a side-drawer for Snap comments.
+            showToast("Comments are loading in Studio...");
+            // Trigger the main video player logic to show comments in a modal if needed
+            // For now, we keep it simple as Snaps are 100vh
         }
 
         // Toast Engine
@@ -896,9 +909,11 @@
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             if (!user) { showToast("Please login to like!"); return; }
 
-            const btn = document.getElementById('like-btn');
-            btn.classList.add('pulse-active');
-            setTimeout(() => btn.classList.remove('pulse-active'), 300);
+            const mainBtn = document.getElementById('like-btn');
+            if (mainBtn) {
+                mainBtn.classList.add('pulse-active');
+                setTimeout(() => mainBtn.classList.remove('pulse-active'), 300);
+            }
 
             try {
                 const res = await fetch('/api/video/like', {
@@ -907,8 +922,19 @@
                     body: JSON.stringify({ video_id: videoId, email: user.email })
                 });
                 const data = await res.json();
-                showToast(data.status === 'liked' ? "Video Liked!" : "Like Removed");
-                loadEngagementStats(videoId, channelEmail);
+                showToast(data.status === 'liked' ? "Liked! ❤️" : "Like Removed");
+
+                // Update Snap card counts if they exist
+                const snapLikeCount = document.getElementById(`snap-like-count-${videoId}`);
+                if (snapLikeCount) {
+                    snapLikeCount.innerText = data.likes;
+                }
+                const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
+                if (snapLikeIcon) {
+                    snapLikeIcon.style.color = data.status === 'liked' ? '#ff0055' : '#fff';
+                }
+
+                if (mainBtn) loadEngagementStats(videoId, channelEmail);
             } catch (e) { console.error(e); }
         }
 
@@ -916,9 +942,11 @@
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             if (!user) { showToast("Please login to join the Squad!"); return; }
 
-            const btn = document.getElementById('sub-btn');
-            btn.classList.add('pulse-active');
-            setTimeout(() => btn.classList.remove('pulse-active'), 300);
+            const mainBtn = document.getElementById('sub-btn');
+            if (mainBtn) {
+                mainBtn.classList.add('pulse-active');
+                setTimeout(() => mainBtn.classList.remove('pulse-active'), 300);
+            }
 
             try {
                 const res = await fetch('/api/channel/subscribe', {
@@ -927,8 +955,17 @@
                     body: JSON.stringify({ subscriber: user.email, channel: channelEmail })
                 });
                 const data = await res.json();
-                showToast(data.status === 'subscribed' ? "Added to Squad!" : "Left the Squad");
-                loadEngagementStats(videoId, channelEmail);
+                showToast(data.status === 'subscribed' ? "Added to Squad! 🚀" : "Left the Squad");
+
+                // Update Snap card follow buttons
+                const snapSubBtn = document.getElementById(`snap-sub-btn-${videoId}`);
+                if (snapSubBtn) {
+                    snapSubBtn.innerText = data.status === 'subscribed' ? 'Joined' : 'Squad';
+                    snapSubBtn.style.background = data.status === 'subscribed' ? 'rgba(255,255,255,0.2)' : 'white';
+                    snapSubBtn.style.color = data.status === 'subscribed' ? 'white' : 'black';
+                }
+
+                if (mainBtn) loadEngagementStats(videoId, channelEmail);
             } catch (e) { console.error(e); }
         }
 
