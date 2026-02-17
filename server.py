@@ -346,9 +346,44 @@ def upload_video():
         conn.close()
         
         return jsonify({'status': 'success'})
+        return jsonify({'status': 'success'})
     except Exception as e:
         print(f"Upload Error: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+def _fetch_from_cloudinary(resource_type='video'):
+    """Helper: Fetch raw video resources from Cloudinary Admin API."""
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    api_key = os.environ.get('CLOUDINARY_API_KEY')
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    if not cloud_name or not api_key or not api_secret:
+        return []
+        
+    try:
+        auth_str = f"{api_key}:{api_secret}"
+        encoded_auth = base64.b64encode(auth_str.encode()).decode()
+        url = f"https://api.cloudinary.com/v1_1/{cloud_name}/resources/{resource_type}?max_results=100"
+        headers = {'Authorization': f'Basic {encoded_auth}'}
+        
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        
+        videos = []
+        for res in data.get('resources', []):
+            videos.append({
+                'id': f"cl-{res.get('asset_id')}",
+                'title': res.get('public_id').split('/')[-1].replace('_', ' ').capitalize(),
+                'user_email': 'Official Creator',
+                'video_url': res.get('secure_url'),
+                'description': 'Direct Cloudinary Recovery Feed',
+                'views': 0, 'likes': 0, 'comment_count': 0,
+                'timestamp': res.get('created_at'),
+                'type': 'video', 'category': 'All'
+            })
+        return videos
+    except Exception as e:
+        print(f"Cloudinary Fetch Error: {e}")
+        return []
 
 @app.route('/api/videos', methods=['GET'])
 def get_all_videos():
@@ -375,6 +410,14 @@ def get_all_videos():
             videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
         
     conn.close()
+
+    if not videos or len(videos) == 0:
+        # FAIL-SAFE: If DB is empty and on Render risk, fetch direct
+        if not USE_POSTGRES and os.environ.get('RENDER') == 'true':
+            print("DB Empty. Fallback to Direct Cloudinary Feed...")
+            videos = _fetch_from_cloudinary(video_type if video_type else 'video')
+            return jsonify(videos)
+
     return jsonify([dict(v) for v in videos])
 
 @app.route('/api/videos/<email>', methods=['GET'])
