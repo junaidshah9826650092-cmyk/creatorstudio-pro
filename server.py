@@ -208,11 +208,14 @@ def init_db():
         except: pass
         try: cursor.execute('ALTER TABLE users ADD COLUMN status TEXT DEFAULT "active"')
         except: pass
+        try: cursor.execute('ALTER TABLE videos ADD COLUMN moderation_status TEXT DEFAULT "safe"')
+        except: pass
     else:
         # Postgres migrations
         try: 
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS type TEXT DEFAULT \'video\'')
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS category TEXT DEFAULT \'All\'')
+            cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS moderation_status TEXT DEFAULT \'safe\'')
             cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT DEFAULT \'active\'')
             conn.commit()
         except: conn.rollback()
