@@ -61,6 +61,21 @@ def get_db_connection():
         conn.execute('PRAGMA synchronous = NORMAL')
         return conn
 
+def to_json(data):
+    """Helper to convert database results (with datetimes) to JSON serializable format."""
+    from datetime import datetime, date
+    if isinstance(data, list):
+        return [to_json(i) for i in data]
+    if isinstance(data, (dict, sqlite3.Row)) or (hasattr(data, 'items') and callable(getattr(data, 'items'))):
+        d = dict(data)
+        for k, v in d.items():
+            if isinstance(v, (datetime, date)):
+                d[k] = v.isoformat()
+            elif isinstance(v, (dict, list)):
+                d[k] = to_json(v)
+        return d
+    return data
+
 def init_db():
     print(f"--- INITIALIZING MILITARY-GRADE DATABASE SYSTEM ---")
     conn = get_db_connection()
@@ -236,9 +251,15 @@ def sync_user():
         conn.commit()
     
     # Fetch updated user
-    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
-    user_data = dict(user)
-    user_data['is_admin'] = (user['role'] == 'admin')
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+        user = cursor.fetchone()
+    else:
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    
+    user_data = to_json(user)
+    user_data['is_admin'] = (user_data.get('role') == 'admin')
     
     conn.close()
     return jsonify(user_data)
@@ -260,9 +281,13 @@ def add_points():
          conn.execute('UPDATE users SET points = points + ? WHERE email = ?', (amount, email))
          conn.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (?, ?, ?, ?, ?)', 
                   (email, amount, 'earn', desc, 'completed'))
-    conn.commit()
-    
-    new_points = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()['points']
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT points FROM users WHERE email = %s', (email,))
+        user = cursor.fetchone()
+        new_points = user['points']
+    else:
+        new_points = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()['points']
     conn.close()
     
     return jsonify({'status': 'success', 'new_points': new_points})
@@ -439,7 +464,7 @@ def get_all_videos():
             videos = [v for v in videos if v.get('type') == video_type]
         return jsonify(videos)
 
-    return jsonify([dict(v) for v in videos])
+    return jsonify(to_json(videos))
 
 @app.route('/api/videos/<email>', methods=['GET'])
 def get_user_videos(email):
@@ -451,15 +476,20 @@ def get_user_videos(email):
     else:
         videos = conn.execute('SELECT * FROM videos WHERE user_email = ? ORDER BY timestamp DESC', (email,)).fetchall()
     conn.close()
-    return jsonify([dict(v) for v in videos])
+    return jsonify(to_json(videos))
 
 
 @app.route('/api/transactions/<email>', methods=['GET'])
 def get_transactions(email):
     conn = get_db_connection()
-    txs = conn.execute('SELECT * FROM transactions WHERE user_email = ? ORDER BY timestamp DESC LIMIT 20', (email,)).fetchall()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM transactions WHERE user_email = %s ORDER BY timestamp DESC LIMIT 20', (email,))
+        txs = cursor.fetchall()
+    else:
+        txs = conn.execute('SELECT * FROM transactions WHERE user_email = ? ORDER BY timestamp DESC LIMIT 20', (email,)).fetchall()
     conn.close()
-    return jsonify([dict(tx) for tx in txs])
+    return jsonify(to_json(txs))
 
 # --- ENGAGEMENT API ---
 
@@ -485,9 +515,8 @@ def get_liked_videos(email):
                 WHERE l.user_email = ?
                 ORDER BY v.timestamp DESC
             ''', (email,)).fetchall()
-            videos = [dict(row) for row in videos]
         
-        return jsonify(videos)
+        return jsonify(to_json(videos))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
@@ -628,7 +657,7 @@ def get_comments(video_id):
     else:
         comments = conn.execute('SELECT * FROM comments WHERE video_id = ? ORDER BY timestamp DESC', (video_id,)).fetchall()
     conn.close()
-    return jsonify([dict(c) for c in comments])
+    return jsonify(to_json(comments))
 
 @app.route('/api/video/stats/<video_id>', methods=['POST'])
 def get_video_stats(video_id):
@@ -835,10 +864,9 @@ def admin_users():
         users = cursor.fetchall()
     else:
         users = conn.execute('SELECT * FROM users ORDER BY last_login DESC').fetchall()
-        users = [dict(u) for u in users]
     
     conn.close()
-    return jsonify(users)
+    return jsonify(to_json(users))
 
 @app.route('/api/admin/transactions', methods=['POST'])
 def admin_transactions():
@@ -854,9 +882,8 @@ def admin_transactions():
         txs = cursor.fetchall()
     else:
         txs = conn.execute('SELECT * FROM transactions ORDER BY timestamp DESC').fetchall()
-        txs = [dict(tx) for tx in txs]
     conn.close()
-    return jsonify(txs)
+    return jsonify(to_json(txs))
 
 @app.route('/api/debug/db', methods=['GET'])
 def debug_db():
