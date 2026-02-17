@@ -322,10 +322,19 @@
                     dbBadge.style.borderColor = "rgba(0,255,136,0.2)";
                     dbText.innerText = stats.db_type;
                 } else {
-                    dbBadge.style.color = "#ff9800";
-                    dbBadge.style.background = "rgba(255,152,0,0.1)";
-                    dbBadge.style.borderColor = "rgba(255,152,0,0.2)";
+                    dbBadge.style.color = "#ff3d00"; // Red-Orange
+                    dbBadge.style.background = "rgba(255,61,0,0.1)";
+                    dbBadge.style.borderColor = "rgba(255,61,0,0.2)";
                     dbText.innerText = stats.db_type || "Unknown DB";
+
+                    if (stats.data_risk) {
+                        dbText.innerText = "CRITICAL: DATA WILL BE LOST!";
+                        dbText.style.fontWeight = "bold";
+                        if (!window.hasWarnedDataRisk) {
+                            alert("CRITICAL WARNING: You are running on Render without a persistent database. All data will be erased on restart.\n\nPlease go to Render Dashboard > New > PostgreSQL and link it to your service.");
+                            window.hasWarnedDataRisk = true;
+                        }
+                    }
                 }
 
                 // Load Users

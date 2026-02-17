@@ -638,7 +638,8 @@ def admin_stats():
             'total_users': total_users,
             'total_points': total_points,
             'pending_withdrawals': pending_withdrawals,
-            'db_type': 'PostgreSQL (Secure Cloud)' if USE_POSTGRES else 'SQLite (Local/Ephemeral)'
+            'db_type': 'PostgreSQL (Secure Cloud)' if USE_POSTGRES else 'SQLite (Local/Ephemeral)',
+            'data_risk': not USE_POSTGRES and os.environ.get('RENDER') == 'true'
         })
     except Exception as e:
         print(f"Stats Error: {e}")
@@ -671,6 +672,7 @@ def creator_stats():
         'watch_time': 0,
         'video_count': total_videos
     })
+@app.route('/api/admin/users', methods=['POST'])
 def admin_users():
     data = request.json
     email = data.get('email')
@@ -678,9 +680,16 @@ def admin_users():
         return jsonify({'error': 'Unauthorized'}), 403
         
     conn = get_db_connection()
-    users = conn.execute('SELECT * FROM users ORDER BY last_login DESC').fetchall()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM users ORDER BY last_login DESC')
+        users = cursor.fetchall()
+    else:
+        users = conn.execute('SELECT * FROM users ORDER BY last_login DESC').fetchall()
+        users = [dict(u) for u in users]
+    
     conn.close()
-    return jsonify([dict(u) for u in users])
+    return jsonify(users)
 
 @app.route('/api/admin/transactions', methods=['POST'])
 def admin_transactions():
@@ -690,9 +699,15 @@ def admin_transactions():
         return jsonify({'error': 'Unauthorized'}), 403
         
     conn = get_db_connection()
-    txs = conn.execute('SELECT * FROM transactions ORDER BY timestamp DESC').fetchall()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM transactions ORDER BY timestamp DESC')
+        txs = cursor.fetchall()
+    else:
+        txs = conn.execute('SELECT * FROM transactions ORDER BY timestamp DESC').fetchall()
+        txs = [dict(tx) for tx in txs]
     conn.close()
-    return jsonify([dict(tx) for tx in txs])
+    return jsonify(txs)
 
 @app.route('/api/debug/db', methods=['GET'])
 def debug_db():
@@ -716,7 +731,11 @@ def update_transaction():
         return jsonify({'error': 'Unauthorized'}), 403
         
     conn = get_db_connection()
-    conn.execute('UPDATE transactions SET status = ? WHERE id = ?', (new_status, tx_id))
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE transactions SET status = %s WHERE id = %s', (new_status, tx_id))
+    else:
+        conn.execute('UPDATE transactions SET status = ? WHERE id = ?', (new_status, tx_id))
     conn.commit()
     conn.close()
     return jsonify({'status': 'success'})
