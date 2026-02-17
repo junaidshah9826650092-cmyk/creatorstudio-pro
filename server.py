@@ -5,6 +5,8 @@ from flask_cors import CORS
 from datetime import datetime, date
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import requests
+import base64
 
 # Local disk storage disabled (Cloud Only)
 
@@ -37,7 +39,13 @@ if USE_POSTGRES:
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     print(f"Using PostgreSQL: {DATABASE_URL[:30]}...")
 else:
+    print("---------------------------------------------------------")
+    print("⚠️  WARNING: USING LOCAL SQLite STORAGE (EPHEMERAL)     ")
+    if os.environ.get('RENDER') == 'true':
+        print("⚠️  DANGER: DATA WILL BE DELETED ON EVERY REDEPLOY!    ")
+        print("💡 FIX: Set DATABASE_URL in Render Dashboard.        ")
     print(f"Using SQLite: {DB_FILE}")
+    print("---------------------------------------------------------")
 
 _db_ready = False
 
@@ -656,6 +664,71 @@ def storage_status():
         'db_type': 'PostgreSQL (Cloud Safe)' if USE_POSTGRES else 'SQLite (Ephemeral/Risk)',
         'data_risk': not USE_POSTGRES and os.environ.get('RENDER') == 'true'
     })
+
+@app.route('/api/admin/sync-cloudinary', methods=['POST'])
+def sync_cloudinary():
+    """Fail-safe: Recover lost video links from Cloudinary directly."""
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    api_key = os.environ.get('CLOUDINARY_API_KEY')
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    
+    if not cloud_name or not api_key or not api_secret:
+        return jsonify({'status': 'error', 'message': 'Cloudinary API credentials missing in .env'}), 400
+        
+    try:
+        # Cloudinary Admin API requires Basic Auth
+        auth_str = f"{api_key}:{api_secret}"
+        encoded_auth = base64.b64encode(auth_str.encode()).decode()
+        
+        url = f"https://api.cloudinary.com/v1_1/{cloud_name}/resources/video?max_results=500"
+        headers = {'Authorization': f'Basic {encoded_auth}'}
+        
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        
+        if 'resources' not in data:
+            return jsonify({'status': 'error', 'message': 'Failed to fetch from Cloudinary', 'debug': data}), 500
+            
+        conn = get_db_connection()
+        count = 0
+        added = 0
+        
+        for res in data['resources']:
+            video_url = res.get('secure_url')
+            public_id = res.get('public_id')
+            
+            # Check if exists in DB
+            if USE_POSTGRES:
+                cursor = conn.cursor()
+                cursor.execute('SELECT 1 FROM videos WHERE video_url = %s', (video_url,))
+                exists = cursor.fetchone()
+            else:
+                exists = conn.execute('SELECT 1 FROM videos WHERE video_url = ?', (video_url,)).fetchone()
+                
+            if not exists:
+                title = public_id.split('/')[-1].replace('_', ' ').capitalize()
+                email = os.environ.get('ADMIN_EMAIL', 'junaidshah78634@gmail.com')
+                
+                if USE_POSTGRES:
+                    cursor.execute('INSERT INTO videos (user_email, title, video_url, type, category) VALUES (%s, %s, %s, %s, %s)',
+                                 (email, title, video_url, 'video', 'Recovered'))
+                else:
+                    conn.execute('INSERT INTO videos (user_email, title, video_url, type, category) VALUES (?, ?, ?, ?, ?)',
+                                 (email, title, video_url, 'video', 'Recovered'))
+                added += 1
+            count += 1
+            
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'status': 'success', 
+            'message': f'Sync complete. Scanned {count} videos, restored {added} missing links.',
+            'restored': added
+        })
+    except Exception as e:
+        print(f"Sync Error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/creator/stats', methods=['POST'])
 def creator_stats():

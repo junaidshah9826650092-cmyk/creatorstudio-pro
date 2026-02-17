@@ -179,28 +179,28 @@
             display: none;
         }
 
-        @media (max-width: 768px) {
-            .admin-header {
-                padding: 15px 20px;
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
+        .db-warning {
+            background: rgba(255, 60, 0, 0.1);
+            border: 1px solid #ff3c00;
+            color: #ff3c00;
+            padding: 15px 40px;
+            margin: 20px 40px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
 
-            .stats-grid {
-                padding: 20px;
-                grid-template-columns: 1fr;
-            }
-
-            .data-section {
-                padding: 0 20px;
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 600px;
-                /* Force scroll */
-            }
+        .db-ok {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 15px 40px;
+            margin: 20px 40px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            gap: 15px;
         }
     </style>
     <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
@@ -217,25 +217,37 @@
             </svg>
             <span>Vitox Admin</span>
         </div>
-        <div style="display: flex; gap: 15px; align-items: center;">
-
-            <div id="db-status-badge"
-                style="display: flex; align-items: center; gap: 8px; color: #aaa; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">
-                <i class="fas fa-database"></i> <span id="db-status-text">Checking DB...</span>
-            </div>
-            <button onclick="location.href='index.html'"
-                style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i
-                    class="fas fa-eye"></i> View Site</button>
-            <button onclick="downloadBackup()"
-                style="background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
-                <i class="fas fa-download"></i> Backup Data
-            </button>
-            <button onclick="refreshData()"
-                style="background: #ff0000; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i
-                    class="fas fa-sync"></i> Sync Database</button>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <button class="btn-text" onclick="location.href='index.html'"
+                style="color: #888; background: transparent; border: none; cursor: pointer; font-size: 0.9rem;"><i
+                    class="fas fa-home"></i> View Site</button>
+            <button class="btn-text" onclick="logout()"
+                style="color: var(--accent); background: transparent; border: 1px solid var(--accent); padding: 6px 15px; border-radius: 4px; cursor: pointer;"><i
+                    class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </header>
 
+    <div id="db-warning-banner" class="db-warning">
+        <i class="fas fa-triangle-exclamation" style="font-size: 1.5rem;"></i>
+        <div style="flex: 1;">
+            <div style="font-weight: 700;">DANGER: EPHEMERAL DATABASE DETECTED</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">You are using SQLite on Render. Your video data will be
+                DELETED every time you redeploy. <b>Connect a PostgreSQL database to fix this permanently.</b></div>
+        </div>
+        <button onclick="syncFromCloudinary()" id="sync-btn"
+            style="background: white; color: #ff3c00; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-rotate"></i> RECOVER LOST VIDEOS
+        </button>
+    </div>
+
+    <div id="db-success-banner" class="db-ok">
+        <i class="fas fa-shield-check" style="font-size: 1.5rem;"></i>
+        <div>
+            <div style="font-weight: 700;">CLOUD STORAGE ACTIVE</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Your database is persistent. Data is safe across redeploys.
+            </div>
+        </div>
+    </div>
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Registered Users</h3>
@@ -450,9 +462,53 @@
             }
         }
 
-        // Auto Refresh every 30 seconds
-        setInterval(refreshData, 30000);
-        window.onload = refreshData;
+        async function checkDB() {
+            try {
+                const res = await fetch('/api/storage/status');
+                const data = await res.json();
+                if (data.persistent) {
+                    document.getElementById('db-success-banner').style.display = 'flex';
+                } else if (data.data_risk) {
+                    document.getElementById('db-warning-banner').style.display = 'flex';
+                }
+            } catch (e) { }
+        }
+
+        async function syncFromCloudinary() {
+            const btn = document.getElementById('sync-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/admin/sync-cloudinary', { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (e) {
+                alert("Connection failed!");
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        window.onload = () => {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user || user.email !== 'junaidshah78634@gmail.com') {
+                location.href = 'index.html';
+                return;
+            }
+            fetchStats();
+            fetchTransactions();
+            checkDB();
+        };
+
+        // Auto Refresh every 2 minutes
+        setInterval(refreshData, 120000);
     </script>
 </body>
 
