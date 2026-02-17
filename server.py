@@ -8,6 +8,19 @@ from psycopg2.extras import RealDictCursor
 import requests
 import base64
 
+# Security & CSRF Protection
+def admin_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        admin_email = os.environ.get('ADMIN_EMAIL', 'junaidshah78634@gmail.com')
+        # Simple header-based or param-based auth for demo, in prod use JWT
+        auth_email = request.headers.get('X-Admin-Email')
+        if auth_email != admin_email:
+            return jsonify({'status': 'error', 'message': 'Administrative privileges required'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Local disk storage disabled (Cloud Only)
 
 # Load .env manually for local development
@@ -28,7 +41,7 @@ Talisman(app, content_security_policy=None, force_https=is_prod)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
-ADMIN_EMAIL = "junaidshah78634@gmail.com" 
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'junaidshah78634@gmail.com')
 
 # PostgreSQL or SQLite
 DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -160,7 +173,7 @@ def init_db():
         )
     ''')
 
-    # Collaboration Messages table
+    # Collaboration & Admin Messages table
     cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS messages (
             id {id_type},
@@ -168,6 +181,7 @@ def init_db():
             receiver_email TEXT,
             content TEXT,
             is_collab BOOLEAN DEFAULT TRUE,
+            is_admin BOOLEAN DEFAULT FALSE,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             is_read BOOLEAN DEFAULT FALSE
         )
@@ -1364,7 +1378,138 @@ def get_chat_history():
     conn.close()
     return jsonify(messages)
 
-# Deploy ID: 1739556801
+# --- ADMINISTRATIVE PANEL APIS ---
+@app.route('/api/admin/stats')
+@admin_required
+def get_platform_stats():
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users")
+        u_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM videos")
+        v_count = cursor.fetchone()[0]
+        cursor.execute("SELECT SUM(views) FROM videos")
+        total_views = cursor.fetchone()[0] or 0
+        cursor.execute("SELECT SUM(points) FROM users")
+        total_points = cursor.fetchone()[0] or 0
+    else:
+        u_count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        v_count = conn.execute("SELECT COUNT(*) FROM videos").fetchone()[0]
+        total_views = conn.execute("SELECT SUM(views) FROM videos").fetchone()[0] or 0
+        total_points = conn.execute("SELECT SUM(points) FROM users").fetchone()[0] or 0
+    conn.close()
+    return jsonify({
+        'users': u_count,
+        'videos': v_count,
+        'views': total_views,
+        'points': total_points
+    })
+
+@app.route('/api/admin/users')
+@admin_required
+def get_all_users():
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute("SELECT * FROM users ORDER BY last_login DESC")
+        rows = cursor.fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM users ORDER BY last_login DESC").fetchall()
+    users = [dict(r) for r in rows]
+    conn.close()
+    return jsonify(users)
+
+@app.route('/api/admin/user/action', methods=['POST'])
+@admin_required
+def admin_user_action():
+    data = request.json
+    target_email = data.get('email')
+    action = data.get('action') # 'verify_brand', 'ban', 'unban', 'make_admin'
+    
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        if action == 'verify_brand':
+            cursor.execute("UPDATE users SET is_verified_brand = TRUE, status = 'active' WHERE email = %s", (target_email,))
+        elif action == 'ban':
+            cursor.execute("UPDATE users SET status = 'banned' WHERE email = %s", (target_email,))
+        elif action == 'unban':
+            cursor.execute("UPDATE users SET status = 'active' WHERE email = %s", (target_email,))
+    else:
+        if action == 'verify_brand':
+            conn.execute("UPDATE users SET is_verified_brand = 1, status = 'active' WHERE email = ?", (target_email,))
+        elif action == 'ban':
+            conn.execute("UPDATE users SET status = 'banned' WHERE email = ?", (target_email,))
+        elif action == 'unban':
+            conn.execute("UPDATE users SET status = 'active' WHERE email = ?", (target_email,))
+    
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'message': f'Action {action} applied to {target_email}'})
+
+@app.route('/api/admin/video/delete', methods=['DELETE'])
+@admin_required
+def admin_delete_video():
+    video_id = request.args.get('id')
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM videos WHERE id = %s", (video_id,))
+    else:
+        conn.execute("DELETE FROM videos WHERE id = ?", (video_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+@app.route('/api/admin/chat/send', methods=['POST'])
+@admin_required
+def api_admin_chat_send():
+    data = request.json
+    receiver_email = data.get('receiver_email')
+    content = data.get('content')
+    admin_email = request.headers.get('X-Admin-Email')
+
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO messages (sender_email, receiver_email, content, is_admin, is_collab) VALUES (%s, %s, %s, %s, %s)',
+                     (admin_email, receiver_email, content, True, False))
+    else:
+        conn.execute('INSERT INTO messages (sender_email, receiver_email, content, is_admin, is_collab) VALUES (?, ?, ?, ?, ?)',
+                     (admin_email, receiver_email, content, 1, 0))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+@app.route('/api/admin/chat/history', methods=['GET'])
+def get_admin_chat_history():
+    user_email = request.args.get('email')
+    admin_email = os.environ.get('ADMIN_EMAIL', 'junaidshah78634@gmail.com')
+    
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute('''
+            SELECT * FROM messages 
+            WHERE (sender_email = %s AND receiver_email = %s)
+            OR (sender_email = %s AND receiver_email = %s)
+            ORDER BY timestamp ASC
+        ''', (admin_email, user_email, user_email, admin_email))
+        rows = cursor.fetchall()
+    else:
+        rows = conn.execute('''
+            SELECT * FROM messages 
+            WHERE (sender_email = ? AND receiver_email = ?)
+            OR (sender_email = ? AND receiver_email = ?)
+            ORDER BY timestamp ASC
+        ''', (admin_email, user_email, user_email, admin_email)).fetchall()
+        
+    messages = [dict(r) for r in rows]
+    conn.close()
+    return jsonify(messages)
+
+# Deploy ID: 1739556810
 
 # Initial DB Setup on Start
 try:

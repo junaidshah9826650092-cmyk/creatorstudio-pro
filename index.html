@@ -138,6 +138,8 @@
                 <a href="#" class="nav-item" onclick="showPagesModal(); return false;"><i
                         class="fas fa-info-circle"></i>
                     <span>About & Privacy</span></a>
+                <a href="#" class="nav-item" onclick="openAdminChat(); return false;" style="color: #ffd700;">
+                    <i class="fas fa-crown"></i> <span>Official Support</span></a>
             </nav>
         </aside>
 
@@ -168,153 +170,188 @@
                 <p>No videos found. Be the first to upload one!</p>
             </div>
         </main>
-    </div>
-
-    <!-- Collab Chat Drawer -->
-    <div id="collab-chat-drawer"
-        style="position: fixed; top: 0; right: -100%; width: 450px; max-width: 100%; height: 100vh; background: #0a0a0a; z-index: 10001; box-shadow: -20px 0 50px rgba(0,0,0,0.9); transition: right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
-        <div
-            style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #111, #0a0a0a);">
-            <div>
-                <h3
-                    style="margin:0; font-weight: 800; color: #ff0055; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-handshake"></i> Brand Collaboration
-                </h3>
-                <div id="collab-chat-target" style="font-size: 0.8rem; color: #aaa; margin-top: 4px;">Chatting with
-                    Creator</div>
+        <!-- Collab Chat Drawer -->
+        <div id="collab-chat-drawer"
+            style="position: fixed; top: 0; right: -100%; width: 450px; max-width: 100%; height: 100vh; background: #0a0a0a; z-index: 10001; box-shadow: -20px 0 50px rgba(0,0,0,0.9); transition: right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
+            <div
+                style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #111, #0a0a0a);">
+                <div>
+                    <h3
+                        style="margin:0; font-weight: 800; color: #ff0055; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-handshake"></i> Brand Collaboration
+                    </h3>
+                    <div id="collab-chat-target" style="font-size: 0.8rem; color: #aaa; margin-top: 4px;">Chatting with
+                        Creator</div>
+                </div>
+                <button onclick="closeCollabChat()"
+                    style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer;">&times;</button>
             </div>
-            <button onclick="closeCollabChat()"
-                style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer;">&times;</button>
-        </div>
-        <div id="collab-messages-content"
-            style="flex:1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-            <!-- Messages load here -->
-        </div>
-        <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); background: #111;">
-            <div style="display: flex; gap: 12px;">
-                <input type="text" id="collab-chat-input" placeholder="Discuss collaboration..."
-                    style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px; color: white; outline: none;">
-                <button id="collab-chat-send"
-                    style="background: #ff0055; color: white; border: none; width: 50px; border-radius: 12px; cursor: pointer;">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+            <div id="collab-messages-content"
+                style="flex:1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+                <!-- Messages load here -->
             </div>
-        </div>
-    </div>
-
-    <!-- Snap Comments Drawer -->
-    <div id="snap-comment-backdrop" onclick="closeSnapComments()"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; backdrop-filter: blur(4px);">
-    </div>
-    <div id="snap-comment-drawer"
-        style="position: fixed; top: 0; right: -100%; width: 450px; max-width: 100%; height: 100vh; background: #0f0f0f; z-index: 10000; box-shadow: -10px 0 40px rgba(0,0,0,0.8); transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column;">
-        <div
-            style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin:0; font-weight: 800; font-size: 1.2rem;">Comments</h3>
-            <button onclick="closeSnapComments()"
-                style="background:none; border:none; color:white; font-size: 1.8rem; cursor:pointer; padding: 0 10px;">&times;</button>
-        </div>
-        <div id="snap-comments-content" style="flex:1; overflow-y: auto; padding: 20px;">
-            <!-- Comments load here -->
-        </div>
-        <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.08); background: #0f0f0f;">
-            <div style="display: flex; gap: 12px; align-items: center;">
-                <input type="text" id="snap-comment-input" placeholder="Add a comment..."
-                    style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 12px 20px; color: white; outline: none; font-size: 0.95rem;">
-                <button id="snap-comment-submit"
-                    style="background: #ff0055; color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+            <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); background: #111;">
+                <div style="display: flex; gap: 12px;">
+                    <input type="text" id="collab-chat-input" placeholder="Discuss collaboration..."
+                        style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px; color: white; outline: none;">
+                    <button id="collab-chat-send"
+                        style="background: #ff0055; color: white; border: none; width: 50px; border-radius: 12px; cursor: pointer;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="toast-container"></div>
-    <div id="toast-container"></div>
-    <script>
-        AOS.init({
-            duration: 800,
-            once: true,
-            easing: 'ease-out-cubic'
-        });
+        <!-- Admin Support Chat Drawer (Alag UI) -->
+        <div id="admin-chat-drawer"
+            style="position: fixed; top: 0; right: -100%; width: 500px; max-width: 100%; height: 100vh; background: #050505; z-index: 10002; box-shadow: -20px 0 60px rgba(0,0,0,1); transition: right 0.6s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; border-left: 2px solid #ffd700;">
+            <div
+                style="padding: 25px; border-bottom: 1px solid rgba(255,215,0,0.2); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #111, #000);">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div
+                        style="width: 45px; height: 45px; background: #ffd700; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: black; font-size: 1.2rem; filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-weight: 900; color: #ffd700; letter-spacing: 1px;">OFFICIAL SUPPORT
+                        </h3>
+                        <div id="admin-chat-target" style="font-size: 0.75rem; color: #aaa; text-transform: uppercase;">
+                            Direct Line to Admin</div>
+                    </div>
+                </div>
+                <button onclick="closeAdminChat()"
+                    style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer; opacity: 0.6;">&times;</button>
+            </div>
+            <div id="admin-messages-content"
+                style="flex:1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Official Messages load here -->
+            </div>
+            <div style="padding: 25px; border-top: 1px solid rgba(255,215,0,0.1); background: #0a0a0a;">
+                <div
+                    style="display: flex; gap: 12px; background: #111; padding: 5px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+                    <input type="text" id="admin-chat-input" placeholder="Type official message..."
+                        style="flex:1; background: transparent; border: none; padding: 12px 18px; color: white; outline: none; font-size: 0.95rem;">
+                    <button id="admin-chat-send"
+                        style="background: #ffd700; color: black; border: none; width: 50px; border-radius: 12px; cursor: pointer; font-weight: 900;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-        let allVideos = []; // Global for search
+        <!-- Snap Comments Drawer -->
+        <div id="snap-comment-backdrop" onclick="closeSnapComments()"
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; backdrop-filter: blur(4px);">
+        </div>
+        <div id="snap-comment-drawer"
+            style="position: fixed; top: 0; right: -100%; width: 450px; max-width: 100%; height: 100vh; background: #0f0f0f; z-index: 10000; box-shadow: -10px 0 40px rgba(0,0,0,0.8); transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column;">
+            <div
+                style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0; font-weight: 800; font-size: 1.2rem;">Comments</h3>
+                <button onclick="closeSnapComments()"
+                    style="background:none; border:none; color:white; font-size: 1.8rem; cursor:pointer; padding: 0 10px;">&times;</button>
+            </div>
+            <div id="snap-comments-content" style="flex:1; overflow-y: auto; padding: 20px;">
+                <!-- Comments load here -->
+            </div>
+            <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.08); background: #0f0f0f;">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="text" id="snap-comment-input" placeholder="Add a comment..."
+                        style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 12px 20px; color: white; outline: none; font-size: 0.95rem;">
+                    <button id="snap-comment-submit"
+                        style="background: #ff0055; color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-        async function loadVideos() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const sharedVidId = urlParams.get('v');
+        <div id="toast-container"></div>
+        <div id="toast-container"></div>
+        <script>
+            AOS.init({
+                duration: 800,
+                once: true,
+                easing: 'ease-out-cubic'
+            });
 
-                // If shared a video, fetch ALL (video + shorts) to find a match
-                const res = await fetch(sharedVidId ? '/api/videos' : '/api/videos?type=video');
-                allVideos = await res.json();
+            let allVideos = []; // Global for search
 
-                // Only render long videos on main feed
-                renderVideos(allVideos.filter(v => v.type === 'video' || !v.type));
+            async function loadVideos() {
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sharedVidId = urlParams.get('v');
 
-                // Auto-play if shared via URL (?v=ID or URL)
-                if (sharedVidId) {
-                    const vid = allVideos.find(v =>
-                        String(v.id) === String(sharedVidId) ||
-                        String(v.video_url) === String(sharedVidId)
-                    );
+                    // If shared a video, fetch ALL (video + shorts) to find a match
+                    const res = await fetch(sharedVidId ? '/api/videos' : '/api/videos?type=video');
+                    allVideos = await res.json();
 
-                    if (vid) {
-                        if (vid.type === 'short') {
-                            loadView('V-Snaps'); // Auto-switch to Snaps view
-                        } else {
-                            playVideo(vid.video_url, vid.title, vid.user_email, vid.views, vid.timestamp, vid.description, vid.id);
+                    // Only render long videos on main feed
+                    renderVideos(allVideos.filter(v => v.type === 'video' || !v.type));
+
+                    // Auto-play if shared via URL (?v=ID or URL)
+                    if (sharedVidId) {
+                        const vid = allVideos.find(v =>
+                            String(v.id) === String(sharedVidId) ||
+                            String(v.video_url) === String(sharedVidId)
+                        );
+
+                        if (vid) {
+                            if (vid.type === 'short') {
+                                loadView('V-Snaps'); // Auto-switch to Snaps view
+                            } else {
+                                playVideo(vid.video_url, vid.title, vid.user_email, vid.views, vid.timestamp, vid.description, vid.id);
+                            }
+                        } else if (sharedVidId.startsWith('http')) {
+                            // LAST RESORT: Try to play it as a direct URL if it's a valid link
+                            playVideo(sharedVidId, "Shared Discovery", "Vitox Guest", 0, "Shared", "Linked directly via URL.", "direct-url");
                         }
-                    } else if (sharedVidId.startsWith('http')) {
-                        // LAST RESORT: Try to play it as a direct URL if it's a valid link
-                        playVideo(sharedVidId, "Shared Discovery", "Vitox Guest", 0, "Shared", "Linked directly via URL.", "direct-url");
                     }
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        function renderVideos(videosToRender) {
-            const grid = document.getElementById('main-video-grid');
-            const emptyState = document.getElementById('empty-state');
-
-            if (!videosToRender || videosToRender.length === 0) {
-                if (emptyState) emptyState.style.display = 'block';
-                if (grid) grid.style.display = 'none';
-                return;
+                } catch (e) { console.error(e); }
             }
 
-            if (emptyState) emptyState.style.display = 'none';
-            if (grid) {
-                // Reset Grid Styles
-                grid.style.display = 'grid';
-                grid.style.flexDirection = '';
-                grid.style.alignItems = '';
-                grid.style.gap = '';
-                grid.style.padding = '';
-                grid.style.height = '';
-                grid.style.overflowY = '';
-                grid.style.scrollSnapType = '';
-                grid.style.justifyContent = 'start';
+            function renderVideos(videosToRender) {
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
 
-                grid.innerHTML = '';
+                if (!videosToRender || videosToRender.length === 0) {
+                    if (emptyState) emptyState.style.display = 'block';
+                    if (grid) grid.style.display = 'none';
+                    return;
+                }
 
-                videosToRender.forEach((vid, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'video-card';
-                    card.setAttribute('data-aos', 'fade-up');
-                    card.setAttribute('data-aos-delay', index * 50);
+                if (emptyState) emptyState.style.display = 'none';
+                if (grid) {
+                    // Reset Grid Styles
+                    grid.style.display = 'grid';
+                    grid.style.flexDirection = '';
+                    grid.style.alignItems = '';
+                    grid.style.gap = '';
+                    grid.style.padding = '';
+                    grid.style.height = '';
+                    grid.style.overflowY = '';
+                    grid.style.scrollSnapType = '';
+                    grid.style.justifyContent = 'start';
 
-                    card.onclick = () => playVideo(
-                        vid.video_url,
-                        vid.title || 'Untitled',
-                        vid.user_email,
-                        vid.views || 0,
-                        vid.timestamp,
-                        vid.description || '',
-                        vid.id
-                    );
+                    grid.innerHTML = '';
 
-                    card.innerHTML = `
+                    videosToRender.forEach((vid, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'video-card';
+                        card.setAttribute('data-aos', 'fade-up');
+                        card.setAttribute('data-aos-delay', index * 50);
+
+                        card.onclick = () => playVideo(
+                            vid.video_url,
+                            vid.title || 'Untitled',
+                            vid.user_email,
+                            vid.views || 0,
+                            vid.timestamp,
+                            vid.description || '',
+                            vid.id
+                        );
+
+                        card.innerHTML = `
                             <div class="thumbnail-wrapper">
                                 <video src="${vid.video_url}" muted onmouseover="this.play()" onmouseout="this.pause()" style="width: 100%; height: 100%; object-fit: cover;"></video>
                             </div>
@@ -331,69 +368,69 @@
                                 </div>
                             </div>
                         `;
-                    grid.appendChild(card);
-                });
-            }
-
-            // Update Sidebar Active State
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.querySelector('.nav-item').classList.add('active'); // Home/Feed is index 0
-        }
-
-        async function loadSnapsView() {
-            const grid = document.getElementById('main-video-grid');
-            const emptyState = document.getElementById('empty-state');
-            if (!grid) return;
-
-            // Update UI Interface
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            const snapLink = Array.from(document.querySelectorAll('.nav-item')).find(a => a.innerText.includes('V-Snaps'));
-            if (snapLink) snapLink.classList.add('active');
-
-            try {
-                // Fetch only SHORTS (V-Snaps)
-                const res = await fetch('/api/videos?type=short');
-                const vids = await res.json();
-
-                // Shuffle for random feed
-                vids.sort(() => Math.random() - 0.5);
-
-                if (!vids || vids.length === 0) {
-                    loadView('V-Snaps');
-                    return;
+                        grid.appendChild(card);
+                    });
                 }
 
-                if (emptyState) emptyState.style.display = 'none';
+                // Update Sidebar Active State
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelector('.nav-item').classList.add('active'); // Home/Feed is index 0
+            }
 
-                // Transformation to Shorts Mode
-                grid.style.display = 'block'; // Block to allow container inside
-                grid.innerHTML = '<div class="snap-container" id="snap-scroller"></div>';
-                const container = document.getElementById('snap-scroller');
+            async function loadSnapsView() {
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
+                if (!grid) return;
 
-                vids.forEach((vid, index) => {
-                    const snap = document.createElement('div');
-                    snap.className = 'snap-card';
+                // Update UI Interface
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                const snapLink = Array.from(document.querySelectorAll('.nav-item')).find(a => a.innerText.includes('V-Snaps'));
+                if (snapLink) snapLink.classList.add('active');
 
-                    // Ad Injection Logic (Every 5th video)
-                    if (index > 0 && index % 5 === 0) {
-                        const adSnap = document.createElement('div');
-                        adSnap.className = 'snap-card';
-                        adSnap.style.background = '#222';
-                        adSnap.style.display = 'flex';
-                        adSnap.style.alignItems = 'center';
-                        adSnap.style.justifyContent = 'center';
-                        adSnap.innerHTML = `
+                try {
+                    // Fetch only SHORTS (V-Snaps)
+                    const res = await fetch('/api/videos?type=short');
+                    const vids = await res.json();
+
+                    // Shuffle for random feed
+                    vids.sort(() => Math.random() - 0.5);
+
+                    if (!vids || vids.length === 0) {
+                        loadView('V-Snaps');
+                        return;
+                    }
+
+                    if (emptyState) emptyState.style.display = 'none';
+
+                    // Transformation to Shorts Mode
+                    grid.style.display = 'block'; // Block to allow container inside
+                    grid.innerHTML = '<div class="snap-container" id="snap-scroller"></div>';
+                    const container = document.getElementById('snap-scroller');
+
+                    vids.forEach((vid, index) => {
+                        const snap = document.createElement('div');
+                        snap.className = 'snap-card';
+
+                        // Ad Injection Logic (Every 5th video)
+                        if (index > 0 && index % 5 === 0) {
+                            const adSnap = document.createElement('div');
+                            adSnap.className = 'snap-card';
+                            adSnap.style.background = '#222';
+                            adSnap.style.display = 'flex';
+                            adSnap.style.alignItems = 'center';
+                            adSnap.style.justifyContent = 'center';
+                            adSnap.innerHTML = `
                             <div style="text-align: center; color: #aaa;">
                                 <i class="fas fa-ad" style="font-size: 3rem; margin-bottom: 20px;"></i>
                                 <p>Sponsored Content</p>
                                 <div id="ad-slot-${index}"></div>
                             </div>
                         `;
-                        container.appendChild(adSnap);
-                        // Initialize ad dynamically if needed
-                    }
+                            container.appendChild(adSnap);
+                            // Initialize ad dynamically if needed
+                        }
 
-                    snap.innerHTML = `
+                        snap.innerHTML = `
                         <video src="${vid.video_url}" class="snap-video" loop muted playsinline></video>
                         
                         <div class="snap-overlay">
@@ -427,81 +464,81 @@
                         </div>
                     `;
 
-                    const video = snap.querySelector('video');
+                        const video = snap.querySelector('video');
 
-                    // Click to Play/Pause
-                    snap.onclick = (e) => {
-                        if (e.target.closest('.action-item') || e.target.closest('button')) return;
-                        if (video.paused) {
-                            // Pause others
-                            container.querySelectorAll('video').forEach(v => {
-                                if (v !== video) {
-                                    v.pause();
-                                    v.currentTime = 0; // Reset for better UX
-                                }
-                            });
-                            video.play();
-                            video.muted = false; // Unmute on interaction
-                        } else {
-                            video.pause();
-                        }
-                    };
+                        // Click to Play/Pause
+                        snap.onclick = (e) => {
+                            if (e.target.closest('.action-item') || e.target.closest('button')) return;
+                            if (video.paused) {
+                                // Pause others
+                                container.querySelectorAll('video').forEach(v => {
+                                    if (v !== video) {
+                                        v.pause();
+                                        v.currentTime = 0; // Reset for better UX
+                                    }
+                                });
+                                video.play();
+                                video.muted = false; // Unmute on interaction
+                            } else {
+                                video.pause();
+                            }
+                        };
 
-                    container.appendChild(snap);
-                });
-
-                // Intersection Observer for Auto-Play on Scroll
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        const vid = entry.target.querySelector('video');
-                        if (!vid) return;
-
-                        if (entry.isIntersecting) {
-                            // Pause all others first to save resources & mobile battery
-                            container.querySelectorAll('video').forEach(v => {
-                                if (v !== vid) v.pause();
-                            });
-
-                            vid.play().catch(e => console.log("Auto-play prevented (interaction needed)"));
-                            vid.muted = false;
-                        } else {
-                            vid.pause();
-                        }
+                        container.appendChild(snap);
                     });
-                }, { threshold: 0.6 }); // 60% visibility triggers play
 
-                document.querySelectorAll('.snap-card').forEach(card => observer.observe(card));
+                    // Intersection Observer for Auto-Play on Scroll
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            const vid = entry.target.querySelector('video');
+                            if (!vid) return;
 
-            } catch (e) {
-                console.error("Snap Load Error:", e);
-            }
-        }
+                            if (entry.isIntersecting) {
+                                // Pause all others first to save resources & mobile battery
+                                container.querySelectorAll('video').forEach(v => {
+                                    if (v !== vid) v.pause();
+                                });
 
-        async function loadLikedVideosView() {
-            const grid = document.getElementById('main-video-grid');
-            const emptyState = document.getElementById('empty-state');
-            if (!grid) return;
+                                vid.play().catch(e => console.log("Auto-play prevented (interaction needed)"));
+                                vid.muted = false;
+                            } else {
+                                vid.pause();
+                            }
+                        });
+                    }, { threshold: 0.6 }); // 60% visibility triggers play
 
-            // Check Login
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) return loadView('Liked Videos'); // Default blocking view if not logged in
+                    document.querySelectorAll('.snap-card').forEach(card => observer.observe(card));
 
-            // Fetch Likes
-            try {
-                const res = await fetch(`/api/user/liked-videos/${user.email}`);
-                const likedVideos = await res.json();
-
-                if (emptyState) emptyState.style.display = 'none';
-                grid.style.display = 'block'; // Block for custom layout
-
-                if (likedVideos.length === 0) {
-                    loadView('Liked Videos'); // Show empty state
-                    return;
+                } catch (e) {
+                    console.error("Snap Load Error:", e);
                 }
+            }
 
-                const firstVideo = likedVideos[0];
+            async function loadLikedVideosView() {
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
+                if (!grid) return;
 
-                grid.innerHTML = `
+                // Check Login
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user) return loadView('Liked Videos'); // Default blocking view if not logged in
+
+                // Fetch Likes
+                try {
+                    const res = await fetch(`/api/user/liked-videos/${user.email}`);
+                    const likedVideos = await res.json();
+
+                    if (emptyState) emptyState.style.display = 'none';
+                    grid.style.display = 'block'; // Block for custom layout
+
+                    if (likedVideos.length === 0) {
+                        loadView('Liked Videos'); // Show empty state
+                        return;
+                    }
+
+                    const firstVideo = likedVideos[0];
+
+                    grid.innerHTML = `
                     <div class="liked-layout" style="display: flex; gap: 24px; color: white; height: 85vh;">
                         <!-- Left Hero -->
                         <div class="liked-hero" style="
@@ -567,23 +604,23 @@
                     </div>
                 `;
 
-            } catch (e) {
-                console.error(e);
-                loadView('Liked Videos');
+                } catch (e) {
+                    console.error(e);
+                    loadView('Liked Videos');
+                }
             }
-        }
 
-        function loadView(viewName) {
-            const grid = document.getElementById('main-video-grid');
-            const emptyState = document.getElementById('empty-state');
+            function loadView(viewName) {
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
 
-            if (grid) grid.innerHTML = '';
+                if (grid) grid.innerHTML = '';
 
-            if (viewName === 'Creator Hub') {
-                const user = JSON.parse(localStorage.getItem('vitox_user'));
-                if (emptyState) emptyState.style.display = 'none';
+                if (viewName === 'Creator Hub') {
+                    const user = JSON.parse(localStorage.getItem('vitox_user'));
+                    if (emptyState) emptyState.style.display = 'none';
 
-                grid.innerHTML = `
+                    grid.innerHTML = `
                     <div style="padding: 40px; color: white; width: 100%;">
                         <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 30px;">Creator Hub</h1>
                         
@@ -602,23 +639,28 @@
                                 <h3 style="margin: 0 0 10px 0;">Brand Collaboration</h3>
                                 <p style="color: #aaa; margin-bottom: 20px;">Work with top brands and creators. Reach 100k Squad to unlock Elite deals.</p>
                                 ${user && user.status === 'pending_brand' ?
-                        '<button disabled style="padding: 10px 20px; background: #333; color: #888; border: none; border-radius: 8px; font-weight: 700;">Application Pending</button>' :
-                        (user && user.is_verified_brand ?
-                            '<span style="color: #00ff88; font-weight: 800;"><i class="fas fa-check-circle"></i> Verified Brand</span>' :
-                            '<button onclick="applyForBrand()" style="padding: 10px 20px; background: #ff0055; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Apply for Brand Verification</button>'
-                        )
-                    }
+                            '<button disabled style="padding: 10px 20px; background: #333; color: #888; border: none; border-radius: 8px; font-weight: 700;">Application Pending</button>' :
+                            (user && user.is_verified_brand ?
+                                '<span style="color: #00ff88; font-weight: 800;"><i class="fas fa-check-circle"></i> Verified Brand</span>' :
+                                '<button onclick="applyForBrand()" style="padding: 10px 20px; background: #ff0055; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Apply for Brand Verification</button>'
+                            )
+                        }
                             </div>
                         </div>
                     </div>
                 `;
-                return;
-            }
+                    return;
+                }
 
-            // Show Custom Message for other views
-            if (emptyState) {
-                emptyState.style.display = 'block';
-                emptyState.innerHTML = `
+                if (viewName === 'Admin Panel') {
+                    loadAdminPanel();
+                    return;
+                }
+
+                // Show Custom Message for other views
+                if (emptyState) {
+                    emptyState.style.display = 'block';
+                    emptyState.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                         <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 20px;"></i>
                         <h2 style="color: var(--text-primary); margin-bottom: 10px;">${viewName}</h2>
@@ -626,90 +668,90 @@
                         <button onclick="loadVideos()" style="margin-top: 20px; padding: 10px 24px; background: var(--accent); border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: 600;">Back to Home</button>
                     </div>
                 `;
-            }
-        }
-
-        function performSearch() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            if (!query) return renderVideos(allVideos);
-
-            const filtered = allVideos.filter(vid =>
-                (vid.title && vid.title.toLowerCase().includes(query)) ||
-                (vid.description && vid.description.toLowerCase().includes(query))
-            );
-            renderVideos(filtered);
-        }
-
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
-
-        function startVoiceSearch() {
-            if (!('webkitSpeechRecognition' in window)) {
-                showToast("Voice search not supported.");
-                return;
-            }
-            const recognition = new webkitSpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.start();
-
-            showToast("Listening...");
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('search-input').value = transcript;
-                performSearch();
-            };
-            recognition.onerror = () => showToast("Voice input failed.");
-        }
-
-        function showToast(msg) {
-            const container = document.getElementById('toast-container');
-            if (!container) return alert(msg);
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerText = msg;
-            toast.style.cssText = "background: #333; color: white; padding: 12px 24px; border-radius: 4px; margin-top: 10px;";
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        async function playVideo(url, title, channel, initialViews, timestamp, description = "", videoId) {
-            console.log("Playing Video ID:", videoId, "Title:", title);
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-
-            // Scrub 'undefined' strings that might leak from storage/API
-            const scrub = (val, fallback) => (!val || val === 'undefined' || val === 'null' ? fallback : val);
-
-            const safeTitle = scrub(title, 'Vitox Exclusive');
-            const safeChannel = scrub(channel, 'Official Creator');
-            const safeDesc = scrub(description, `Exploring the depth of ${safeTitle} on Vitox.`);
-            const safeId = videoId;
-            const isSelf = user && (user.email === safeChannel || user.email.toLowerCase() === safeChannel.toLowerCase());
-
-            // Increment View Immediately (Only if not own video)
-            if (!isSelf && user) {
-                fetch('/api/video/view', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        video_id: safeId,
-                        email: user.email  // ✅ UNIQUE VIEW TRACKING
-                    })
-                }).catch(e => console.error("View increment failed:", e));
+                }
             }
 
-            const playerOverlay = document.createElement('div');
-            playerOverlay.id = 'video-modal';
-            playerOverlay.style.cssText = `
+            function performSearch() {
+                const query = document.getElementById('search-input').value.toLowerCase();
+                if (!query) return renderVideos(allVideos);
+
+                const filtered = allVideos.filter(vid =>
+                    (vid.title && vid.title.toLowerCase().includes(query)) ||
+                    (vid.description && vid.description.toLowerCase().includes(query))
+                );
+                renderVideos(filtered);
+            }
+
+            document.getElementById('search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            function startVoiceSearch() {
+                if (!('webkitSpeechRecognition' in window)) {
+                    showToast("Voice search not supported.");
+                    return;
+                }
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.start();
+
+                showToast("Listening...");
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('search-input').value = transcript;
+                    performSearch();
+                };
+                recognition.onerror = () => showToast("Voice input failed.");
+            }
+
+            function showToast(msg) {
+                const container = document.getElementById('toast-container');
+                if (!container) return alert(msg);
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.innerText = msg;
+                toast.style.cssText = "background: #333; color: white; padding: 12px 24px; border-radius: 4px; margin-top: 10px;";
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            async function playVideo(url, title, channel, initialViews, timestamp, description = "", videoId) {
+                console.log("Playing Video ID:", videoId, "Title:", title);
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+
+                // Scrub 'undefined' strings that might leak from storage/API
+                const scrub = (val, fallback) => (!val || val === 'undefined' || val === 'null' ? fallback : val);
+
+                const safeTitle = scrub(title, 'Vitox Exclusive');
+                const safeChannel = scrub(channel, 'Official Creator');
+                const safeDesc = scrub(description, `Exploring the depth of ${safeTitle} on Vitox.`);
+                const safeId = videoId;
+                const isSelf = user && (user.email === safeChannel || user.email.toLowerCase() === safeChannel.toLowerCase());
+
+                // Increment View Immediately (Only if not own video)
+                if (!isSelf && user) {
+                    fetch('/api/video/view', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            video_id: safeId,
+                            email: user.email  // ✅ UNIQUE VIEW TRACKING
+                        })
+                    }).catch(e => console.error("View increment failed:", e));
+                }
+
+                const playerOverlay = document.createElement('div');
+                playerOverlay.id = 'video-modal';
+                playerOverlay.style.cssText = `
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                 background: rgba(0,0,0,0.9); z-index: 5000;
                 display: flex; justify-content: center; overflow-y: auto; padding: 20px 0;
             `;
 
-            const timeAgo = timestamp ? new Date(timestamp).toLocaleDateString() : 'Just now';
-            const displayDesc = safeDesc;
+                const timeAgo = timestamp ? new Date(timestamp).toLocaleDateString() : 'Just now';
+                const displayDesc = safeDesc;
 
-            playerOverlay.innerHTML = `
+                playerOverlay.innerHTML = `
                 <div id="modal-container" style="width: 95%; max-width: 1400px; position: relative; background: rgba(10,10,10,0.85); min-height: 90vh; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(40px); display: flex; flex-direction: row; overflow: hidden; animation: scale-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 50px 100px rgba(0,0,0,0.8);">
                     
                     <style>
@@ -822,22 +864,22 @@
                     </div>
                 </div>
             `;
-            document.body.appendChild(playerOverlay);
-            document.body.style.overflow = 'hidden';
+                document.body.appendChild(playerOverlay);
+                document.body.style.overflow = 'hidden';
 
-            // Add simple logic to fill recommendations for visual flair
-            const relatedGrid = document.getElementById('related-videos');
-            fetch('/api/videos')
-                .then(r => r.json())
-                .then(vids => {
-                    relatedGrid.innerHTML = '';
-                    vids.filter(v => v.id != videoId).slice(0, 10).forEach(v => {
-                        const item = document.createElement('div');
-                        item.style.cssText = `
+                // Add simple logic to fill recommendations for visual flair
+                const relatedGrid = document.getElementById('related-videos');
+                fetch('/api/videos')
+                    .then(r => r.json())
+                    .then(vids => {
+                        relatedGrid.innerHTML = '';
+                        vids.filter(v => v.id != videoId).slice(0, 10).forEach(v => {
+                            const item = document.createElement('div');
+                            item.style.cssText = `
                             display: flex; gap: 12px; cursor: pointer; transition: all 0.3s;
                             padding: 8px; border-radius: 12px;
                         `;
-                        item.innerHTML = `
+                            item.innerHTML = `
                             <div style="width: 140px; height: 80px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: #222; border: 1px solid rgba(255,255,255,0.05);">
                                 <video src="${v.video_url}" muted style="width: 100%; height: 100%; object-fit: cover;"></video>
                             </div>
@@ -847,99 +889,99 @@
                                 <div style="font-size: 0.75rem; color: #888;">${v.views} views</div>
                             </div>
                         `;
-                        item.onmouseover = () => {
-                            item.style.background = 'rgba(255,255,255,0.05)';
-                            item.querySelector('video').play();
-                        };
-                        item.onmouseout = () => {
-                            item.style.background = 'transparent';
-                            item.querySelector('video').pause();
-                        };
-                        item.onclick = () => {
-                            document.getElementById('video-modal').remove();
-                            playVideo(v.video_url, v.title, v.user_email, v.views, v.timestamp, v.description, v.id);
-                        };
-                        relatedGrid.appendChild(item);
+                            item.onmouseover = () => {
+                                item.style.background = 'rgba(255,255,255,0.05)';
+                                item.querySelector('video').play();
+                            };
+                            item.onmouseout = () => {
+                                item.style.background = 'transparent';
+                                item.querySelector('video').pause();
+                            };
+                            item.onclick = () => {
+                                document.getElementById('video-modal').remove();
+                                playVideo(v.video_url, v.title, v.user_email, v.views, v.timestamp, v.description, v.id);
+                            };
+                            relatedGrid.appendChild(item);
+                        });
                     });
-                });
-            // Setup Comment Input Logic
-            const commentInput = document.getElementById('comment-input');
-            const commentActions = document.getElementById('comment-actions');
-            const submitBtn = document.getElementById('submit-comment-btn');
+                // Setup Comment Input Logic
+                const commentInput = document.getElementById('comment-input');
+                const commentActions = document.getElementById('comment-actions');
+                const submitBtn = document.getElementById('submit-comment-btn');
 
-            commentInput.onfocus = () => commentActions.style.display = 'flex';
-            commentInput.oninput = () => {
-                submitBtn.disabled = !commentInput.value.trim();
-                submitBtn.style.opacity = commentInput.value.trim() ? '1' : '0.5';
-            };
+                commentInput.onfocus = () => commentActions.style.display = 'flex';
+                commentInput.oninput = () => {
+                    submitBtn.disabled = !commentInput.value.trim();
+                    submitBtn.style.opacity = commentInput.value.trim() ? '1' : '0.5';
+                };
 
-            // Load Real Engagement Stats
-            loadEngagementStats(safeId, safeChannel);
-            loadComments(safeId);
+                // Load Real Engagement Stats
+                loadEngagementStats(safeId, safeChannel);
+                loadComments(safeId);
 
-            const originalRemove = playerOverlay.remove.bind(playerOverlay);
-            playerOverlay.remove = function () {
-                document.body.style.overflow = '';
-                originalRemove();
-                loadVideos(); // Refresh home grid views
-            };
-        }
+                const originalRemove = playerOverlay.remove.bind(playerOverlay);
+                playerOverlay.remove = function () {
+                    document.body.style.overflow = '';
+                    originalRemove();
+                    loadVideos(); // Refresh home grid views
+                };
+            }
 
-        async function loadEngagementStats(videoId, channelEmail) {
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            try {
-                const res = await fetch(`/api/video/stats/${videoId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: user ? user.email : '',
-                        channel_email: channelEmail
-                    })
-                });
-                const stats = await res.json();
+            async function loadEngagementStats(videoId, channelEmail) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                try {
+                    const res = await fetch(`/api/video/stats/${videoId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: user ? user.email : '',
+                            channel_email: channelEmail
+                        })
+                    });
+                    const stats = await res.json();
 
-                const likeCountEl = document.getElementById('like-count');
-                if (likeCountEl) likeCountEl.innerText = stats.likes.toLocaleString();
+                    const likeCountEl = document.getElementById('like-count');
+                    if (likeCountEl) likeCountEl.innerText = stats.likes.toLocaleString();
 
-                const subCountEl = document.getElementById('sub-count');
-                if (subCountEl) subCountEl.innerText = `${stats.subscribers} Squad members`;
+                    const subCountEl = document.getElementById('sub-count');
+                    if (subCountEl) subCountEl.innerText = `${stats.subscribers} Squad members`;
 
-                const commCountEl = document.getElementById('comment-total');
-                if (commCountEl) commCountEl.innerText = stats.comment_count.toLocaleString();
+                    const commCountEl = document.getElementById('comment-total');
+                    if (commCountEl) commCountEl.innerText = stats.comment_count.toLocaleString();
 
-                const likeBtn = document.getElementById('like-btn');
-                if (likeBtn) likeBtn.style.color = stats.liked ? '#ff003c' : '#fff';
+                    const likeBtn = document.getElementById('like-btn');
+                    if (likeBtn) likeBtn.style.color = stats.liked ? '#ff003c' : '#fff';
 
-                // Sync Snap UI if it exists
-                const snapLikeCount = document.getElementById(`snap-like-count-${videoId}`);
-                if (snapLikeCount) snapLikeCount.innerText = stats.likes;
-                const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
-                if (snapLikeIcon) snapLikeIcon.style.color = stats.liked ? '#ff003c' : '#fff';
+                    // Sync Snap UI if it exists
+                    const snapLikeCount = document.getElementById(`snap-like-count-${videoId}`);
+                    if (snapLikeCount) snapLikeCount.innerText = stats.likes;
+                    const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
+                    if (snapLikeIcon) snapLikeIcon.style.color = stats.liked ? '#ff003c' : '#fff';
 
-                const subBtn = document.getElementById('sub-btn');
-                if (subBtn) {
-                    subBtn.innerHTML = stats.subbed ? 'In Squad' : 'Join Squad';
-                    subBtn.style.background = stats.subbed ? 'rgba(255,255,255,0.1)' : '#fff';
-                    subBtn.style.color = stats.subbed ? '#fff' : '#000';
-                    subBtn.style.border = stats.subbed ? '1px solid rgba(255,255,255,0.1)' : 'none';
-                }
-            } catch (e) { console.error(e); }
-        }
+                    const subBtn = document.getElementById('sub-btn');
+                    if (subBtn) {
+                        subBtn.innerHTML = stats.subbed ? 'In Squad' : 'Join Squad';
+                        subBtn.style.background = stats.subbed ? 'rgba(255,255,255,0.1)' : '#fff';
+                        subBtn.style.color = stats.subbed ? '#fff' : '#000';
+                        subBtn.style.border = stats.subbed ? '1px solid rgba(255,255,255,0.1)' : 'none';
+                    }
+                } catch (e) { console.error(e); }
+            }
 
-        async function loadComments(videoId) {
-            try {
-                const res = await fetch(`/api/video/comments/${videoId}`);
-                const comments = await res.json();
-                const box = document.getElementById('comments-box');
-                box.innerHTML = '';
+            async function loadComments(videoId) {
+                try {
+                    const res = await fetch(`/api/video/comments/${videoId}`);
+                    const comments = await res.json();
+                    const box = document.getElementById('comments-box');
+                    box.innerHTML = '';
 
-                comments.forEach(c => {
-                    const el = document.createElement('div');
-                    el.style.display = 'flex';
-                    el.style.gap = '15px';
-                    el.style.animation = 'fade-up 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards';
-                    el.style.opacity = '0';
-                    el.innerHTML = `
+                    comments.forEach(c => {
+                        const el = document.createElement('div');
+                        el.style.display = 'flex';
+                        el.style.gap = '15px';
+                        el.style.animation = 'fade-up 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards';
+                        el.style.opacity = '0';
+                        el.innerHTML = `
                         <div style="width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; items-center justify-content: center; font-weight: 800; font-size: 0.9rem;">
                             ${c.user_email.charAt(0).toUpperCase()}
                         </div>
@@ -956,94 +998,301 @@
                             </div>
                         </div>
                     `;
-                    box.appendChild(el);
-                });
-            } catch (e) { console.error(e); }
-        }
+                        box.appendChild(el);
+                    });
+                } catch (e) { console.error(e); }
+            }
 
-        async function applyForBrand() {
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) return alert("Login first!");
-
-            try {
-                const res = await fetch('/api/brand/apply', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: user.email })
-                });
-                const data = await res.json();
-                showToast(data.message);
-                if (data.status === 'success') {
-                    user.status = 'pending_brand';
-                    localStorage.setItem('vitox_user', JSON.stringify(user));
-                    loadView('Creator Hub'); // Refresh
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        async function submitComment(videoId) {
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            const input = document.getElementById('comment-input');
-            const content = input.value.trim();
-            if (!user) { alert("Login to comment!"); return; }
-            if (!content) return;
-
-            try {
-                await fetch('/api/video/comment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ video_id: videoId, email: user.email, content: content })
-                });
-                input.value = '';
-                document.getElementById('comment-actions').style.display = 'none';
-                loadComments(videoId);
-                // Increment visual total
-                const total = document.getElementById('comment-total');
-                if (total) total.innerText = (parseInt(total.innerText.replace(/,/g, '')) + 1).toLocaleString();
-
-                const snapTotal = document.getElementById(`snap-comm-count-${videoId}`);
-                if (snapTotal) snapTotal.innerText = parseInt(snapTotal.innerText) + 1;
-            } catch (e) { console.error(e); }
-        }
-
-        function openSnapComments(videoId) {
-            const drawer = document.getElementById('snap-comment-drawer');
-            const backdrop = document.getElementById('snap-comment-backdrop');
-
-            if (drawer) drawer.style.right = '0';
-            if (backdrop) backdrop.style.display = 'block';
-
-            // Setup loading state
-            const content = document.getElementById('snap-comments-content');
-            content.innerHTML = '<div style="text-align:center; padding: 50px; opacity: 0.5;">Loading comments...</div>';
-
-            // Fetch comments
-            loadSnapComments(videoId);
-
-            // Setup submit listener
-            const submitBtn = document.getElementById('snap-comment-submit');
-            submitBtn.onclick = () => submitSnapComment(videoId);
-        }
-
-        function closeSnapComments() {
-            const drawer = document.getElementById('snap-comment-drawer');
-            const backdrop = document.getElementById('snap-comment-backdrop');
-            if (drawer) drawer.style.right = '-100%';
-            if (backdrop) backdrop.style.display = 'none';
-        }
-
-        async function loadSnapComments(videoId) {
-            try {
-                const res = await fetch(`/api/video/comments/${videoId}`);
-                const comments = await res.json();
-                const content = document.getElementById('snap-comments-content');
-
-                if (comments.length === 0) {
-                    content.innerHTML = '<div style="text-align:center; padding: 50px; opacity: 0.3;">No comments yet. Be the first!</div>';
+            // Administrative Panel Logic
+            async function loadAdminPanel() {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user || user.email !== 'junaidshah78634@gmail.com') {
+                    showToast("Access Denied: Admin only");
+                    loadVideos();
                     return;
                 }
 
-                content.innerHTML = comments.map(c => `
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
+                if (emptyState) emptyState.style.display = 'none';
+                grid.innerHTML = '<div style="padding: 40px; color: white; width: 100%; text-align:center;"><h2><i class="fas fa-cog fa-spin"></i> Initializing Command Center...</h2></div>';
+
+                try {
+                    // Fetch Stats
+                    const statsRes = await fetch('/api/admin/stats', { headers: { 'X-Admin-Email': user.email } });
+                    const stats = await statsRes.json();
+
+                    // Fetch Users
+                    const usersRes = await fetch('/api/admin/users', { headers: { 'X-Admin-Email': user.email } });
+                    const allUsers = await usersRes.json();
+
+                    grid.innerHTML = `
+                    <div style="padding: 40px; color: white; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                            <h1 style="font-size: 2.5rem; font-weight: 800; margin:0;">Admin Command Center</h1>
+                            <div style="background: #ff0055; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.9rem;">PLATFORM OWNER</div>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                            <div style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                                <div style="color: #aaa; font-size: 0.8rem; margin-bottom: 8px;">TOTAL USERS</div>
+                                <div style="font-size: 1.8rem; font-weight: 800;">${stats.users}</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                                <div style="color: #aaa; font-size: 0.8rem; margin-bottom: 8px;">TOTAL VIDEOS</div>
+                                <div style="font-size: 1.8rem; font-weight: 800;">${stats.videos}</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                                <div style="color: #aaa; font-size: 0.8rem; margin-bottom: 8px;">TOTAL VIEWS</div>
+                                <div style="font-size: 1.8rem; font-weight: 800;">${(stats.views / 1000).toFixed(1)}k</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                                <div style="color: #aaa; font-size: 0.8rem; margin-bottom: 8px;">TOTAL SQUARES</div>
+                                <div style="font-size: 1.8rem; font-weight: 800;">${(stats.points / 1000).toFixed(1)}k</div>
+                            </div>
+                        </div>
+
+                        <!-- User Management -->
+                        <h3 style="margin-bottom: 20px;">User Management</h3>
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; overflow: hidden;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                                <thead style="background: rgba(255,255,255,0.05);">
+                                    <tr>
+                                        <th style="padding: 16px; text-align: left;">User</th>
+                                        <th style="padding: 16px; text-align: left;">Status</th>
+                                        <th style="padding: 16px; text-align: left;">Points</th>
+                                        <th style="padding: 16px; text-align: right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${allUsers.map(u => `
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <td style="padding: 16px;">
+                                                <div style="font-weight: 700;">${u.name}</div>
+                                                <div style="font-size: 0.8rem; color: #888;">${u.email}</div>
+                                            </td>
+                                            <td style="padding: 16px;">
+                                                ${u.status === 'banned' ? '<span style="color: #ff4444;">Banned</span>' : (u.status === 'pending_brand' ? '<span style="color: #ffaa00;">Pending Brand</span>' : '<span style="color: #00ff88;">Active</span>')}
+                                                ${u.is_verified_brand ? ' <i class="fas fa-check-circle" style="color: #00ff88;" title="Verified Brand"></i>' : ''}
+                                            </td>
+                                            <td style="padding: 16px;">${u.points}</td>
+                                            <td style="padding: 16px; text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                                                ${u.status === 'pending_brand' ? `
+                                                    <button onclick="adminUserAction('${u.email}', 'verify_brand')" style="background: #00ff88; color: black; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; cursor: pointer;">APPROVE</button>
+                                                ` : ''}
+                                                ${u.status === 'banned' ? `
+                                                    <button onclick="adminUserAction('${u.email}', 'unban')" style="background: white; color: black; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; cursor: pointer;">UNBAN</button>
+                                                ` : `
+                                                    <button onclick="adminUserAction('${u.email}', 'ban')" style="background: rgba(255,0,0,0.2); color: #ff4444; border: 1px solid #ff4444; padding: 6px 12px; border-radius: 6px; font-weight: 800; cursor: pointer;">BAN</button>
+                                                `}
+                                                <button onclick="openAdminChat('${u.email}')" style="background: #ffd700; color: black; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; cursor: pointer;"><i class="fas fa-comment"></i> CHAT</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                } catch (e) { console.error(e); grid.innerHTML = '<h2>Failed to load Admin Panel. Try again.</h2>'; }
+            }
+
+            async function adminUserAction(email, action) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                try {
+                    const res = await fetch('/api/admin/user/action', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Email': user.email },
+                        body: JSON.stringify({ email, action })
+                    });
+                    const data = await res.json();
+                    showToast(data.message);
+                    loadAdminPanel(); // Refresh UI
+                } catch (e) { console.error(e); }
+            }
+
+            // --- OFFICIAL ADMIN CHAT LOGIC ---
+            let adminChatPoller = null;
+
+            function openAdminChat(targetUserEmail) {
+                const admin = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!admin) { showToast("Login required"); return; }
+
+                // If not admin, target is admin by default (Support Line)
+                if (admin.email !== 'junaidshah78634@gmail.com') {
+                    targetUserEmail = 'junaidshah78634@gmail.com';
+                }
+
+                const drawer = document.getElementById('admin-chat-drawer');
+                if (drawer) drawer.style.right = '0';
+
+                const targetDisplay = targetUserEmail === 'junaidshah78634@gmail.com' ? "Official Support" : `@${targetUserEmail.split('@')[0]}`;
+                document.getElementById('admin-chat-target').innerText = `Direct Line to: ${targetDisplay}`;
+
+                loadAdminHistory(targetUserEmail);
+
+                const sendBtn = document.getElementById('admin-chat-send');
+                sendBtn.onclick = () => sendAdminMsg(targetUserEmail);
+
+                if (adminChatPoller) clearInterval(adminChatPoller);
+                adminChatPoller = setInterval(() => loadAdminHistory(targetUserEmail, true), 3000);
+            }
+
+            function closeAdminChat() {
+                const drawer = document.getElementById('admin-chat-drawer');
+                if (drawer) drawer.style.right = '-100%';
+                if (adminChatPoller) clearInterval(adminChatPoller);
+            }
+
+            async function loadAdminHistory(targetEmail, isPolling = false) {
+                try {
+                    const res = await fetch(`/api/admin/chat/history?email=${targetEmail}`);
+                    const msgs = await res.json();
+                    const content = document.getElementById('admin-messages-content');
+                    if (!content) return;
+
+                    const wasAtBottom = content.scrollHeight - content.clientHeight <= content.scrollTop + 50;
+
+                    content.innerHTML = msgs.map(m => {
+                        const isSystem = m.sender_email === 'junaidshah78634@gmail.com';
+                        const admin = JSON.parse(localStorage.getItem('vitox_user'));
+                        const isMe = m.sender_email === admin.email;
+
+                        return `
+                            <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 85%;">
+                                <div style="background: ${isSystem ? 'linear-gradient(135deg, #ffd700, #ffaa00)' : '#1a1a1a'}; 
+                                            color: ${isSystem ? 'black' : 'white'}; 
+                                            padding: 14px 18px; 
+                                            border-radius: ${isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px'}; 
+                                            font-size: 0.95rem; 
+                                            border: 1px solid ${isSystem ? '#ffd700' : 'rgba(255,255,255,0.05)'};
+                                            box-shadow: ${isSystem ? '0 5px 15px rgba(255,215,0,0.2)' : 'none'};
+                                            font-weight: ${isSystem ? '700' : 'normal'};">
+                                    ${isSystem ? '<i class="fas fa-shield-halved" style="margin-right:8px; opacity:0.6;"></i>' : ''}
+                                    ${m.content}
+                                </div>
+                                <div style="font-size: 0.7rem; color: #888; margin-top: 6px; text-align: ${isMe ? 'right' : 'left'}; display: flex; align-items: center; justify-content: ${isMe ? 'flex-end' : 'flex-start'}; gap: 5px;">
+                                    ${isSystem ? '<span style="color:#ffd700; font-weight:900;">OFFICIAL</span>' : ''}
+                                    ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    if (!isPolling || wasAtBottom) content.scrollTop = content.scrollHeight;
+                } catch (e) { console.error(e); }
+            }
+
+            async function sendAdminMsg(targetEmail) {
+                const input = document.getElementById('admin-chat-input');
+                const content = input.value.trim();
+                if (!content) return;
+
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                const isAdmin = user && user.email === 'junaidshah78634@gmail.com';
+
+                try {
+                    const url = isAdmin ? '/api/admin/chat/send' : '/api/collab/chat/send';
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Email': user.email },
+                        body: JSON.stringify({
+                            sender_email: user.email,
+                            receiver_email: isAdmin ? targetEmail : 'junaidshah78634@gmail.com',
+                            content: content
+                        })
+                    });
+                    if (res.ok) {
+                        input.value = '';
+                        loadAdminHistory(targetEmail);
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            async function applyForBrand() {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user) return alert("Login first!");
+
+                try {
+                    const res = await fetch('/api/brand/apply', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user.email })
+                    });
+                    const data = await res.json();
+                    showToast(data.message);
+                    if (data.status === 'success') {
+                        user.status = 'pending_brand';
+                        localStorage.setItem('vitox_user', JSON.stringify(user));
+                        loadView('Creator Hub'); // Refresh
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            async function submitComment(videoId) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                const input = document.getElementById('comment-input');
+                const content = input.value.trim();
+                if (!user) { alert("Login to comment!"); return; }
+                if (!content) return;
+
+                try {
+                    await fetch('/api/video/comment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ video_id: videoId, email: user.email, content: content })
+                    });
+                    input.value = '';
+                    document.getElementById('comment-actions').style.display = 'none';
+                    loadComments(videoId);
+                    // Increment visual total
+                    const total = document.getElementById('comment-total');
+                    if (total) total.innerText = (parseInt(total.innerText.replace(/,/g, '')) + 1).toLocaleString();
+
+                    const snapTotal = document.getElementById(`snap-comm-count-${videoId}`);
+                    if (snapTotal) snapTotal.innerText = parseInt(snapTotal.innerText) + 1;
+                } catch (e) { console.error(e); }
+            }
+
+            function openSnapComments(videoId) {
+                const drawer = document.getElementById('snap-comment-drawer');
+                const backdrop = document.getElementById('snap-comment-backdrop');
+
+                if (drawer) drawer.style.right = '0';
+                if (backdrop) backdrop.style.display = 'block';
+
+                // Setup loading state
+                const content = document.getElementById('snap-comments-content');
+                content.innerHTML = '<div style="text-align:center; padding: 50px; opacity: 0.5;">Loading comments...</div>';
+
+                // Fetch comments
+                loadSnapComments(videoId);
+
+                // Setup submit listener
+                const submitBtn = document.getElementById('snap-comment-submit');
+                submitBtn.onclick = () => submitSnapComment(videoId);
+            }
+
+            function closeSnapComments() {
+                const drawer = document.getElementById('snap-comment-drawer');
+                const backdrop = document.getElementById('snap-comment-backdrop');
+                if (drawer) drawer.style.right = '-100%';
+                if (backdrop) backdrop.style.display = 'none';
+            }
+
+            async function loadSnapComments(videoId) {
+                try {
+                    const res = await fetch(`/api/video/comments/${videoId}`);
+                    const comments = await res.json();
+                    const content = document.getElementById('snap-comments-content');
+
+                    if (comments.length === 0) {
+                        content.innerHTML = '<div style="text-align:center; padding: 50px; opacity: 0.3;">No comments yet. Be the first!</div>';
+                        return;
+                    }
+
+                    content.innerHTML = comments.map(c => `
                     <div style="display: flex; gap: 12px; margin-bottom: 24px;">
                         <div style="width: 32px; height: 32px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; flex-shrink: 0;">
                             ${(c.user_email || '?').charAt(0).toUpperCase()}
@@ -1054,71 +1303,71 @@
                         </div>
                     </div>
                 `).join('');
-            } catch (e) { console.error(e); }
-        }
+                } catch (e) { console.error(e); }
+            }
 
-        async function submitSnapComment(videoId) {
-            const input = document.getElementById('snap-comment-input');
-            const content = input.value.trim();
-            if (!content) return;
+            async function submitSnapComment(videoId) {
+                const input = document.getElementById('snap-comment-input');
+                const content = input.value.trim();
+                if (!content) return;
 
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) { showToast("Please login to comment!"); return; }
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user) { showToast("Please login to comment!"); return; }
 
-            try {
-                const res = await fetch('/api/video/comment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ video_id: videoId, email: user.email, content: content })
-                });
-                if (res.ok) {
-                    input.value = '';
-                    loadSnapComments(videoId);
-                    const commCount = document.getElementById(`snap-comm-count-${videoId}`);
-                    if (commCount) commCount.innerText = parseInt(commCount.innerText || 0) + 1;
-                }
-            } catch (e) { console.error(e); }
-        }
+                try {
+                    const res = await fetch('/api/video/comment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ video_id: videoId, email: user.email, content: content })
+                    });
+                    if (res.ok) {
+                        input.value = '';
+                        loadSnapComments(videoId);
+                        const commCount = document.getElementById(`snap-comm-count-${videoId}`);
+                        if (commCount) commCount.innerText = parseInt(commCount.innerText || 0) + 1;
+                    }
+                } catch (e) { console.error(e); }
+            }
 
-        // Collab Chat Logic
-        let collabChatPoller = null;
+            // Collab Chat Logic
+            let collabChatPoller = null;
 
-        function openCollabChat(creatorEmail) {
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) { showToast("Login required to Collab"); return; }
+            function openCollabChat(creatorEmail) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user) { showToast("Login required to Collab"); return; }
 
-            const drawer = document.getElementById('collab-chat-drawer');
-            drawer.style.right = '0';
-            document.getElementById('collab-chat-target').innerText = `Chatting with: @${creatorEmail.split('@')[0]}`;
+                const drawer = document.getElementById('collab-chat-drawer');
+                drawer.style.right = '0';
+                document.getElementById('collab-chat-target').innerText = `Chatting with: @${creatorEmail.split('@')[0]}`;
 
-            loadCollabHistory(user.email, creatorEmail);
+                loadCollabHistory(user.email, creatorEmail);
 
-            // setup send button
-            const sendBtn = document.getElementById('collab-chat-send');
-            sendBtn.onclick = () => sendCollabMsg(user.email, creatorEmail);
+                // setup send button
+                const sendBtn = document.getElementById('collab-chat-send');
+                sendBtn.onclick = () => sendCollabMsg(user.email, creatorEmail);
 
-            // Poll for new messages every 3 seconds
-            if (collabChatPoller) clearInterval(collabChatPoller);
-            collabChatPoller = setInterval(() => loadCollabHistory(user.email, creatorEmail, true), 3000);
-        }
+                // Poll for new messages every 3 seconds
+                if (collabChatPoller) clearInterval(collabChatPoller);
+                collabChatPoller = setInterval(() => loadCollabHistory(user.email, creatorEmail, true), 3000);
+            }
 
-        function closeCollabChat() {
-            document.getElementById('collab-chat-drawer').style.right = '-100%';
-            if (collabChatPoller) clearInterval(collabChatPoller);
-        }
+            function closeCollabChat() {
+                document.getElementById('collab-chat-drawer').style.right = '-100%';
+                if (collabChatPoller) clearInterval(collabChatPoller);
+            }
 
-        async function loadCollabHistory(myEmail, targetEmail, isPolling = false) {
-            try {
-                const res = await fetch(`/api/collab/chat/history?user1=${myEmail}&user2=${targetEmail}`);
-                const msgs = await res.json();
-                const content = document.getElementById('collab-messages-content');
+            async function loadCollabHistory(myEmail, targetEmail, isPolling = false) {
+                try {
+                    const res = await fetch(`/api/collab/chat/history?user1=${myEmail}&user2=${targetEmail}`);
+                    const msgs = await res.json();
+                    const content = document.getElementById('collab-messages-content');
 
-                const oldScroll = content.scrollTop;
-                const wasAtBottom = content.scrollHeight - content.clientHeight <= content.scrollTop + 50;
+                    const oldScroll = content.scrollTop;
+                    const wasAtBottom = content.scrollHeight - content.clientHeight <= content.scrollTop + 50;
 
-                content.innerHTML = msgs.map(m => {
-                    const isMe = m.sender_email === myEmail;
-                    return `
+                    content.innerHTML = msgs.map(m => {
+                        const isMe = m.sender_email === myEmail;
+                        return `
                         <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 80%;">
                             <div style="background: ${isMe ? '#ff0055' : '#222'}; color: white; padding: 12px 16px; border-radius: ${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'}; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.05);">
                                 ${m.content}
@@ -1128,288 +1377,288 @@
                             </div>
                         </div>
                     `;
-                }).join('');
+                    }).join('');
 
-                if (!isPolling || wasAtBottom) {
-                    content.scrollTop = content.scrollHeight;
-                } else {
-                    content.scrollTop = oldScroll;
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        async function sendCollabMsg(myEmail, targetEmail) {
-            const input = document.getElementById('collab-chat-input');
-            const content = input.value.trim();
-            if (!content) return;
-
-            try {
-                const res = await fetch('/api/collab/chat/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender_email: myEmail, receiver_email: targetEmail, content: content })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    input.value = '';
-                    loadCollabHistory(myEmail, targetEmail);
-                } else {
-                    showToast(data.message);
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        // Toast Engine
-        function showToast(msg) {
-            let container = document.getElementById('toast-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'toast-container';
-                document.body.appendChild(container);
-            }
-            const t = document.createElement('div');
-            t.className = 'toast';
-            t.innerText = msg;
-            container.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
-        }
-
-        async function toggleLike(videoId, channelEmail) {
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) { showToast("Please login to like!"); return; }
-
-            const mainBtn = document.getElementById('like-btn');
-            if (mainBtn) {
-                mainBtn.classList.add('pulse-active');
-                setTimeout(() => mainBtn.classList.remove('pulse-active'), 300);
+                    if (!isPolling || wasAtBottom) {
+                        content.scrollTop = content.scrollHeight;
+                    } else {
+                        content.scrollTop = oldScroll;
+                    }
+                } catch (e) { console.error(e); }
             }
 
-            try {
-                const res = await fetch('/api/video/like', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ video_id: videoId, email: user.email })
-                });
-                const data = await res.json();
-                showToast(data.status === 'liked' ? "Liked! ❤️" : "Like Removed");
+            async function sendCollabMsg(myEmail, targetEmail) {
+                const input = document.getElementById('collab-chat-input');
+                const content = input.value.trim();
+                if (!content) return;
 
-                // Update Snap card counts if they exist
-                const snapLikeCount = document.getElementById(`snap-like-count-${videoId}`);
-                if (snapLikeCount) {
-                    snapLikeCount.innerText = data.likes;
+                try {
+                    const res = await fetch('/api/collab/chat/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sender_email: myEmail, receiver_email: targetEmail, content: content })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        input.value = '';
+                        loadCollabHistory(myEmail, targetEmail);
+                    } else {
+                        showToast(data.message);
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            // Toast Engine
+            function showToast(msg) {
+                let container = document.getElementById('toast-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'toast-container';
+                    document.body.appendChild(container);
                 }
-                const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
-                if (snapLikeIcon) {
-                    snapLikeIcon.style.color = data.status === 'liked' ? '#ff0055' : '#fff';
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.innerText = msg;
+                container.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            }
+
+            async function toggleLike(videoId, channelEmail) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user) { showToast("Please login to like!"); return; }
+
+                const mainBtn = document.getElementById('like-btn');
+                if (mainBtn) {
+                    mainBtn.classList.add('pulse-active');
+                    setTimeout(() => mainBtn.classList.remove('pulse-active'), 300);
                 }
 
-                if (mainBtn) loadEngagementStats(videoId, channelEmail);
-            } catch (e) { console.error(e); }
-        }
+                try {
+                    const res = await fetch('/api/video/like', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ video_id: videoId, email: user.email })
+                    });
+                    const data = await res.json();
+                    showToast(data.status === 'liked' ? "Liked! ❤️" : "Like Removed");
 
-        async function toggleSubscribe(channelEmail, videoId) {
-            const user = JSON.parse(localStorage.getItem('vitox_user'));
-            if (!user) { showToast("Please login to join the Squad!"); return; }
-
-            const mainBtn = document.getElementById('sub-btn');
-            if (mainBtn) {
-                mainBtn.classList.add('pulse-active');
-                setTimeout(() => mainBtn.classList.remove('pulse-active'), 300);
-            }
-
-            try {
-                const res = await fetch('/api/channel/subscribe', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subscriber: user.email, channel: channelEmail })
-                });
-                const data = await res.json();
-                showToast(data.status === 'subscribed' ? "Added to Squad! 🚀" : "Left the Squad");
-
-                // Update Snap card follow buttons
-                const snapSubBtn = document.getElementById(`snap-sub-btn-${videoId}`);
-                if (snapSubBtn) {
-                    snapSubBtn.innerText = data.status === 'subscribed' ? 'Joined' : 'Squad';
-                    snapSubBtn.style.background = data.status === 'subscribed' ? 'rgba(255,255,255,0.2)' : 'white';
-                    snapSubBtn.style.color = data.status === 'subscribed' ? 'white' : 'black';
-                }
-
-                if (mainBtn) loadEngagementStats(videoId, channelEmail);
-            } catch (e) { console.error(e); }
-        }
-
-        // Logic for Category Filtering
-        function filterByCategory(cat) {
-            const chips = document.querySelectorAll('.chip');
-            chips.forEach(c => {
-                c.classList.remove('active');
-                if (c.innerText === cat) c.classList.add('active');
-            });
-
-            if (cat === 'All') {
-                renderVideos(allVideos);
-                return;
-            }
-
-            const filtered = allVideos.filter(vid =>
-                (vid.category && vid.category === cat) ||
-                (vid.title && vid.title.toLowerCase().includes(cat.toLowerCase()))
-            );
-            renderVideos(filtered);
-        }
-
-        // Mobile Search Toggle
-        function toggleMobileSearch() {
-            const searchBar = document.getElementById('search-bar-container');
-            const backBtn = document.querySelector('.mobile-back-btn');
-
-            searchBar.classList.toggle('mobile-active');
-
-            if (searchBar.classList.contains('mobile-active')) {
-                backBtn.style.display = 'flex';
-                document.getElementById('search-input').focus();
-            } else {
-                backBtn.style.display = 'none';
-            }
-        }
-
-        // Mobile Search Toggle Logic is handled by toggleMobileSearch above
-
-
-        async function handleCredentialResponse(response) {
-            const base64Url = response.credential.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const payload = JSON.parse(window.atob(base64));
-
-            console.log("Syncing with Full Stack Backend...");
-
-            // Sync with Python Backend
-            try {
-                const res = await fetch('/api/user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: payload.email,
-                        name: payload.name,
-                        picture: payload.picture
-                    })
-                });
-
-                const dbUser = await res.json();
-
-                // Save complete backend user profile
-                localStorage.setItem('vitox_user', JSON.stringify(dbUser));
-
-                updateLoginUI(dbUser);
-                alert(`Welcome back, ${dbUser.name}!`);
-            } catch (error) {
-                console.error("Backend Sync Failed:", error);
-                // Fallback to local only if server is down
-                localStorage.setItem('vitox_user', JSON.stringify(payload));
-                updateLoginUI(payload);
-            }
-        }
-
-        function updateLoginUI(user) {
-            if (user) {
-                console.log("Updating UI for:", user.name);
-                const loginContainer = document.getElementById('login-container');
-                const avatar = document.getElementById('user-avatar');
-
-                if (loginContainer) loginContainer.style.display = 'none';
-
-                if (avatar) {
-                    avatar.textContent = user.name.charAt(0).toUpperCase();
-                    // Remove Mavo property temporarily to prevent overwrite
-                    avatar.removeAttribute('property');
-
-                    if (user.picture) {
-                        avatar.style.backgroundImage = `url(${user.picture})`;
-                        avatar.style.backgroundSize = 'cover';
-                        avatar.style.backgroundPosition = 'center';
-                        avatar.style.color = 'transparent';
+                    // Update Snap card counts if they exist
+                    const snapLikeCount = document.getElementById(`snap-like-count-${videoId}`);
+                    if (snapLikeCount) {
+                        snapLikeCount.innerText = data.likes;
+                    }
+                    const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
+                    if (snapLikeIcon) {
+                        snapLikeIcon.style.color = data.status === 'liked' ? '#ff0055' : '#fff';
                     }
 
-                    // Show Admin Button if authorized
-                    if (user.email === 'junaidshah78634@gmail.com') {
-                        const headerRight = document.querySelector('.header-right');
-                        if (!document.getElementById('admin-link-btn')) {
-                            const adminBtn = document.createElement('button');
-                            adminBtn.id = 'admin-link-btn';
-                            adminBtn.className = 'btn-text';
-                            adminBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Admin';
-                            adminBtn.onclick = () => location.href = 'admin.html';
-                            adminBtn.style.color = '#ff4d4d';
-                            headerRight.insertBefore(adminBtn, headerRight.firstChild);
+                    if (mainBtn) loadEngagementStats(videoId, channelEmail);
+                } catch (e) { console.error(e); }
+            }
+
+            async function toggleSubscribe(channelEmail, videoId) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user) { showToast("Please login to join the Squad!"); return; }
+
+                const mainBtn = document.getElementById('sub-btn');
+                if (mainBtn) {
+                    mainBtn.classList.add('pulse-active');
+                    setTimeout(() => mainBtn.classList.remove('pulse-active'), 300);
+                }
+
+                try {
+                    const res = await fetch('/api/channel/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subscriber: user.email, channel: channelEmail })
+                    });
+                    const data = await res.json();
+                    showToast(data.status === 'subscribed' ? "Added to Squad! 🚀" : "Left the Squad");
+
+                    // Update Snap card follow buttons
+                    const snapSubBtn = document.getElementById(`snap-sub-btn-${videoId}`);
+                    if (snapSubBtn) {
+                        snapSubBtn.innerText = data.status === 'subscribed' ? 'Joined' : 'Squad';
+                        snapSubBtn.style.background = data.status === 'subscribed' ? 'rgba(255,255,255,0.2)' : 'white';
+                        snapSubBtn.style.color = data.status === 'subscribed' ? 'white' : 'black';
+                    }
+
+                    if (mainBtn) loadEngagementStats(videoId, channelEmail);
+                } catch (e) { console.error(e); }
+            }
+
+            // Logic for Category Filtering
+            function filterByCategory(cat) {
+                const chips = document.querySelectorAll('.chip');
+                chips.forEach(c => {
+                    c.classList.remove('active');
+                    if (c.innerText === cat) c.classList.add('active');
+                });
+
+                if (cat === 'All') {
+                    renderVideos(allVideos);
+                    return;
+                }
+
+                const filtered = allVideos.filter(vid =>
+                    (vid.category && vid.category === cat) ||
+                    (vid.title && vid.title.toLowerCase().includes(cat.toLowerCase()))
+                );
+                renderVideos(filtered);
+            }
+
+            // Mobile Search Toggle
+            function toggleMobileSearch() {
+                const searchBar = document.getElementById('search-bar-container');
+                const backBtn = document.querySelector('.mobile-back-btn');
+
+                searchBar.classList.toggle('mobile-active');
+
+                if (searchBar.classList.contains('mobile-active')) {
+                    backBtn.style.display = 'flex';
+                    document.getElementById('search-input').focus();
+                } else {
+                    backBtn.style.display = 'none';
+                }
+            }
+
+            // Mobile Search Toggle Logic is handled by toggleMobileSearch above
+
+
+            async function handleCredentialResponse(response) {
+                const base64Url = response.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(window.atob(base64));
+
+                console.log("Syncing with Full Stack Backend...");
+
+                // Sync with Python Backend
+                try {
+                    const res = await fetch('/api/user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: payload.email,
+                            name: payload.name,
+                            picture: payload.picture
+                        })
+                    });
+
+                    const dbUser = await res.json();
+
+                    // Save complete backend user profile
+                    localStorage.setItem('vitox_user', JSON.stringify(dbUser));
+
+                    updateLoginUI(dbUser);
+                    alert(`Welcome back, ${dbUser.name}!`);
+                } catch (error) {
+                    console.error("Backend Sync Failed:", error);
+                    // Fallback to local only if server is down
+                    localStorage.setItem('vitox_user', JSON.stringify(payload));
+                    updateLoginUI(payload);
+                }
+            }
+
+            function updateLoginUI(user) {
+                if (user) {
+                    console.log("Updating UI for:", user.name);
+                    const loginContainer = document.getElementById('login-container');
+                    const avatar = document.getElementById('user-avatar');
+
+                    if (loginContainer) loginContainer.style.display = 'none';
+
+                    if (avatar) {
+                        avatar.textContent = user.name.charAt(0).toUpperCase();
+                        // Remove Mavo property temporarily to prevent overwrite
+                        avatar.removeAttribute('property');
+
+                        if (user.picture) {
+                            avatar.style.backgroundImage = `url(${user.picture})`;
+                            avatar.style.backgroundSize = 'cover';
+                            avatar.style.backgroundPosition = 'center';
+                            avatar.style.color = 'transparent';
+                        }
+
+                        // Show Admin Button if authorized
+                        if (user.email === 'junaidshah78634@gmail.com') {
+                            const headerRight = document.querySelector('.header-right');
+                            if (!document.getElementById('admin-link-btn')) {
+                                const adminBtn = document.createElement('button');
+                                adminBtn.id = 'admin-link-btn';
+                                adminBtn.className = 'btn-text';
+                                adminBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Admin';
+                                adminBtn.onclick = () => loadView('Admin Panel');
+                                adminBtn.style.color = '#ff4d4d';
+                                headerRight.insertBefore(adminBtn, headerRight.firstChild);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Check if user is already logged in on page load
-        window.addEventListener('load', () => {
-            const savedUser = localStorage.getItem('vitox_user');
-            if (savedUser) {
-                updateLoginUI(JSON.parse(savedUser));
-            }
+            // Check if user is already logged in on page load
+            window.addEventListener('load', () => {
+                const savedUser = localStorage.getItem('vitox_user');
+                if (savedUser) {
+                    updateLoginUI(JSON.parse(savedUser));
+                }
 
-            // Load real videos from DB
-            loadVideos();
+                // Load real videos from DB
+                loadVideos();
 
-            // Category Chip Interaction
-            const chips = document.querySelectorAll('.chip');
-            chips.forEach(chip => {
-                chip.onclick = () => {
-                    chips.forEach(c => c.classList.remove('active'));
-                    chip.classList.add('active');
-                };
+                // Category Chip Interaction
+                const chips = document.querySelectorAll('.chip');
+                chips.forEach(chip => {
+                    chip.onclick = () => {
+                        chips.forEach(c => c.classList.remove('active'));
+                        chip.classList.add('active');
+                    };
+                });
             });
-        });
 
-        function toggleUserMenu() {
-            const menu = document.getElementById('user-menu');
-            const createMenu = document.getElementById('create-dropdown');
-            if (createMenu) createMenu.style.display = 'none';
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function toggleCreateMenu() {
-            const createMenu = document.getElementById('create-dropdown');
-            const userMenu = document.getElementById('user-menu');
-            if (userMenu) userMenu.style.display = 'none';
-            createMenu.style.display = createMenu.style.display === 'block' ? 'none' : 'block';
-        }
-
-        // Close menus on outside click
-        window.addEventListener('click', (e) => {
-            const userMenu = document.getElementById('user-menu');
-            const createMenu = document.getElementById('create-dropdown');
-
-            if (userMenu && !e.target.closest('.user-avatar') && !e.target.closest('#user-menu')) {
-                userMenu.style.display = 'none';
+            function toggleUserMenu() {
+                const menu = document.getElementById('user-menu');
+                const createMenu = document.getElementById('create-dropdown');
+                if (createMenu) createMenu.style.display = 'none';
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
             }
-            if (createMenu && !e.target.closest('.create-container')) {
-                createMenu.style.display = 'none';
+
+            function toggleCreateMenu() {
+                const createMenu = document.getElementById('create-dropdown');
+                const userMenu = document.getElementById('user-menu');
+                if (userMenu) userMenu.style.display = 'none';
+                createMenu.style.display = createMenu.style.display === 'block' ? 'none' : 'block';
             }
-        });
 
-        function logout() {
-            localStorage.removeItem('vitox_user');
-            location.reload();
-        }
+            // Close menus on outside click
+            window.addEventListener('click', (e) => {
+                const userMenu = document.getElementById('user-menu');
+                const createMenu = document.getElementById('create-dropdown');
 
-        // Privacy & Terms Modal
-        function showPagesModal() {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
+                if (userMenu && !e.target.closest('.user-avatar') && !e.target.closest('#user-menu')) {
+                    userMenu.style.display = 'none';
+                }
+                if (createMenu && !e.target.closest('.create-container')) {
+                    createMenu.style.display = 'none';
+                }
+            });
+
+            function logout() {
+                localStorage.removeItem('vitox_user');
+                location.reload();
+            }
+
+            // Privacy & Terms Modal
+            function showPagesModal() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
                 position: fixed; top: 0; left: 0; right: 0; bottom: 0;
                 background: rgba(0,0,0,0.8); z-index: 5000;
                 display: flex; align-items: center; justify-content: center;
                 backdrop-filter: blur(5px);
             `;
 
-            modal.innerHTML = `
+                modal.innerHTML = `
                 <div style="background: #1e1e1e; width: 90%; max-width: 600px; max-height: 80vh; border-radius: 16px; overflow-y: auto; padding: 24px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
                     <button onclick="this.closest('div').parentNode.remove()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: white; font-size: 1.5rem;"><i class="fas fa-times"></i></button>
                     
@@ -1439,26 +1688,26 @@
                 </div>
             `;
 
-            document.body.appendChild(modal);
-        }
-        function shareVideo(videoId) {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = videoId ? `${baseUrl}?v=${videoId}` : window.location.href;
-
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Watch this on Vitox',
-                    url: shareUrl
-                }).catch(console.error);
-            } else {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    showToast("Link copied to clipboard!");
-                }).catch(() => {
-                    showToast("Failed to copy link.");
-                });
+                document.body.appendChild(modal);
             }
-        }
-    </script>
+            function shareVideo(videoId) {
+                const baseUrl = window.location.origin + window.location.pathname;
+                const shareUrl = videoId ? `${baseUrl}?v=${videoId}` : window.location.href;
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Watch this on Vitox',
+                        url: shareUrl
+                    }).catch(console.error);
+                } else {
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        showToast("Link copied to clipboard!");
+                    }).catch(() => {
+                        showToast("Failed to copy link.");
+                    });
+                }
+            }
+        </script>
 </body>
 
 </html>
