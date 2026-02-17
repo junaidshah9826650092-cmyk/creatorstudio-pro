@@ -317,7 +317,12 @@ def upload_video():
         conn = get_db_connection()
         # Double check if table exists as fallback
         try:
-            conn.execute('SELECT 1 FROM videos LIMIT 1')
+            if USE_POSTGRES:
+                check_cursor = conn.cursor()
+                check_cursor.execute('SELECT 1 FROM videos LIMIT 1')
+                check_cursor.close()
+            else:
+                conn.execute('SELECT 1 FROM videos LIMIT 1')
         except:
             print("Fallback: Table 'videos' missing in route. Re-init...")
             init_db()
@@ -643,6 +648,14 @@ def admin_stats():
     except Exception as e:
         print(f"Stats Error: {e}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/storage/status', methods=['GET'])
+def storage_status():
+    return jsonify({
+        'persistent': USE_POSTGRES,
+        'db_type': 'PostgreSQL (Cloud Safe)' if USE_POSTGRES else 'SQLite (Ephemeral/Risk)',
+        'data_risk': not USE_POSTGRES and os.environ.get('RENDER') == 'true'
+    })
 
 @app.route('/api/creator/stats', methods=['POST'])
 def creator_stats():
