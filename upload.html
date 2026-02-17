@@ -19,8 +19,8 @@
     <div class="upload-container">
         <header class="upload-header">
             <div style="display: flex; flex-direction: column;">
-                <h2 id="modal-title" style="margin-bottom: 4px;">Elite Cloud Studio</h2>
-                <div style="font-size: 0.75rem; color: #888;">Saved as private <i class="far fa-comment-alt"></i></div>
+                <h2 id="modal-title" style="margin-bottom: 4px;">Vitox Creator Studio</h2>
+                <div style="font-size: 0.75rem; color: #888;">Save as private <i class="far fa-comment-alt"></i></div>
             </div>
             <div class="stepper">
                 <div class="step active" id="step-node-1" data-title="Details"></div>
@@ -38,10 +38,10 @@
                 <!-- Drop Zone (Initial) -->
                 <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
                     <div class="circle-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                    <p style="font-size: 1.1rem; margin-bottom: 8px; font-weight: 600;">Elite Cloud Studio</p>
+                    <p style="font-size: 1.1rem; margin-bottom: 8px; font-weight: 600;">Vitox Creator Studio</p>
                     <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 20px;">Drag and drop video files to upload
                     </p>
-                    <button class="btn-upload" style="background:#fff; color:#000;">Select Files</button>
+                    <button class="btn-upload">Select Files</button>
                     <input type="file" id="file-input" accept="video/*" style="display: none;"
                         onchange="handleFileSelect(event)">
                 </div>
@@ -60,21 +60,44 @@
                         </div>
 
                         <!-- Video Type Selector -->
-                        <div class="input-wrapper" style="margin-top: 24px;">
-                            <label>Video Type</label>
-                            <div
-                                style="display: flex; gap: 20px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">
-                                <label
-                                    style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white;">
+                        <div class="input-wrapper" style="margin-top: 24px; border: none; background: transparent;">
+                            <label
+                                style="position: static; font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: block;">Video
+                                Type</label>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <label class="type-option">
                                     <input type="radio" name="video_type" value="video" checked>
-                                    <span>Regular Video (Long form)</span>
+                                    <div class="option-card">
+                                        <i class="fas fa-video"></i>
+                                        <span>Regular Video</span>
+                                    </div>
                                 </label>
-                                <label
-                                    style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white;">
+                                <label class="type-option">
                                     <input type="radio" name="video_type" value="short">
-                                    <span>V-Snap (Short &lt; 60s)</span>
+                                    <div class="option-card">
+                                        <i class="fas fa-bolt"></i>
+                                        <span>V-Snap (Short)</span>
+                                    </div>
                                 </label>
                             </div>
+                        </div>
+
+                        <!-- Category Selector -->
+                        <div class="input-wrapper" style="margin-top: 24px;">
+                            <label>Category (required)</label>
+                            <select id="video-category"
+                                style="width: 100%; background: transparent; border: none; color: white; padding: 28px 12px 10px 12px; font-size: 0.95rem; outline: none; appearance: none; cursor: pointer;">
+                                <option value="All">All Categories</option>
+                                <option value="Music">Music</option>
+                                <option value="Gaming">Gaming</option>
+                                <option value="Live">Live</option>
+                                <option value="Tech">Tech</option>
+                                <option value="News">News</option>
+                                <option value="Comedy">Comedy</option>
+                                <option value="Education">Education</option>
+                            </select>
+                            <i class="fas fa-chevron-down"
+                                style="position: absolute; right: 15px; top: 28px; color: #888; pointer-events: none;"></i>
                         </div>
                         <div class="input-wrapper" style="margin-top: 32px;">
                             <label>Description <i class="far fa-question-circle"></i></label>
@@ -87,17 +110,18 @@
                             <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 16px;">Set a thumbnail that
                                 stands out and draws viewers' attention. <a href="#"
                                     style="color: #3ea6ff; text-decoration: none;">Learn more</a></div>
-                            <div style="display: flex; gap: 12px;">
-                                <div
-                                    style="width: 120px; height: 68px; border: 1px dashed #444; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; cursor: pointer; background: rgba(255,255,255,0.02);">
-                                    <i class="fas fa-image" style="margin-bottom: 4px;"></i>
-                                    <span style="font-size: 0.65rem;">Upload thumbnail</span>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <div class="thumb-picker active" onclick="selectThumbnail(this)">
+                                    <i class="fas fa-image"></i>
+                                    <span>Auto</span>
                                 </div>
-                                <div
-                                    style="width: 120px; height: 68px; background: #222; border-radius: 4px; border: 1px solid #333;">
+                                <div class="thumb-picker" onclick="selectThumbnail(this)">
+                                    <i class="fas fa-magic"></i>
+                                    <span>AI Gen</span>
                                 </div>
-                                <div
-                                    style="width: 120px; height: 68px; background: #222; border-radius: 4px; border: 1px solid #333;">
+                                <div class="thumb-picker" onclick="selectThumbnail(this)">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Upload</span>
                                 </div>
                             </div>
                         </div>
@@ -117,7 +141,7 @@
                             <div class="element-title">Add subtitles</div>
                             <div class="element-desc">Reach a broader audience by adding subtitles to your video</div>
                         </div>
-                        <button class="element-btn">ADD</button>
+                        <button class="element-btn" onclick="alert('Feature coming soon!')">ADD</button>
                     </div>
 
                     <div class="element-row">
@@ -126,7 +150,7 @@
                             <div class="element-title">Add an end screen</div>
                             <div class="element-desc">Promote related content at the end of your video</div>
                         </div>
-                        <button class="element-btn">ADD</button>
+                        <button class="element-btn" onclick="alert('Feature coming soon!')">ADD</button>
                     </div>
 
                     <div class="element-row">
@@ -135,7 +159,7 @@
                             <div class="element-title">Add cards</div>
                             <div class="element-desc">Promote related content during your video</div>
                         </div>
-                        <button class="element-btn">ADD</button>
+                        <button class="element-btn" onclick="alert('Feature coming soon!')">ADD</button>
                     </div>
                 </div>
 
@@ -411,6 +435,7 @@
             statusMsg.innerText = "SYNCING WITH DASHBOARD...";
 
             const videoType = document.querySelector('input[name="video_type"]:checked').value; // Get selected type
+            const category = document.getElementById('video-category').value;
 
             const dbRes = await fetch('/api/video/upload', {
                 method: 'POST',
@@ -421,7 +446,8 @@
                     description: desc,
                     video_url: videoUrl,
                     thumbnail_url: thumbUrl,
-                    type: videoType // Pass type to backend
+                    type: videoType,
+                    category: category
                 })
             });
 
@@ -435,6 +461,10 @@
                 statusMsg.innerText = "DB FAILED: " + dbData.message;
                 nextBtn.disabled = false;
             }
+        }
+        function selectThumbnail(el) {
+            document.querySelectorAll('.thumb-picker').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
         }
     </script>
 </body>

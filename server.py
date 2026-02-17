@@ -98,6 +98,8 @@ def init_db():
             thumbnail_url TEXT,
             views INTEGER DEFAULT 0,
             likes INTEGER DEFAULT 0,
+            type TEXT DEFAULT 'video',
+            category TEXT DEFAULT 'All',
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -154,6 +156,7 @@ def init_db():
         # Postgres migrations
         try: 
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS type TEXT DEFAULT \'video\'')
+            cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS category TEXT DEFAULT \'All\'')
             conn.commit()
         except: conn.rollback()
 
@@ -309,22 +312,23 @@ def upload_video():
         if not email or not title or not video_url:
             return jsonify({'status': 'error', 'message': 'Missing data'}), 400
         video_type = data.get('type', 'video') # 'video' or 'short'
+        category = data.get('category', 'All')
 
         conn = get_db_connection()
         # Double check if table exists as fallback
         try:
             conn.execute('SELECT 1 FROM videos LIMIT 1')
-        except sqlite3.OperationalError:
+        except:
             print("Fallback: Table 'videos' missing in route. Re-init...")
             init_db()
 
         if USE_POSTGRES:
             cursor = conn.cursor()
-            cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type) VALUES (%s, %s, %s, %s, %s, %s)', 
-                         (email, title, desc, video_url, thumb_url, video_type))
+            cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category) VALUES (%s, %s, %s, %s, %s, %s, %s)', 
+                         (email, title, desc, video_url, thumb_url, video_type, category))
         else:
-            conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type) VALUES (?, ?, ?, ?, ?, ?)', 
-                         (email, title, desc, video_url, thumb_url, video_type))
+            conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                         (email, title, desc, video_url, thumb_url, video_type, category))
         conn.commit()
         conn.close()
         

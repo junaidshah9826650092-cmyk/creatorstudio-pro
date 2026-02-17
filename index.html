@@ -901,21 +901,22 @@
 
         // Logic for Category Filtering
         function filterByCategory(cat) {
-            const cards = document.querySelectorAll('.video-card');
             const chips = document.querySelectorAll('.chip');
-            chips.forEach(c => c.classList.remove('active'));
-            if (event) event.target.classList.add('active');
+            chips.forEach(c => {
+                c.classList.remove('active');
+                if (c.innerText === cat) c.classList.add('active');
+            });
 
             if (cat === 'All') {
-                cards.forEach(c => c.style.display = 'block');
+                renderVideos(allVideos);
                 return;
             }
 
-            cards.forEach(card => {
-                const title = card.querySelector('.video-title').innerText.toLowerCase();
-                const fits = title.includes(cat.toLowerCase());
-                card.style.display = fits ? 'block' : 'none';
-            });
+            const filtered = allVideos.filter(vid =>
+                (vid.category && vid.category === cat) ||
+                (vid.title && vid.title.toLowerCase().includes(cat.toLowerCase()))
+            );
+            renderVideos(filtered);
         }
 
         // Mobile Search Toggle
