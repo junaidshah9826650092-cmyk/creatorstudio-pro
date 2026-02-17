@@ -95,6 +95,7 @@ def init_db():
             points INTEGER DEFAULT 0,
             role TEXT DEFAULT 'user',
             status TEXT DEFAULT 'active',
+            is_verified_brand BOOLEAN DEFAULT FALSE,
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -156,6 +157,19 @@ def init_db():
             user_email TEXT,
             content TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Collaboration Messages table
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS messages (
+            id {id_type},
+            sender_email TEXT,
+            receiver_email TEXT,
+            content TEXT,
+            is_collab BOOLEAN DEFAULT TRUE,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_read BOOLEAN DEFAULT FALSE
         )
     ''')
 
@@ -1257,7 +1271,101 @@ def serve_index():
     return response
 
 
-# Deploy ID: 1739556800
+@app.route('/api/collab/chat/send', methods=['POST'])
+def send_collab_message():
+    try:
+        data = request.json
+        sender_email = data.get('sender_email')
+        receiver_email = data.get('receiver_email')
+        content = data.get('content')
+        
+        if not sender_email or not receiver_email or not content:
+            return jsonify({'status': 'error', 'message': 'Missing fields'}), 400
+            
+        conn = get_db_connection()
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            # Get sender info (points and brand status)
+            cursor.execute('SELECT points, is_verified_brand FROM users WHERE email = %s', (sender_email,))
+            sender = cursor.fetchone()
+            sender_points = sender[0] if sender else 0
+            
+            # Get receiver subscriber count
+            cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (receiver_email,))
+            squad_count = cursor.fetchone()[0]
+            
+            # 1M Squad requirement for Elite Creators (> 100k subs)
+            if squad_count > 100000 and (sender_points or 0) < 1000000:
+                conn.close()
+                return jsonify({'status': 'error', 'message': '1M Square/Points required to chat with Elite Creators (100k+ Squad)'}), 403
+
+            cursor.execute('INSERT INTO messages (sender_email, receiver_email, content) VALUES (%s, %s, %s)',
+                         (sender_email, receiver_email, content))
+        else:
+            sender = conn.execute('SELECT points, is_verified_brand FROM users WHERE email = ?', (sender_email,)).fetchone()
+            sender_points = sender['points'] if sender else 0
+            
+            squad_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (receiver_email,)).fetchone()[0]
+            # Enforce 1M Points rule for creators with > 1k subs on SQLite (test mode)
+            if squad_count > 1000 and (sender_points or 0) < 1000000:
+                conn.close()
+                return jsonify({'status': 'error', 'message': '1M Square/Points required'}), 403
+
+            conn.execute('INSERT INTO messages (sender_email, receiver_email, content) VALUES (?, ?, ?)',
+                         (sender_email, receiver_email, content))
+        
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/brand/apply', methods=['POST'])
+def apply_brand_verification():
+    try:
+        data = request.json
+        email = data.get('email')
+        conn = get_db_connection()
+        # For now, we just mark them as 'pending_brand' in a new status or use role
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE users SET status = 'pending_brand' WHERE email = %s", (email,))
+        else:
+            conn.execute("UPDATE users SET status = 'pending_brand' WHERE email = ?", (email,))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'message': 'Application submitted! Admin will verify your brand.'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/collab/chat/history', methods=['GET'])
+def get_chat_history():
+    user1 = request.args.get('user1')
+    user2 = request.args.get('user2')
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute('''
+            SELECT * FROM messages 
+            WHERE (sender_email = %s AND receiver_email = %s)
+            OR (sender_email = %s AND receiver_email = %s)
+            ORDER BY timestamp ASC
+        ''', (user1, user2, user2, user1))
+        rows = cursor.fetchall()
+    else:
+        rows = conn.execute('''
+            SELECT * FROM messages 
+            WHERE (sender_email = ? AND receiver_email = ?)
+            OR (sender_email = ? AND receiver_email = ?)
+            ORDER BY timestamp ASC
+        ''', (user1, user2, user2, user1)).fetchall()
+        
+    messages = [dict(r) for r in rows]
+    conn.close()
+    return jsonify(messages)
+
+# Deploy ID: 1739556801
+
 # Initial DB Setup on Start
 try:
     init_db()

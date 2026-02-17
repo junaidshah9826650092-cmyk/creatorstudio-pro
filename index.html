@@ -170,6 +170,38 @@
         </main>
     </div>
 
+    <!-- Collab Chat Drawer -->
+    <div id="collab-chat-drawer"
+        style="position: fixed; top: 0; right: -100%; width: 450px; max-width: 100%; height: 100vh; background: #0a0a0a; z-index: 10001; box-shadow: -20px 0 50px rgba(0,0,0,0.9); transition: right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
+        <div
+            style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #111, #0a0a0a);">
+            <div>
+                <h3
+                    style="margin:0; font-weight: 800; color: #ff0055; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-handshake"></i> Brand Collaboration
+                </h3>
+                <div id="collab-chat-target" style="font-size: 0.8rem; color: #aaa; margin-top: 4px;">Chatting with
+                    Creator</div>
+            </div>
+            <button onclick="closeCollabChat()"
+                style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer;">&times;</button>
+        </div>
+        <div id="collab-messages-content"
+            style="flex:1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- Messages load here -->
+        </div>
+        <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); background: #111;">
+            <div style="display: flex; gap: 12px;">
+                <input type="text" id="collab-chat-input" placeholder="Discuss collaboration..."
+                    style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px; color: white; outline: none;">
+                <button id="collab-chat-send"
+                    style="background: #ff0055; color: white; border: none; width: 50px; border-radius: 12px; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Snap Comments Drawer -->
     <div id="snap-comment-backdrop" onclick="closeSnapComments()"
         style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; backdrop-filter: blur(4px);">
@@ -545,10 +577,45 @@
             const grid = document.getElementById('main-video-grid');
             const emptyState = document.getElementById('empty-state');
 
-            // Clear Grid
             if (grid) grid.innerHTML = '';
 
-            // Show Custom Message
+            if (viewName === 'Creator Hub') {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (emptyState) emptyState.style.display = 'none';
+
+                grid.innerHTML = `
+                    <div style="padding: 40px; color: white; width: 100%;">
+                        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 30px;">Creator Hub</h1>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                            <!-- Analytics Card -->
+                            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 20px;">
+                                <i class="fas fa-chart-line" style="font-size: 2rem; color: #ff0055; margin-bottom: 20px;"></i>
+                                <h3 style="margin: 0 0 10px 0;">Analytics</h3>
+                                <p style="color: #aaa; margin-bottom: 20px;">Track your growth and view detailed performance of your videos.</p>
+                                <button onclick="location.href='dashboard_overview.html'" style="padding: 10px 20px; background: white; color: black; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Go to Dashboard</button>
+                            </div>
+
+                            <!-- Brand Collab Card -->
+                            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 20px;">
+                                <i class="fas fa-handshake" style="font-size: 2rem; color: #00ff88; margin-bottom: 20px;"></i>
+                                <h3 style="margin: 0 0 10px 0;">Brand Collaboration</h3>
+                                <p style="color: #aaa; margin-bottom: 20px;">Work with top brands and creators. Reach 100k Squad to unlock Elite deals.</p>
+                                ${user && user.status === 'pending_brand' ?
+                        '<button disabled style="padding: 10px 20px; background: #333; color: #888; border: none; border-radius: 8px; font-weight: 700;">Application Pending</button>' :
+                        (user && user.is_verified_brand ?
+                            '<span style="color: #00ff88; font-weight: 800;"><i class="fas fa-check-circle"></i> Verified Brand</span>' :
+                            '<button onclick="applyForBrand()" style="padding: 10px 20px; background: #ff0055; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Apply for Brand Verification</button>'
+                        )
+                    }
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show Custom Message for other views
             if (emptyState) {
                 emptyState.style.display = 'block';
                 emptyState.innerHTML = `
@@ -677,10 +744,18 @@
                                         <div style="font-size: 0.8rem; color: #aaa;" id="sub-count">0 Squad members</div>
                                     </div>
                                     ${isSelf ? '' : `
-                                    <button id="sub-btn" onclick="toggleSubscribe('${safeChannel}', ${safeId})" 
-                                        style="background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; margin-left: 10px; transition: all 0.2s; font-size: 0.9rem;">
-                                        Join Squad
-                                    </button>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button id="sub-btn" onclick="toggleSubscribe('${safeChannel}', ${safeId})" 
+                                            style="background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;">
+                                            Join Squad
+                                        </button>
+                                        ${user ? `
+                                            <button onclick="openCollabChat('${safeChannel}')" 
+                                                style="background: #ff0055; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-handshake"></i> Collab
+                                            </button>
+                                        ` : ''}
+                                    </div>
                                     `}
                                 </div>
 
@@ -886,6 +961,26 @@
             } catch (e) { console.error(e); }
         }
 
+        async function applyForBrand() {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) return alert("Login first!");
+
+            try {
+                const res = await fetch('/api/brand/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email })
+                });
+                const data = await res.json();
+                showToast(data.message);
+                if (data.status === 'success') {
+                    user.status = 'pending_brand';
+                    localStorage.setItem('vitox_user', JSON.stringify(user));
+                    loadView('Creator Hub'); // Refresh
+                }
+            } catch (e) { console.error(e); }
+        }
+
         async function submitComment(videoId) {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             const input = document.getElementById('comment-input');
@@ -981,6 +1076,85 @@
                     loadSnapComments(videoId);
                     const commCount = document.getElementById(`snap-comm-count-${videoId}`);
                     if (commCount) commCount.innerText = parseInt(commCount.innerText || 0) + 1;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Collab Chat Logic
+        let collabChatPoller = null;
+
+        function openCollabChat(creatorEmail) {
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
+            if (!user) { showToast("Login required to Collab"); return; }
+
+            const drawer = document.getElementById('collab-chat-drawer');
+            drawer.style.right = '0';
+            document.getElementById('collab-chat-target').innerText = `Chatting with: @${creatorEmail.split('@')[0]}`;
+
+            loadCollabHistory(user.email, creatorEmail);
+
+            // setup send button
+            const sendBtn = document.getElementById('collab-chat-send');
+            sendBtn.onclick = () => sendCollabMsg(user.email, creatorEmail);
+
+            // Poll for new messages every 3 seconds
+            if (collabChatPoller) clearInterval(collabChatPoller);
+            collabChatPoller = setInterval(() => loadCollabHistory(user.email, creatorEmail, true), 3000);
+        }
+
+        function closeCollabChat() {
+            document.getElementById('collab-chat-drawer').style.right = '-100%';
+            if (collabChatPoller) clearInterval(collabChatPoller);
+        }
+
+        async function loadCollabHistory(myEmail, targetEmail, isPolling = false) {
+            try {
+                const res = await fetch(`/api/collab/chat/history?user1=${myEmail}&user2=${targetEmail}`);
+                const msgs = await res.json();
+                const content = document.getElementById('collab-messages-content');
+
+                const oldScroll = content.scrollTop;
+                const wasAtBottom = content.scrollHeight - content.clientHeight <= content.scrollTop + 50;
+
+                content.innerHTML = msgs.map(m => {
+                    const isMe = m.sender_email === myEmail;
+                    return `
+                        <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 80%;">
+                            <div style="background: ${isMe ? '#ff0055' : '#222'}; color: white; padding: 12px 16px; border-radius: ${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'}; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.05);">
+                                ${m.content}
+                            </div>
+                            <div style="font-size: 0.7rem; color: #888; margin-top: 4px; text-align: ${isMe ? 'right' : 'left'};">
+                                ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (!isPolling || wasAtBottom) {
+                    content.scrollTop = content.scrollHeight;
+                } else {
+                    content.scrollTop = oldScroll;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function sendCollabMsg(myEmail, targetEmail) {
+            const input = document.getElementById('collab-chat-input');
+            const content = input.value.trim();
+            if (!content) return;
+
+            try {
+                const res = await fetch('/api/collab/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender_email: myEmail, receiver_email: targetEmail, content: content })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    input.value = '';
+                    loadCollabHistory(myEmail, targetEmail);
+                } else {
+                    showToast(data.message);
                 }
             } catch (e) { console.error(e); }
         }
