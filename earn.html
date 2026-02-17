@@ -218,47 +218,38 @@
 
     <div class="main-container">
         <div class="earn-header">
-            <h1 class="earn-title">Become a Partner</h1>
-            <p class="earn-subtitle">Join the Vitox Partner Program to earn money, get creator support, and more.</p>
+            <h1 class="earn-title">Join the Vitox Elite</h1>
+            <p class="earn-subtitle">Monetize your passion. Level up your Squad. Earn rewards.</p>
         </div>
 
         <div class="criterias">
-            <!-- Subs Card -->
+            <!-- Level 1 Card -->
             <div class="criteria-card">
-                <h3 style="margin-bottom: 24px;">Reach requirements to apply</h3>
-                <div class="ring-container">
-                    <svg class="progress-ring" width="160" height="160">
-                        <circle class="progress-ring__circle" stroke="#333" stroke-width="12" fill="transparent" r="70"
-                            cx="80" cy="80" />
-                        <circle id="sub-ring" class="progress-ring__circle" stroke="#2ba640" stroke-width="12"
-                            fill="transparent" r="70" cx="80" cy="80" stroke-dasharray="439.8"
-                            stroke-dashoffset="439.8" />
-                    </svg>
-                    <div class="count-text">
-                        <span class="current-val" id="sub-count">0</span>
-                        <span class="target-val">/ 1,000 subscribers</span>
+                <h3 style="margin-bottom: 24px;">Squad Strength (Followers)</h3>
+                <div style="background:#333; height:10px; border-radius:5px; margin-bottom:12px; overflow:hidden;">
+                    <div id="sub-bar" style="width:0%; height:100%; background:var(--accent); transition:width 1s;">
                     </div>
                 </div>
-                <p style="font-size: 0.9rem; color: #aaa;">Required for eligibility</p>
+                <div class="count-text"
+                    style="position:static; transform:none; flex-direction:row; justify-content:space-between; width:100%;">
+                    <span class="current-val" id="sub-count" style="font-size:1.2rem;">0</span>
+                    <span class="target-val">/ 1,000</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #aaa; margin-top:8px;">Unlock: Ad Revenue</p>
             </div>
 
-            <!-- Public Watch Hours (Mocked via Views) -->
+            <!-- Level 2 Card -->
             <div class="criteria-card">
-                <h3 style="margin-bottom: 24px;">Public watch hours</h3>
-                <div class="ring-container">
-                    <svg class="progress-ring" width="160" height="160">
-                        <circle class="progress-ring__circle" stroke="#333" stroke-width="12" fill="transparent" r="70"
-                            cx="80" cy="80" />
-                        <circle id="watch-ring" class="progress-ring__circle" stroke="#2ba640" stroke-width="12"
-                            fill="transparent" r="70" cx="80" cy="80" stroke-dasharray="439.8"
-                            stroke-dashoffset="439.8" />
-                    </svg>
-                    <div class="count-text">
-                        <span class="current-val" id="watch-count">0</span>
-                        <span class="target-val">/ 4,000 public hours</span>
-                    </div>
+                <h3 style="margin-bottom: 24px;">Engagement Score (Views)</h3>
+                <div style="background:#333; height:10px; border-radius:5px; margin-bottom:12px; overflow:hidden;">
+                    <div id="watch-bar" style="width:0%; height:100%; background:#ff003c; transition:width 1s;"></div>
                 </div>
-                <p style="font-size: 0.9rem; color: #aaa;">Based on long-form video views</p>
+                <div class="count-text"
+                    style="position:static; transform:none; flex-direction:row; justify-content:space-between; width:100%;">
+                    <span class="current-val" id="watch-count" style="font-size:1.2rem;">0</span>
+                    <span class="target-val">/ 10,000 Views</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #aaa; margin-top:8px;">Unlock: V-Snap Bonuses</p>
             </div>
         </div>
 
@@ -287,8 +278,8 @@
                 const stats = await res.json();
 
                 // Update UI
-                updateRing('sub-ring', 'sub-count', stats.subscribers, 1000);
-                updateRing('watch-ring', 'watch-count', stats.watch_time || (stats.views * 0.1).toFixed(1), 4000); // Mock watch status if missing
+                updateRing('sub-bar', 'sub-count', stats.subscribers, 1000);
+                updateRing('watch-bar', 'watch-count', stats.views || 0, 10000); // Changed logic to Views
 
                 // Check eligibility
                 if (stats.subscribers >= 1000 && (stats.watch_time || stats.views * 0.1) >= 4000) {
@@ -302,15 +293,9 @@
             } catch (e) { console.error(e); }
         });
 
-        function updateRing(ringId, textId, current, target) {
-            const circle = document.getElementById(ringId);
-            const radius = circle.r.baseVal.value;
-            const circumference = radius * 2 * Math.PI;
-
+        function updateRing(barId, textId, current, target) {
             const percent = Math.min((current / target) * 100, 100);
-            const offset = circumference - (percent / 100) * circumference;
-
-            circle.style.strokeDashoffset = offset;
+            document.getElementById(barId).style.width = percent + "%";
             document.getElementById(textId).innerText = Math.floor(current).toLocaleString();
         }
 
