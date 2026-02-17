@@ -272,7 +272,6 @@ def withdraw():
         user = conn.execute('SELECT points FROM users WHERE email = ?', (email,)).fetchone()
     
     if user and user['points'] >= amount_points:
-    if user and user['points'] >= amount_points:
         if USE_POSTGRES:
             cursor = conn.cursor()
             cursor.execute('UPDATE users SET points = points - %s WHERE email = %s', (amount_points, email))
@@ -309,10 +308,6 @@ def upload_video():
         
         if not email or not title or not video_url:
             return jsonify({'status': 'error', 'message': 'Missing data'}), 400
-            
-        if not email or not title or not video_url:
-            return jsonify({'status': 'error', 'message': 'Missing data'}), 400
-            
         video_type = data.get('type', 'video') # 'video' or 'short'
 
         conn = get_db_connection()
@@ -775,7 +770,8 @@ def creator_delete_video():
         cursor = conn.cursor()
         cursor.execute('SELECT user_email FROM videos WHERE id = %s', (video_id,))
         video = cursor.fetchone()
-        owner = video['user_email'] if video else None
+        # Postgres fetchone returns tuple (email,) or None
+        owner = video[0] if video else None
     else:
         video = conn.execute('SELECT user_email FROM videos WHERE id = ?', (video_id,)).fetchone()
         owner = video['user_email'] if video else None
