@@ -356,67 +356,88 @@ def _fetch_from_cloudinary(resource_type='video'):
     cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
     api_key = os.environ.get('CLOUDINARY_API_KEY')
     api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    
     if not cloud_name or not api_key or not api_secret:
+        print("FAIL-SAFE ERROR: Cloudinary credentials missing in environment.")
         return []
         
     try:
         auth_str = f"{api_key}:{api_secret}"
         encoded_auth = base64.b64encode(auth_str.encode()).decode()
-        url = f"https://api.cloudinary.com/v1_1/{cloud_name}/resources/{resource_type}?max_results=100"
+        
+        # Try both 'video' and 'image' (Cloudinary sometimes lists long videos as videos but small ones as raw/images in some configs)
+        # But we mostly want videos
+        url = f"https://api.cloudinary.com/v1_1/{cloud_name}/resources/video?max_results=500"
         headers = {'Authorization': f'Basic {encoded_auth}'}
         
+        print(f"FAIL-SAFE: Calling Cloudinary Admin API for {cloud_name}...")
         response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            print(f"FAIL-SAFE ERROR: Cloudinary API returned {response.status_code}: {response.text}")
+            return []
+            
         data = response.json()
+        resources = data.get('resources', [])
+        print(f"FAIL-SAFE: Found {len(resources)} assets in Cloudinary.")
         
         videos = []
-        for res in data.get('resources', []):
+        for res in resources:
+            v_url = res.get('secure_url')
+            p_id = res.get('public_id')
+            
+            # Use public_id to guess type (Shorts usually have 'short' in name if uploaded via our tool)
+            v_type = 'short' if 'short' in p_id.lower() or 'snap' in p_id.lower() else 'video'
+            
             videos.append({
-                'id': f"cl-{res.get('asset_id')}",
-                'title': res.get('public_id').split('/')[-1].replace('_', ' ').capitalize(),
-                'user_email': 'Official Creator',
-                'video_url': res.get('secure_url'),
-                'description': 'Direct Cloudinary Recovery Feed',
+                'id': f"cl-{res.get('asset_id', p_id)}",
+                'title': p_id.split('/')[-1].replace('_', ' ').replace('-', ' ').capitalize(),
+                'user_email': ADMIN_EMAIL,
+                'video_url': v_url,
+                'thumbnail_url': v_url.replace('.mp4', '.jpg').replace('.mov', '.jpg') if v_url else '',
+                'description': f"Restored from Cloudinary Cloud ({p_id})",
                 'views': 0, 'likes': 0, 'comment_count': 0,
                 'timestamp': res.get('created_at'),
-                'type': 'video', 'category': 'All'
+                'type': v_type, 'category': 'All'
             })
         return videos
     except Exception as e:
-        print(f"Cloudinary Fetch Error: {e}")
+        print(f"FAIL-SAFE CRITICAL ERROR: {e}")
         return []
 
 @app.route('/api/videos', methods=['GET'])
 def get_all_videos():
     video_type = request.args.get('type')
-    conn = get_db_connection()
+    videos = []
     
-    if video_type:
-        if USE_POSTGRES:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
-            cursor.execute('SELECT * FROM videos WHERE type = %s ORDER BY timestamp DESC', (video_type,))
-            videos = cursor.fetchall()
+    try:
+        conn = get_db_connection()
+        if video_type:
+            if USE_POSTGRES:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                cursor.execute('SELECT * FROM videos WHERE type = %s ORDER BY timestamp DESC', (video_type,))
+                videos = cursor.fetchall()
+            else:
+                videos = conn.execute('SELECT * FROM videos WHERE type = ? ORDER BY timestamp DESC', (video_type,)).fetchall()
         else:
-            videos = conn.execute('SELECT * FROM videos WHERE type = ? ORDER BY timestamp DESC', (video_type,)).fetchall()
-    else:
-        # Default to show both if not specified, or just videos? Let's check logic.
-        # Ideally, main feed shows only 'video' and shorts tab shows 'short'
-        # But for backward compatibility if type not passed, maybe show all or just video?
-        # Let's show all for now, but client will filter. Or better, update client.
-        if USE_POSTGRES:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
-            cursor.execute('SELECT * FROM videos ORDER BY timestamp DESC')
-            videos = cursor.fetchall()
-        else:
-            videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
-        
-    conn.close()
+            if USE_POSTGRES:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                cursor.execute('SELECT * FROM videos ORDER BY timestamp DESC')
+                videos = cursor.fetchall()
+            else:
+                videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
+        conn.close()
+    except Exception as e:
+        print(f"Database Query Error: {e}. Falling back to Cloudinary...")
 
     if not videos or len(videos) == 0:
-        # FAIL-SAFE: If DB is empty and on Render risk, fetch direct
-        if not USE_POSTGRES and os.environ.get('RENDER') == 'true':
-            print("DB Empty. Fallback to Direct Cloudinary Feed...")
-            videos = _fetch_from_cloudinary(video_type if video_type else 'video')
-            return jsonify(videos)
+        # FAIL-SAFE: If DB is empty or fails, fetch direct from Cloudinary
+        print("FAIL-SAFE: Fetching direct from Cloudinary...")
+        videos = _fetch_from_cloudinary(video_type if video_type else 'video')
+        # Filter by type if Cloudinary returns more than requested
+        if video_type:
+            videos = [v for v in videos if v.get('type') == video_type]
+        return jsonify(videos)
 
     return jsonify([dict(v) for v in videos])
 
