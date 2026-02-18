@@ -338,16 +338,27 @@
                     <button onclick="document.getElementById('go-live-modal').style.display='none'; stopLiveMedia();"
                         style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
                 </div>
-                <div
-                    style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 24px;">
-                    <p style="color: #aaa; font-size: 0.9rem; margin-top: 0;">Stream Category</p>
-                    <select id="stream-category"
-                        style="width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 12px; color: white; border-radius: 8px;">
-                        <option>Gaming</option>
-                        <option>Music</option>
-                        <option>Social</option>
-                        <option>Tech</option>
-                    </select>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 24px;">
+                    <div
+                        style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="color: #aaa; font-size: 0.8rem; margin: 0 0 8px 0;">Stream Category</p>
+                        <select id="stream-category"
+                            style="width: 100%; background: transparent; border: none; color: white; outline: none;">
+                            <option>Gaming</option>
+                            <option>Music</option>
+                            <option>Social</option>
+                            <option>Tech</option>
+                        </select>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="color: #aaa; font-size: 0.8rem; margin: 0 0 8px 0;">Stream Source</p>
+                        <select id="stream-source" onchange="switchSource(this.value)"
+                            style="width: 100%; background: transparent; border: none; color: white; outline: none;">
+                            <option value="camera">Camera</option>
+                            <option value="screen">Computer Screen</option>
+                        </select>
+                    </div>
                 </div>
                 <div
                     style="position: relative; width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
@@ -789,10 +800,12 @@
                                 </div>
 
                                 <!-- Studio Control Bar (Bottom Floating) -->
-                                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); padding: 10px 30px; border-radius: 50px; display: flex; gap: 25px; align-items: center; border: 1px solid rgba(255,255,255,0.1); z-index: 10;">
+                                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); padding: 10px 30px; border-radius: 50px; display: flex; gap: 20px; align-items: center; border: 1px solid rgba(255,255,255,0.1); z-index: 10;">
                                     <i class="fas fa-microphone" style="font-size: 1.2rem; color: #00ff88; cursor: pointer;"></i>
                                     <i class="fas fa-video" style="font-size: 1.2rem; color: #00ff88; cursor: pointer;"></i>
-                                    <i class="fas fa-desktop" style="font-size: 1.2rem; color: #888; cursor: pointer;"></i>
+                                    <button id="record-btn" onclick="toggleRecording()" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 20px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.8rem;">
+                                        <i class="fas fa-circle" style="color: #ff0050;"></i> RECORD SESSION
+                                    </button>
                                     <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1);"></div>
                                     <button onclick="stopStreaming()" style="background: #ff0055; color: white; border: none; padding: 10px 30px; border-radius: 30px; font-weight: 900; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(255,0,85,0.3);">
                                         END STREAM
@@ -1608,6 +1621,36 @@
                 loadVideos();
             }
 
+            let mediaRecorder = null;
+            let recordedChunks = [];
+
+            async function toggleRecording() {
+                const recBtn = document.getElementById('record-btn');
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    recBtn.innerHTML = '<i class="fas fa-circle" style="color: #ff0050;"></i> RECORD SESSION';
+                    recBtn.style.color = '#fff';
+                } else {
+                    if (!liveStream) return showToast("No active stream to record!");
+                    recordedChunks = [];
+                    mediaRecorder = new MediaRecorder(liveStream);
+                    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `Vitox_Session_${Date.now()}.webm`;
+                        a.click();
+                        showToast("Recording saved to computer!");
+                    };
+                    mediaRecorder.start();
+                    recBtn.innerHTML = '<i class="fas fa-square" style="color: #ff0050;"></i> STOP RECORDING';
+                    recBtn.style.color = '#ff0055';
+                    showToast("Screen Recording Started!");
+                }
+            }
+
             // Live streaming session variables defined globally above
 
             async function openGoLiveModal() {
@@ -1627,6 +1670,26 @@
                 } catch (err) {
                     console.error("Camera access denied:", err);
                     showToast("Camera access required for streaming!");
+                }
+            }
+
+            async function switchSource(source) {
+                stopLiveMedia();
+                try {
+                    if (source === 'screen') {
+                        liveStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                    } else {
+                        liveStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    }
+                    const videoPreview = document.getElementById('live-preview');
+                    if (videoPreview) {
+                        videoPreview.srcObject = liveStream;
+                        videoPreview.play();
+                    }
+                } catch (err) {
+                    console.error("Source switching failed:", err);
+                    showToast("Failed to access " + source);
+                    document.getElementById('stream-source').value = 'camera';
                 }
             }
 
