@@ -67,10 +67,12 @@
                 </button>
                 <div class="create-dropdown" id="create-dropdown">
                     <a href="upload.html?v=8.0"><i class="fas fa-upload"></i> Upload video</a>
-                    <a href="#" onclick="alert('Go Live coming soon!')"><i class="fas fa-tower-broadcast"></i> Go
-                        live</a>
-                    <a href="#" onclick="alert('Posts coming soon!')"><i class="fas fa-pen-to-square"></i> Create
-                        post</a>
+                    <a href="#"
+                        onclick="document.getElementById('go-live-modal').style.display='flex'; toggleCreateMenu(); return false;"><i
+                            class="fas fa-tower-broadcast"></i> Go live</a>
+                    <a href="#"
+                        onclick="document.getElementById('create-post-modal').style.display='flex'; toggleCreateMenu(); return false;"><i
+                            class="fas fa-pen-to-square"></i> Create post</a>
                 </div>
             </div>
 
@@ -87,7 +89,8 @@
                     data-text="signin_with" data-size="medium" data-logo_alignment="left">
                 </div>
             </div>
-            <button class="icon-btn" onclick="alert('No new notifications')"><i class="fas fa-bell"></i></button>
+            <button class="icon-btn" onclick="toggleNotifications()" title="Notifications"><i
+                    class="fas fa-bell"></i></button>
             <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu()" title="Account Options">?</div>
 
             <!-- Hidden User Menu -->
@@ -245,6 +248,36 @@
             </div>
         </div>
 
+        <!-- Notification Drawer -->
+        <div id="notification-drawer"
+            style="position: fixed; top: 0; right: -100%; width: 400px; max-width: 100%; height: 100vh; background: rgba(10,10,10,0.95); z-index: 10005; box-shadow: -20px 0 60px rgba(0,0,0,1); transition: right 0.6s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.05);">
+            <div
+                style="padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0; font-weight: 800; letter-spacing: -0.5px;">Notifications</h3>
+                <button onclick="toggleNotifications()"
+                    style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer; opacity: 0.6;">&times;</button>
+            </div>
+            <div id="notification-content"
+                style="flex:1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                <!-- System Welcome Notification -->
+                <div
+                    style="background: rgba(255,0,85,0.05); border: 1px solid rgba(255,0,85,0.1); padding: 16px; border-radius: 16px; display: flex; gap: 12px;">
+                    <div
+                        style="width: 40px; height: 40px; background: #ff0055; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-bolt" style="color: white; font-size: 1rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">System Update: Community
+                            V1 Live!</div>
+                        <div style="font-size: 0.85rem; color: #aaa; line-height: 1.4;">You can now post updates to your
+                            Squad and check the unified feed in the Squad tab.</div>
+                        <div style="font-size: 0.75rem; color: #ff0055; margin-top: 8px; font-weight: 700;">NEW FEATURE
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Snap Comments Drawer -->
         <div id="snap-comment-backdrop" onclick="closeSnapComments()"
             style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; backdrop-filter: blur(4px);">
@@ -272,7 +305,62 @@
             </div>
         </div>
 
-        <div id="toast-container"></div>
+        <!-- Custom Modals (Under Development Fix) -->
+        <div id="create-post-modal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 20000; backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+            <div
+                style="background: #111; width: 500px; max-width: 100%; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-weight: 800; margin: 0;">Create Community Post</h2>
+                    <button onclick="document.getElementById('create-post-modal').style.display='none'"
+                        style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                </div>
+                <textarea id="post-content" placeholder="What's on your mind?"
+                    style="width: 100%; height: 150px; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; color: white; font-size: 1rem; outline: none; margin-bottom: 20px; resize: none;"></textarea>
+                <input type="text" id="post-image" placeholder="Image URL (optional)"
+                    style="width: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; margin-bottom: 24px;">
+                <button onclick="submitPost()"
+                    style="width: 100%; padding: 14px; background: #ff0055; color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer;">Post
+                    to Squad</button>
+            </div>
+        </div>
+
+        <div id="go-live-modal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 20000; backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+            <div
+                style="background: #000; width: 600px; max-width: 100%; border-radius: 24px; border: 1px solid #ff0055; padding: 32px; box-shadow: 0 0 40px rgba(255,0,85,0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div
+                            style="width: 12px; height: 12px; background: #ff0055; border-radius: 50%; box-shadow: 0 0 10px #ff0055;">
+                        </div>
+                        <h2 style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">LIVE STREAM SETUP</h2>
+                    </div>
+                    <button onclick="document.getElementById('go-live-modal').style.display='none'"
+                        style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                </div>
+                <div
+                    style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 24px;">
+                    <p style="color: #aaa; font-size: 0.9rem; margin-top: 0;">Stream Category</p>
+                    <select
+                        style="width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 12px; color: white; border-radius: 8px;">
+                        <option>Gaming</option>
+                        <option>Music</option>
+                        <option>Education</option>
+                        <option>Tech</option>
+                    </select>
+                </div>
+                <input type="text" placeholder="Stream Title"
+                    style="width: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; color: white; outline: none; margin-bottom: 12px;">
+                <p style="color: #ff0055; font-size: 0.8rem; font-weight: 700; text-align: center; margin: 20px 0;">
+                    EXPERIMENTAL FEATURE: WEBRTC CONNECTION PENDING</p>
+                <button onclick="alert('Streaming requires RTMP Handshake. Coming in V2!')"
+                    style="width: 100%; padding: 16px; background: white; color: black; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fas fa-tower-broadcast"></i> GO LIVE NOW
+                </button>
+            </div>
+        </div>
+
         <div id="toast-container"></div>
         <script>
             AOS.init({
@@ -622,6 +710,11 @@
 
                 if (grid) grid.innerHTML = '';
 
+                if (viewName === 'Squad') {
+                    loadCommunityFeed();
+                    return;
+                }
+
                 if (viewName === 'Creator Hub') {
                     const user = JSON.parse(localStorage.getItem('vitox_user'));
                     if (emptyState) emptyState.style.display = 'none';
@@ -651,6 +744,14 @@
                                 '<button onclick="applyForBrand()" style="padding: 10px 20px; background: #ff0055; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Apply for Brand Verification</button>'
                             )
                         }
+                            </div>
+
+                            <!-- Community Post Card -->
+                            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 20px;">
+                                <i class="fas fa-pen-to-square" style="font-size: 2rem; color: #ffd700; margin-bottom: 20px;"></i>
+                                <h3 style="margin: 0 0 10px 0;">Community Feed</h3>
+                                <p style="color: #aaa; margin-bottom: 20px;">Engage with your fans. Post updates, images, and announcements.</p>
+                                <button onclick="document.getElementById('create-post-modal').style.display='flex'" style="padding: 10px 20px; background: #ffd700; color: black; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Create Post</button>
                             </div>
                         </div>
                     </div>
@@ -1229,6 +1330,86 @@
                         loadAdminHistory(targetEmail);
                     }
                 } catch (e) { console.error(e); }
+            }
+
+            async function submitPost() {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!user) return showToast("Login required!");
+
+                const content = document.getElementById('post-content').value.trim();
+                const imageUrl = document.getElementById('post-image').value.trim();
+
+                if (!content) return showToast("Post content cannot be empty");
+
+                try {
+                    const res = await fetch('/api/posts/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_email: user.email, content, image_url: imageUrl })
+                    });
+                    if (res.ok) {
+                        showToast("Post published to your Squad!");
+                        document.getElementById('create-post-modal').style.display = 'none';
+                        document.getElementById('post-content').value = '';
+                        document.getElementById('post-image').value = '';
+                        loadView('Squad');
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            async function loadCommunityFeed() {
+                const grid = document.getElementById('main-video-grid');
+                if (grid) grid.innerHTML = '<div style="padding: 40px; text-align: center;"><h2><i class="fas fa-sync fa-spin"></i> Syncing Squad Feed...</h2></div>';
+
+                try {
+                    const res = await fetch('/api/posts');
+                    const posts = await res.json();
+
+                    grid.innerHTML = `
+                    <div style="padding: 40px; max-width: 800px; margin: 0 auto; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                            <h1 style="font-weight: 800; font-size: 2.2rem; margin:0;">Squad Community</h1>
+                            <button onclick="document.getElementById('create-post-modal').style.display='flex'" style="padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; font-weight: 700; cursor: pointer;">
+                                <i class="fas fa-plus"></i> New Post
+                            </button>
+                        </div>
+                        
+                        ${posts.length === 0 ? '<div style="text-align:center; padding: 100px 0; color: #888;"><h3>No posts in your community yet.</h3><p>Be the first to share something!</p></div>' : ''}
+
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
+                            ${posts.map(p => `
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px;">
+                                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 16px;">
+                                        <div style="width: 44px; height: 44px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">
+                                            ${p.user_email.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 700; font-size: 1rem;">@${p.user_email.split('@')[0]} <i class="fas fa-check-circle" style="color: #00ff88; font-size: 0.8rem;"></i></div>
+                                            <div style="font-size: 0.8rem; color: #888;">${new Date(p.timestamp).toLocaleDateString()}</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 1.1rem; line-height: 1.6; color: #eee; white-space: pre-wrap; margin-bottom: 20px;">${p.content}</div>
+                                    ${p.image_url ? `<img src="${p.image_url}" style="width: 100%; border-radius: 16px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">` : ''}
+                                    <div style="display: flex; gap: 24px; color: #aaa; font-size: 0.9rem;">
+                                        <span style="cursor: pointer;"><i class="fas fa-thumbs-up"></i> ${p.likes || 0}</span>
+                                        <span style="cursor: pointer;"><i class="fas fa-comment"></i> Reply</span>
+                                        <span style="cursor: pointer;"><i class="fas fa-share"></i></span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                } catch (e) { console.error(e); }
+            }
+
+            function toggleNotifications() {
+                const drawer = document.getElementById('notification-drawer');
+                if (drawer.style.right === '0px') {
+                    drawer.style.right = '-100%';
+                } else {
+                    drawer.style.right = '0';
+                }
             }
 
             async function applyForBrand() {

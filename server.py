@@ -187,6 +187,18 @@ def init_db():
         )
     ''')
 
+    # Community Posts Table
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS posts (
+            id {id_type},
+            user_email TEXT,
+            content TEXT,
+            image_url TEXT,
+            likes INTEGER DEFAULT 0,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
     # Video Views
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS video_views (
@@ -1512,7 +1524,56 @@ def get_admin_chat_history():
     conn.close()
     return jsonify(messages)
 
-# Deploy ID: 1739556810
+# --- COMMUNITY POSTS APIS ---
+@app.route('/api/posts/create', methods=['POST'])
+def create_post():
+    try:
+        data = request.json
+        user_email = data.get('user_email')
+        content = data.get('content')
+        image_url = data.get('image_url', '')
+
+        if not user_email or not content:
+            return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+
+        conn = get_db_connection()
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO posts (user_email, content, image_url) VALUES (%s, %s, %s)',
+                         (user_email, content, image_url))
+        else:
+            conn.execute('INSERT INTO posts (user_email, content, image_url) VALUES (?, ?, ?)',
+                         (user_email, content, image_url))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/posts', methods=['GET'])
+def get_posts():
+    user_email = request.args.get('email')
+    conn = get_db_connection()
+    if user_email:
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cursor.execute('SELECT * FROM posts WHERE user_email = %s ORDER BY timestamp DESC', (user_email,))
+            rows = cursor.fetchall()
+        else:
+            rows = conn.execute('SELECT * FROM posts WHERE user_email = ? ORDER BY timestamp DESC', (user_email,)).fetchall()
+    else:
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cursor.execute('SELECT * FROM posts ORDER BY timestamp DESC')
+            rows = cursor.fetchall()
+        else:
+            rows = conn.execute('SELECT * FROM posts ORDER BY timestamp DESC').fetchall()
+    
+    posts = [dict(r) for r in rows]
+    conn.close()
+    return jsonify(posts)
+
+# Deploy ID: 1739556815
 
 # Initial DB Setup on Start
 try:
