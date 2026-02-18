@@ -834,6 +834,21 @@
                                         END STREAM
                                     </button>
                                 </div>
+
+                                <!-- Lower Third -->
+                                <div id="lower-third" style="position: absolute; bottom: 100px; left: 40px; background: linear-gradient(90deg, #ff0055, transparent); padding: 15px 40px; border-radius: 0 50px 50px 0; border-left: 5px solid white; transform: translateX(-150%); transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1); z-index: 10;">
+                                    <div style="font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; text-transform: uppercase;">${data.user.name}</div>
+                                    <div style="font-size: 0.8rem; font-weight: 700; opacity: 0.8; letter-spacing: 2px;">LIVE FROM VITOX STUDIO 🎥</div>
+                                </div>
+
+                                <!-- Watermark -->
+                                <div style="position: absolute; top: 25px; right: 25px; opacity: 0.3; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.2rem; filter: grayscale(1); z-index: 10;">
+                                    <i class="fas fa-play-circle"></i> VITOX PRO
+                                </div>
+
+                                <!-- Hearts Overlay -->
+                                <div id="hearts-container" style="position: absolute; bottom: 0; right: 100px; width: 100px; height: 300px; pointer-events: none; z-index: 5;"></div>
+                            </div>
                             </div>
                             
                             <!-- Channel Info -->
@@ -875,6 +890,10 @@
                     <style>
                         @keyframes alert-slide-in { 0% { opacity: 0; transform: translateY(-50px) scale(0.8); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
                         @keyframes alert-slide-out { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
+                        @keyframes float-heart { 
+                            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+                            100% { transform: translateY(-250px) scale(1.5) rotate(45deg); opacity: 0; }
+                        }
                         @keyframes tada { 0% { transform: scale(1); } 10% { transform: scale(0.9) rotate(-3deg); } 20% { transform: scale(0.9) rotate(-3deg); } 30% { transform: scale(1.1) rotate(3deg); } 40% { transform: scale(1.1) rotate(-3deg); } 50% { transform: scale(1.1) rotate(3deg); } 60% { transform: scale(1.1) rotate(-3deg); } 70% { transform: scale(1.1) rotate(3deg); } 80% { transform: scale(1.1) rotate(-3deg); } 90% { transform: scale(1.1) rotate(3deg); } 100% { transform: scale(1) rotate(0); } }
                         @keyframes bar-rise { from { height: 20%; } to { height: 95%; } }
                         @keyframes pulse-red { 
@@ -1643,6 +1662,7 @@
             function stopStreaming() {
                 if (liveChatInterval) clearInterval(liveChatInterval);
                 if (liveAlertInterval) clearInterval(liveAlertInterval);
+                if (liveHeartsInterval) clearInterval(liveHeartsInterval);
                 stopLiveMedia();
                 showToast("Stream ended successfully!");
                 loadVideos();
@@ -1667,8 +1687,26 @@
                 }, 1000);
             }
 
+            let liveHeartsInterval = null;
+
             function startInteractionSimulations() {
                 simulateLiveChat();
+
+                // Show Lower Third for 8 seconds
+                const lt = document.getElementById('lower-third');
+                if (lt) {
+                    setTimeout(() => lt.style.transform = 'translateX(0)', 1000);
+                    setTimeout(() => lt.style.transform = 'translateX(-150%)', 9000);
+                }
+
+                // Start Floating Hearts
+                liveHeartsInterval = setInterval(() => {
+                    if (!document.getElementById('hearts-container')) {
+                        clearInterval(liveHeartsInterval);
+                        return;
+                    }
+                    spawnHeart();
+                }, 800);
 
                 // Periodically show Subscriber/Donation Alerts
                 liveAlertInterval = setInterval(() => {
@@ -1679,7 +1717,25 @@
                     const types = ['sub', 'donation'];
                     const type = types[Math.floor(Math.random() * types.length)];
                     showStudioAlert(type);
-                }, 15000);
+                }, 12000);
+            }
+
+            function spawnHeart() {
+                const container = document.getElementById('hearts-container');
+                const heart = document.createElement('i');
+                heart.className = 'fas fa-heart';
+                const colors = ['#ff0055', '#ffb700', '#00ff88', '#ffffff'];
+                heart.style.cssText = `
+                position: absolute;
+                bottom: 0;
+                left: ${Math.random() * 80}%;
+                color: ${colors[Math.floor(Math.random() * colors.length)]};
+                font-size: ${1 + Math.random()}rem;
+                opacity: 0.8;
+                animation: float-heart ${2 + Math.random()}s linear forwards;
+            `;
+                container.appendChild(heart);
+                setTimeout(() => heart.remove(), 3000);
             }
 
             function showStudioAlert(type) {
