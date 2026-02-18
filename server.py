@@ -2,6 +2,8 @@ import sqlite3
 import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from ai_engine import VitoxAI
+ai_processor = VitoxAI()
 from datetime import datetime, date
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -1099,184 +1101,37 @@ def creator_delete_video():
 def ai_suggest():
     data = request.json
     topic = data.get('topic', 'General Gaming')
-    api_key = os.environ.get('GOOGLE_API_KEY', '').strip()
-    
-    if not api_key:
-        print("API Key missing")
-        return jsonify({'error': 'AI API Key not configured'}), 500
-        
-    try:
-        import requests
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-        payload = {
-            "contents": [{
-                "parts": [{"text": f"Suggest a catchy video title and a 2-sentence description for a video about: {topic}. Return JSON format with 'title' and 'description' keys. Do not include markdown formatting indicators."}]
-            }]
-        }
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(url, json=payload, headers=headers)
-        result = response.json()
-        
-        # Parse the response (Gemini returns a specific nested structure)
-        text = result['candidates'][0]['content']['parts'][0]['text']
-        # Clean up JSON if LLM added markdown
-        import json
-        import re
-        clean_text = re.sub(r'```json\n?|\n?```', '', text).strip()
-        suggestion = json.loads(clean_text)
-        
-        return jsonify(suggestion)
-    except Exception as e:
-        print(f"AI Error: {e}")
-        return jsonify({'title': f'Cool {topic} Video', 'description': f'An amazing video exploring {topic}. Check it out!'})
+    suggestion = ai_processor.suggest_content(topic)
+    return jsonify(suggestion)
 
 @app.route('/api/video/moderate', methods=['POST'])
 def moderate_video():
     data = request.json
     title = data.get('title', '')
     desc = data.get('description', '')
-    api_key = os.environ.get('GOOGLE_API_KEY', '').strip()
-    
-    if not api_key:
-        return jsonify({'status': 'safe', 'message': 'Safety check skipped'})
-
-    try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-        prompt = f"""
-        Act as a strict content moderator for Vitox Video Platform. 
-        Analyze the following video details and determine if it violates our 18+ policy (nudity, sexual content, extreme violence, or hate speech).
-        
-        Title: {title}
-        Description: {desc}
-        
-        Return ONLY a JSON object with two keys:
-        'status': 'safe' or 'flagged'
-        'reason': a short explanation if flagged, otherwise empty.
-        """
-        
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "safetySettings": [
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_LOW_AND_ABOVE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_LOW_AND_ABOVE"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_LOW_AND_ABOVE"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_LOW_AND_ABOVE"}
-            ]
-        }
-        
-        response = requests.post(url, json=payload)
-        result = response.json()
-        
-        # If Gemini's own safety filter blocks it, flag it immediately
-        if 'promptFeedback' in result and result['promptFeedback'].get('blockReason'):
-            return jsonify({'status': 'flagged', 'reason': 'Google Safety Filter Triggered'})
-
-        text = result['candidates'][0]['content']['parts'][0]['text']
-        import json, re
-        clean_text = re.sub(r'```json\n?|\n?```', '', text).strip()
-        mod_result = json.loads(clean_text)
-        return jsonify(mod_result)
-        
-    except Exception as e:
-        print(f"Moderation Error: {e}")
-        return jsonify({'status': 'safe', 'message': 'Auto-approved (Error in Check)'})
+    status = ai_processor.moderate(title, desc)
+    return jsonify({'status': status, 'reason': 'Flagged by Vitox AI System' if status == 'unsafe' else ''})
 
 @app.route('/api/ai/ask', methods=['POST'])
 def ai_ask():
     data = request.json
     prompt = data.get('prompt', '')
-    model_alias = data.get('model', 'gemini-flash')
+    model = data.get('model', 'gemini-flash')
     
     if not prompt:
         return jsonify({'error': 'No prompt provided'}), 400
 
-    # Model Mapping
-    models = {
-        'gemini-flash': 'gemini-1.5-flash',
-        'gemini-pro': 'gemini-1.5-pro',
-        'llama-3-free': 'meta-llama/llama-3-8b-instruct:free',
-        'mistral-free': 'mistralai/mistral-7b-instruct:free',
-        'google-gemma-free': 'google/gemma-7b-it:free'
-    }
-    
-    selected_model = models.get(model_alias, 'gemini-1.5-flash')
-    
-    # Handle Gemini Models
-    if 'gemini' in selected_model:
-        api_key = os.environ.get('GOOGLE_API_KEY', '').strip()
-        if not api_key:
-            return jsonify({'answer': "Gemini API key is not configured. Please use a free OpenRouter model."})
-            
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{selected_model}:generateContent?key={api_key}"
-            payload = {"contents": [{"parts": [{"text": prompt}]}]}
-            res = requests.post(url, json=payload, headers={'Content-Type': 'application/json'})
-            result = res.json()
-            answer = result['candidates'][0]['content']['parts'][0]['text']
-            return jsonify({'answer': answer})
-        except Exception as e:
-            return jsonify({'answer': f"Gemini Error: {str(e)}"})
-
-    # Handle OpenRouter Free Models
-    else:
-        api_key = os.environ.get('OPENROUTER_API_KEY', '').strip()
-        if not api_key:
-            return jsonify({'answer': "OpenRouter API key is not configured."})
-            
-        try:
-            response = requests.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                },
-                data=json.dumps({
-                    "model": selected_model,
-                    "messages": [
-                        {"role": "system", "content": "You are Vitox AI, a helpful assistant. Keep responses helpful and concise."},
-                        {"role": "user", "content": prompt}
-                    ]
-                })
-            )
-            result = response.json()
-            answer = result['choices'][0]['message']['content']
-            return jsonify({'answer': answer})
-        except Exception as e:
-            return jsonify({'answer': f"OpenRouter Error: {str(e)}"})
+    answer = ai_processor.ask(prompt, model)
+    return jsonify({'answer': answer})
 
 @app.route('/api/ai/chat', methods=['POST'])
 def ai_chat():
-    # Keep original for compatibility if needed
     data = request.json
     prompt = data.get('prompt', '')
-    if not prompt:
-        return jsonify({'error': 'No prompt provided'}), 400
-        
-    api_key = os.environ.get('OPENROUTER_API_KEY', '').strip()
-    if not api_key:
-        return jsonify({'error': 'AI configuration missing'}), 500
-
-    try:
-        response = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            data=json.dumps({
-                "model": "meta-llama/llama-3-8b-instruct:free",
-                "messages": [
-                    {"role": "system", "content": "You are Vitox AI, a helpful assistant for creators on the Vitox video platform. Keep responses concise and professional."},
-                    {"role": "user", "content": prompt}
-                ]
-            })
-        )
-        result = response.json()
-        answer = result['choices'][0]['message']['content']
-        return jsonify({'answer': answer})
-    except Exception as e:
-        print(f"OpenRouter Error: {e}")
-        return jsonify({'answer': "I'm having trouble connecting to my brain right now. Please try again later!"})
+    if not prompt: return jsonify({'error': 'No prompt provided'}), 400
+    
+    answer = ai_processor.ask(prompt, model_alias='llama-3-free')
+    return jsonify({'answer': answer})
 
 @app.route('/api/admin/backup', methods=['POST'])
 def admin_backup():
