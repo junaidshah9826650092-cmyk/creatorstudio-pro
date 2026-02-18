@@ -1110,7 +1110,7 @@ def ai_suggest():
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
         payload = {
             "contents": [{
-                "parts": [{"text": f"Suggest a catchy YouTube title and a 2-sentence description for a video about: {topic}. Return JSON format with 'title' and 'description' keys. Do not include markdown formatting indicators."}]
+                "parts": [{"text": f"Suggest a catchy video title and a 2-sentence description for a video about: {topic}. Return JSON format with 'title' and 'description' keys. Do not include markdown formatting indicators."}]
             }]
         }
         headers = {'Content-Type': 'application/json'}
@@ -1181,8 +1181,72 @@ def moderate_video():
         print(f"Moderation Error: {e}")
         return jsonify({'status': 'safe', 'message': 'Auto-approved (Error in Check)'})
 
+@app.route('/api/ai/ask', methods=['POST'])
+def ai_ask():
+    data = request.json
+    prompt = data.get('prompt', '')
+    model_alias = data.get('model', 'gemini-flash')
+    
+    if not prompt:
+        return jsonify({'error': 'No prompt provided'}), 400
+
+    # Model Mapping
+    models = {
+        'gemini-flash': 'gemini-1.5-flash',
+        'gemini-pro': 'gemini-1.5-pro',
+        'llama-3-free': 'meta-llama/llama-3-8b-instruct:free',
+        'mistral-free': 'mistralai/mistral-7b-instruct:free',
+        'google-gemma-free': 'google/gemma-7b-it:free'
+    }
+    
+    selected_model = models.get(model_alias, 'gemini-1.5-flash')
+    
+    # Handle Gemini Models
+    if 'gemini' in selected_model:
+        api_key = os.environ.get('GOOGLE_API_KEY', '').strip()
+        if not api_key:
+            return jsonify({'answer': "Gemini API key is not configured. Please use a free OpenRouter model."})
+            
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{selected_model}:generateContent?key={api_key}"
+            payload = {"contents": [{"parts": [{"text": prompt}]}]}
+            res = requests.post(url, json=payload, headers={'Content-Type': 'application/json'})
+            result = res.json()
+            answer = result['candidates'][0]['content']['parts'][0]['text']
+            return jsonify({'answer': answer})
+        except Exception as e:
+            return jsonify({'answer': f"Gemini Error: {str(e)}"})
+
+    # Handle OpenRouter Free Models
+    else:
+        api_key = os.environ.get('OPENROUTER_API_KEY', '').strip()
+        if not api_key:
+            return jsonify({'answer': "OpenRouter API key is not configured."})
+            
+        try:
+            response = requests.post(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                data=json.dumps({
+                    "model": selected_model,
+                    "messages": [
+                        {"role": "system", "content": "You are Vitox AI, a helpful assistant. Keep responses helpful and concise."},
+                        {"role": "user", "content": prompt}
+                    ]
+                })
+            )
+            result = response.json()
+            answer = result['choices'][0]['message']['content']
+            return jsonify({'answer': answer})
+        except Exception as e:
+            return jsonify({'answer': f"OpenRouter Error: {str(e)}"})
+
 @app.route('/api/ai/chat', methods=['POST'])
 def ai_chat():
+    # Keep original for compatibility if needed
     data = request.json
     prompt = data.get('prompt', '')
     if not prompt:
@@ -1198,8 +1262,6 @@ def ai_chat():
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://vitox.ai", # Optional
-                "X-Title": "Vitox AI", # Optional
             },
             data=json.dumps({
                 "model": "meta-llama/llama-3-8b-instruct:free",

@@ -184,6 +184,36 @@
             border-left: 4px solid var(--accent);
         }
 
+        /* Sidebar Collapsed State */
+        body.sidebar-collapsed .sidebar {
+            width: 72px;
+        }
+
+        body.sidebar-collapsed main {
+            margin-left: 72px;
+        }
+
+        body.sidebar-collapsed .channel-profile {
+            display: none;
+            /* Hide profile info in mini mode */
+        }
+
+        body.sidebar-collapsed .nav-item span {
+            display: none;
+            /* Hide text labels */
+        }
+
+        body.sidebar-collapsed .nav-item {
+            justify-content: center;
+            padding: 16px 0;
+        }
+
+        body.sidebar-collapsed .nav-item i {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+
         main {
             margin-left: 256px;
             margin-top: 64px;
@@ -337,7 +367,8 @@
     <amp-auto-ads type="adsense" data-ad-client="ca-pub-7142476355791158"></amp-auto-ads>
     <header>
         <div class="header-left">
-            <button class="studio-btn" style="border:none;"><i class="fas fa-bars"></i></button>
+            <button class="studio-btn" style="border:none;" onclick="toggleSidebar()"><i
+                    class="fas fa-bars"></i></button>
             <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 8px;">
                 <svg width="28" height="28" viewBox="0 0 64 64">
                     <defs>
@@ -468,6 +499,13 @@
                         <div class="stat-row"><span>Likes</span> <span class="stat-val">${latest.likes || 0}</span></div>
                         <button class="action-btn-full" style="margin-top: 16px;">GO TO VIDEO ANALYTICS</button>
                     `;
+                } else {
+                    document.getElementById('latest-content').innerHTML = `
+                        <div style="color: var(--text-dim); text-align: center; padding: 40px 0;">
+                            <i class="fas fa-video-slash" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                            <br>No videos found
+                        </div>
+                    `;
                 }
             } catch (e) {
                 console.error("Studio Error:", e);
@@ -499,8 +537,7 @@
         }
 
         function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.style.transform = sidebar.style.transform === 'translateX(0px)' ? 'translateX(-100%)' : 'translateX(0px)';
+            document.body.classList.toggle('sidebar-collapsed');
         }
 
         window.onload = loadOverview;

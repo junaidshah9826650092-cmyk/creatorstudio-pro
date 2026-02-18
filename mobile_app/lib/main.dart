@@ -422,9 +422,10 @@ class _SnapsScreenState extends State<SnapsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading)
+    if (isLoading) {
       return const Center(
           child: CircularProgressIndicator(color: Color(0xFFFF0055)));
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -460,9 +461,9 @@ class _SnapsScreenState extends State<SnapsScreen> {
                     SnapAction(
                         icon: Icons.favorite,
                         label: snap.likes > 0 ? snap.likes.toString() : 'Like'),
-                    SnapAction(icon: Icons.comment, label: 'Chat'),
-                    SnapAction(icon: Icons.share, label: 'Share'),
-                    SnapAction(icon: Icons.loop, label: 'Remix'),
+                    const SnapAction(icon: Icons.comment, label: 'Chat'),
+                    const SnapAction(icon: Icons.share, label: 'Share'),
+                    const SnapAction(icon: Icons.loop, label: 'Remix'),
                     const CircleAvatar(
                         radius: 20,
                         backgroundColor: Colors.white10,
@@ -510,8 +511,8 @@ class _SnapsScreenState extends State<SnapsScreen> {
                             fontSize: 15,
                             fontWeight: FontWeight.w500)),
                     const SizedBox(height: 8),
-                    Row(
-                      children: const [
+                    const Row(
+                      children: [
                         Icon(Icons.music_note, size: 14, color: Colors.white70),
                         SizedBox(width: 8),
                         Text('Original Sound - Vitox Audio',
@@ -569,16 +570,16 @@ class SquadScreen extends StatelessWidget {
           title: const Text('Squad Feed'),
           backgroundColor: const Color(0xFF0F0F0F),
           elevation: 0),
-      body: Center(
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.group_work, size: 80, color: Colors.white10),
-            const SizedBox(height: 20),
-            const Text('Join a Creator Squad',
+            Icon(Icons.group_work, size: 80, color: Colors.white10),
+            SizedBox(height: 20),
+            Text('Join a Creator Squad',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            const Text('Their latest videos will appear here.',
+            SizedBox(height: 10),
+            Text('Their latest videos will appear here.',
                 style: TextStyle(color: Colors.white54)),
           ],
         ),
@@ -647,16 +648,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                   radius: 25,
                   backgroundColor: Color(0xFFFF0055),
                   child: Icon(Icons.analytics, color: Colors.white)),
-              const SizedBox(width: 15),
+              SizedBox(width: 15),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text('Junaid Shah',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -710,8 +711,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.auto_awesome, color: Colors.white, size: 20),
               SizedBox(width: 8),
               Text('Ask Studio AI',
