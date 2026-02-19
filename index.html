@@ -68,8 +68,8 @@
                 </button>
                 <div class="create-dropdown" id="create-dropdown">
                     <a href="upload.html?v=8.0"><i class="fas fa-upload"></i> Upload video</a>
-                    <a href="#" onclick="openGoLiveModal(); return false;"><i class="fas fa-tower-broadcast"></i> Go
-                        live</a>
+                    <a href="#" onclick="openGoLiveModal(); return false;"><i class="fas fa-tower-broadcast"></i> Vitox
+                        Live</a>
                     <a href="#"
                         onclick="document.getElementById('create-post-modal').style.display='flex'; toggleCreateMenu(); return false;"><i
                             class="fas fa-pen-to-square"></i> Create post</a>
@@ -329,54 +329,111 @@
         </div>
 
         <div id="go-live-modal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 20000; backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20000; backdrop-filter: blur(15px); align-items: center; justify-content: center; padding: 20px;">
             <div
-                style="background: #000; width: 600px; max-width: 100%; border-radius: 24px; border: 1px solid #ff0055; padding: 32px; box-shadow: 0 0 40px rgba(255,0,85,0.2);">
+                style="background: #0a0a0a; width: 700px; max-width: 100%; border-radius: 24px; border: 1px solid rgba(255,0,85,0.3); padding: 32px; box-shadow: 0 20px 80px rgba(0,0,0,0.8); display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div
-                            style="width: 12px; height: 12px; background: #ff0055; border-radius: 50%; box-shadow: 0 0 10px #ff0055;">
+                            style="width: 12px; height: 12px; background: #ff0055; border-radius: 50%; box-shadow: 0 0 15px #ff0055; animation: pulse 1s infinite;">
                         </div>
-                        <h2 style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">LIVE STREAM SETUP</h2>
+                        <h2 style="font-weight: 800; margin: 0; letter-spacing: -0.5px; text-transform: uppercase;">
+                            Broadcast Control Room</h2>
                     </div>
                     <button onclick="document.getElementById('go-live-modal').style.display='none'; stopLiveMedia();"
-                        style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                        style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.5;">&times;</button>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 24px;">
-                    <div
-                        style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                        <p style="color: #aaa; font-size: 0.8rem; margin: 0 0 8px 0;">Stream Category</p>
-                        <select id="stream-category"
-                            style="width: 100%; background: transparent; border: none; color: white; outline: none;">
-                            <option>Gaming</option>
-                            <option>Music</option>
-                            <option>Social</option>
-                            <option>Tech</option>
-                        </select>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <!-- Left: Preview & Details -->
+                    <div>
+                        <div
+                            style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                            <video id="live-preview" autoplay muted playsinline
+                                style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            <div
+                                style="position: absolute; top: 12px; left: 12px; background: rgba(255,0,85,0.8); padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">
+                                BROWSER PREVIEW</div>
+                        </div>
+                        <input type="text" id="stream-title-input" placeholder="Stream Title"
+                            style="width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; color: white; outline: none; margin-bottom: 12px;">
+                        <input type="text" id="stream-thumb-input" placeholder="Custom Thumbnail URL"
+                            style="width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 10px 10px 0 0; padding: 12px; color: white; outline: none; border-bottom: none;">
+                        <div
+                            style="background: #222; padding: 10px; border-radius: 0 0 10px 10px; border: 1px solid #333; display: flex; align-items: center; gap: 10px;">
+                            <label for="live-thumb-file"
+                                style="background: #444; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 700;">
+                                <i class="fas fa-file-upload"></i> UPLOAD IMAGE
+                            </label>
+                            <input type="file" id="live-thumb-file" hidden accept="image/*"
+                                onchange="uploadLiveThumbnail(this)">
+                            <div id="thumb-upload-status" style="font-size: 0.75rem; color: #888;">From device</div>
+                        </div>
                     </div>
-                    <div
-                        style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                        <p style="color: #aaa; font-size: 0.8rem; margin: 0 0 8px 0;">Stream Source</p>
-                        <select id="stream-source" onchange="switchSource(this.value)"
-                            style="width: 100%; background: transparent; border: none; color: white; outline: none;">
-                            <option value="camera">Camera</option>
-                            <option value="screen">Computer Screen</option>
-                        </select>
+
+                    <!-- Right: Config & OBS -->
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div
+                            style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid #222;">
+                            <label
+                                style="font-size: 0.75rem; color: #888; font-weight: 700; margin-bottom: 8px; display: block;">BROADCAST
+                                SOURCE</label>
+                            <select id="stream-source" onchange="switchSource(this.value)"
+                                style="width: 100%; background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px;">
+                                <option value="camera">Webcam & Mic</option>
+                                <option value="screen">Share Screen</option>
+                                <option value="obs">External (OBS Studio)</option>
+                            </select>
+                        </div>
+
+                        <div id="obs-config"
+                            style="display:none; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ff005533;">
+                            <h4 style="margin: 0 0 10px 0; font-size: 0.85rem; color: #ff0055;"><i
+                                    class="fas fa-tower-broadcast"></i> OBS SETUP</h4>
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 0.7rem; color: #666;">SERVER URL</label>
+                                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                    <input type="text" readonly value="rtmp://vitox-live.junaid.tv/live"
+                                        style="flex:1; background: #000; border: none; font-size: 0.75rem; color: #aaa; padding: 8px; border-radius: 4px;">
+                                    <button
+                                        onclick="navigator.clipboard.writeText('rtmp://vitox-live.junaid.tv/live'); showToast('Copied!')"
+                                        style="background: #222; border: none; color: white; padding: 0 10px; border-radius: 4px;"><i
+                                            class="fas fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; color: #666;">STREAM KEY</label>
+                                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                    <input type="text" id="obs-stream-key" readonly value="vt_live_****"
+                                        style="flex:1; background: #000; border: none; font-size: 0.75rem; color: #aaa; padding: 8px; border-radius: 4px;">
+                                    <button
+                                        onclick="document.getElementById('obs-stream-key').value='vt_live_' + Math.random().toString(36).substring(7); showToast('Generated Key!')"
+                                        style="background: #222; border: none; color: white; padding: 0 10px; border-radius: 4px;"><i
+                                            class="fas fa-sync"></i></button>
+                                </div>
+                            </div>
+                            <p style="font-size: 0.65rem; color: #555; margin-top: 10px;">Note: Real-time RTMP ingest
+                                requires Virtual Camera in OBS for this beta version.</p>
+                        </div>
+
+                        <div
+                            style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid #222;">
+                            <label
+                                style="font-size: 0.75rem; color: #888; font-weight: 700; margin-bottom: 8px; display: block;">CATEGORY</label>
+                            <select id="stream-category"
+                                style="width: 100%; background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px;">
+                                <option>Gaming</option>
+                                <option>Music</option>
+                                <option>Tech</option>
+                                <option>Social</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div
-                    style="position: relative; width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-                    <video id="live-preview" autoplay muted playsinline
-                        style="width: 100%; height: 100%; object-fit: cover;"></video>
-                    <div
-                        style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #ff0055; border: 1px solid #ff0055;">
-                        PREVIEW</div>
-                </div>
-                <input type="text" id="stream-title-input" placeholder="Enter Stream Title..."
-                    style="width: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; color: white; outline: none; margin-bottom: 24px;">
+
                 <button onclick="startStreamingSession()"
-                    style="width: 100%; padding: 16px; background: #ff0055; color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <i class="fas fa-tower-broadcast"></i> START STREAMING
+                    style="width: 100%; padding: 18px; background: #ff0055; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; font-size: 1.1rem; box-shadow: 0 10px 40px rgba(255,0,85,0.3);">
+                    <i class="fas fa-tower-broadcast"></i> START BROADCAST
                 </button>
             </div>
         </div>
@@ -435,6 +492,21 @@
                 }
 
                 if (emptyState) emptyState.style.display = 'none';
+
+                // Reset Layout for Feed
+                const sidebar = document.querySelector('.sidebar');
+                const catBar = document.querySelector('.categories-bar');
+                const content = document.querySelector('.content');
+                const topBar = document.querySelector('.top-bar');
+                if (sidebar) sidebar.style.display = 'block';
+                if (catBar) catBar.style.display = 'flex';
+                if (topBar) topBar.style.display = 'flex';
+                if (content) {
+                    content.style.marginLeft = '240px';
+                    content.style.padding = '12px 24px';
+                    content.style.paddingTop = '12px';
+                }
+
                 if (grid) {
                     // Reset Grid Styles
                     grid.style.display = 'grid';
@@ -469,7 +541,7 @@
                         const isLive = vid.type === 'live';
                         card.innerHTML = `
                             <div class="thumbnail-wrapper">
-                                <video src="${isLive ? 'https://res.cloudinary.com/demo/video/upload/sp_auto/dog.mp4' : vid.video_url}" muted onmouseover="${isLive ? '' : 'this.play()'}" onmouseout="${isLive ? '' : 'this.pause()'}" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                <video src="${isLive ? '' : vid.video_url}" poster="${vid.thumbnail_url}" muted onmouseover="${isLive ? '' : 'this.play()'}" onmouseout="${isLive ? '' : 'this.pause()'}" style="width: 100%; height: 100%; object-fit: cover; background: #111;"></video>
                                 ${isLive ? '<div style="position: absolute; bottom: 10px; right: 10px; background: #ff0055; color: white; padding: 2px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 4px; animation: pulse 2s infinite;">LIVE</div>' : ''}
                             </div>
                             <div class="video-info">
@@ -730,8 +802,24 @@
             function loadView(viewName, data = {}) {
                 const grid = document.getElementById('main-video-grid');
                 const emptyState = document.getElementById('empty-state');
+                const sidebar = document.querySelector('.sidebar');
+                const catBar = document.querySelector('.categories-bar');
+                const content = document.querySelector('.content');
+                const topBar = document.querySelector('.top-bar');
 
-                if (grid) grid.innerHTML = '';
+                if (grid) {
+                    grid.innerHTML = '';
+                    grid.style.display = 'block';
+                }
+
+                // Default show common UI elements
+                if (sidebar) sidebar.style.display = 'block';
+                if (catBar) catBar.style.display = 'flex';
+                if (topBar) topBar.style.display = 'flex';
+                if (content) {
+                    content.style.marginLeft = '240px';
+                    content.style.padding = '12px 24px';
+                }
 
                 if (viewName === 'Squad') {
                     loadCommunityFeed();
@@ -740,107 +828,96 @@
 
                 if (viewName === 'Live Stream') {
                     if (emptyState) emptyState.style.display = 'none';
+
+                    // Full screen dashboard mode (Hide main UI)
+                    if (sidebar) sidebar.style.display = 'none';
+                    if (catBar) catBar.style.display = 'none';
+                    if (topBar) topBar.style.display = 'none';
+                    if (content) {
+                        content.style.marginLeft = '0';
+                        content.style.padding = '0';
+                    }
+
                     grid.innerHTML = `
-                    <div style="display: flex; flex-direction: column; height: calc(100vh - 84px); background: #0f0f0f; color: white;">
+                    <div style="display: flex; flex-direction: column; height: 100vh; background: #000; color: white; position: relative; overflow: hidden;">
 
-                        <!-- Top: Video + Chat -->
-                        <div style="display: flex; flex: 1; min-height: 0; gap: 0;">
+                        
+                        <!-- YouTube-style Broadcast Header -->
+                        <div style="background: rgba(15,15,15,0.95); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 100; backdrop-filter: blur(10px);">
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <div style="display: flex; align-items: center; gap: 8px; background: #ff0000; padding: 4px 12px; border-radius: 4px; font-weight: 800; font-size: 0.8rem; box-shadow: 0 0 15px rgba(255,0,0,0.3);">
+                                    <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse-red 1s infinite;"></div>
+                                    LIVE
+                                </div>
+                                <div id="stream-duration" style="font-family: monospace; font-size: 1.1rem; color: #fff; font-weight: 600;">00:00:00</div>
+                                <div style="display: flex; gap: 16px; color: #aaa; font-size: 0.9rem;">
+                                    <span><i class="fas fa-eye"></i> <span id="view-count-header">0</span></span>
+                                    <span><i class="fas fa-thumbs-up"></i> <span id="like-count-header">0</span></span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="text-align: right; margin-right: 15px;">
+                                    <div style="font-size: 0.75rem; color: #00ff88; font-weight: 800;"><i class="fas fa-signal"></i> EXCELLENT</div>
+                                    <div style="font-size: 0.65rem; color: #666;">Connection Strength</div>
+                                </div>
+                                <button onclick="stopStreaming()" style="background: #ff0000; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(255,0,0,0.2);" onmouseover="this.style.background='#cc0000'" onmouseout="this.style.background='#ff0000'">
+                                    End Stream
+                                </button>
+                            </div>
+                        </div>
 
-                            <!-- Main Video Area -->
-                            <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
-                                <!-- Video Player -->
-                                <div style="position: relative; width: 100%; background: #000; aspect-ratio: 16/9; max-height: 65vh;">
-                                    <video id="stream-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
-
+                        <!-- Main Content Area -->
+                        <div style="display: flex; flex: 1; min-height: 0; overflow: hidden;">
+                            <!-- Left: Video & Controls -->
+                            <div style="flex: 1; display: flex; flex-direction: column; background: #000; border-right: 1px solid rgba(255,255,255,0.05);">
+                                <div style="position: relative; flex: 1; display: flex; align-items: center; justify-content: center;">
+                                    <video id="stream-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: contain;"></video>
+                                    
                                     <!-- PRO ALERT OVERLAY -->
-                                    <div id="alert-container" style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100; pointer-events: none; width: 90%; text-align: center;"></div>
-
+                                    <div id="alert-container" style="position: absolute; top: 30px; left: 50%; transform: translateX(-50%); z-index: 100; pointer-events: none; width: 90%; text-align: center;"></div>
+                                    
                                     <!-- COUNTDOWN OVERLAY -->
-                                    <div id="live-countdown-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <div id="live-countdown-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                                         <div style="width: 120px; height: 120px; border: 4px solid #ff0055; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,0,85,0.4);">
                                             <span id="countdown-timer" style="font-size: 3.5rem; font-weight: 900; color: #ff0055;">10</span>
                                         </div>
-                                        <h2 style="font-weight: 700; color: white; margin: 0;">Starting soon...</h2>
-                                        <p style="color: #aaa; margin-top: 8px; font-size: 0.9rem;">Preparing your broadcast</p>
+                                        <h2 style="font-weight: 700; color: white; margin: 0;">Broadcast starting...</h2>
                                     </div>
 
-                                    <!-- Top Overlays: LIVE badge + viewers -->
-                                    <div style="position: absolute; top: 12px; left: 12px; display: flex; gap: 10px; align-items: center; z-index: 10;">
-                                        <div style="background: #ff0055; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
-                                            <div style="width: 7px; height: 7px; background: white; border-radius: 50%; animation: pulse-red 1s infinite;"></div> LIVE
-                                        </div>
-                                        <div style="background: rgba(0,0,0,0.7); color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
-                                            <i class="fas fa-eye"></i> <span id="view-count">1.5k</span> watching
-                                        </div>
-                                    </div>
-
-                                    <!-- Lower Third -->
-                                    <div id="lower-third" style="position: absolute; bottom: 80px; left: 0; background: linear-gradient(90deg, rgba(255,0,85,0.9), transparent); padding: 10px 30px; border-left: 4px solid white; transform: translateX(-110%); transition: transform 0.8s ease; z-index: 10;">
-                                        <div style="font-size: 1.1rem; font-weight: 800; text-transform: uppercase;">${data.user.name}</div>
-                                        <div style="font-size: 0.75rem; opacity: 0.85; letter-spacing: 1px;">LIVE ON VITOX</div>
+                                    <!-- Bottom Control Bar -->
+                                    <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                                        <button class="icon-btn" style="color: #00ff88;"><i class="fas fa-microphone"></i></button>
+                                        <button class="icon-btn" style="color: #00ff88;"><i class="fas fa-video"></i></button>
+                                        <button id="record-btn" onclick="toggleRecording()" style="background: transparent; color: #fff; border: none; font-size: 1.2rem; cursor: pointer;"><i class="fas fa-circle" style="color:#ff0000;"></i></button>
+                                        <button class="icon-btn"><i class="fas fa-share-alt"></i></button>
                                     </div>
 
                                     <!-- Watermark -->
-                                    <div style="position: absolute; top: 12px; right: 12px; opacity: 0.25; font-weight: 800; font-size: 0.9rem; z-index: 10;">
-                                        <i class="fas fa-play-circle"></i> VITOX
+                                    <div style="position: absolute; bottom: 30px; right: 30px; opacity: 0.3; font-weight: 800; font-size: 0.8rem;">
+                                        VITOX BROADCASTER
                                     </div>
-
+                                    
                                     <!-- Hearts -->
-                                    <div id="hearts-container" style="position: absolute; bottom: 0; right: 60px; width: 60px; height: 250px; pointer-events: none; z-index: 5;"></div>
-
-                                    <!-- Bottom Controls -->
-                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px 16px 12px; display: flex; align-items: center; gap: 12px; z-index: 10;">
-                                        <button id="record-btn" onclick="toggleRecording()" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 7px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
-                                            <i class="fas fa-circle" style="color: #ff0055; font-size: 0.7rem;"></i> REC
-                                        </button>
-                                        <i class="fas fa-microphone" style="color: #00ff88; cursor: pointer; font-size: 1rem;"></i>
-                                        <i class="fas fa-video" style="color: #00ff88; cursor: pointer; font-size: 1rem;"></i>
-                                        <div style="flex: 1;"></div>
-                                        <button onclick="stopStreaming()" style="background: #ff0055; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">
-                                            End Stream
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Stream Info Below Video -->
-                                <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                                    <h1 style="margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 700;">${data.title}</h1>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                                        <div style="display: flex; align-items: center; gap: 12px;">
-                                            <div style="width: 36px; height: 36px; background: linear-gradient(45deg, #ff0000, #ff6b35); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem;">
-                                                ${data.user.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <div>
-                                                <div style="font-weight: 700; font-size: 0.95rem;">${data.user.name}</div>
-                                                <div style="font-size: 0.8rem; color: #aaa;">${data.category} Stream</div>
-                                            </div>
-                                        </div>
-                                        <!-- Sub Goal -->
-                                        <div style="display: flex; align-items: center; gap: 12px;">
-                                            <div style="font-size: 0.8rem; color: #aaa;">Sub Goal: <span id="sub-count-display" style="color: white; font-weight: 700;">1,240 / 1,500</span></div>
-                                            <div style="width: 120px; height: 5px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
-                                                <div id="sub-goal-bar" style="width: 82.6%; height: 100%; background: #ff0000; border-radius: 5px; transition: width 1s;"></div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <div id="hearts-container" style="position: absolute; bottom: 0; right: 80px; width: 100px; height: 100%; pointer-events: none;"></div>
                                 </div>
                             </div>
 
-                            <!-- Chat Sidebar -->
-                            <div style="width: 360px; flex-shrink: 0; border-left: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; background: #0f0f0f;">
-                                <div style="padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fas fa-comments" style="color: #aaa;"></i> Live Chat
+                            <!-- Right: Chat & Activities -->
+                            <div style="width: 400px; background: #0a0a0a; display: flex; flex-direction: column;">
+                                <div style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 800; letter-spacing: 0.5px; color: #eee;">LIVE CHAT</span>
+                                    <span style="font-size: 0.75rem; color: #666;">Top Messages</span>
                                 </div>
-                                <div id="live-chat-content" style="flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 0.88rem;">
-                                    <div style="background: rgba(255,255,255,0.04); padding: 10px 12px; border-radius: 8px; color: #aaa; font-size: 0.8rem;">
-                                        <i class="fas fa-shield-alt" style="color: #ffb700;"></i> Chat moderation is active
+                                <div id="live-chat-content" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+                                    <!-- Chat Messages -->
+                                </div>
+                                <div style="padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.05); background: #111;">
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="text" id="live-chat-input" placeholder="Say something..." style="flex: 1; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px; color: white; outline: none;">
+                                        <button onclick="sendLiveChatMsg()" style="background: #ff0000; border: none; color: white; width: 45px; border-radius: 8px; cursor: pointer;">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
                                     </div>
-                                </div>
-                                <div style="padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 10px;">
-                                    <input type="text" id="live-chat-input" placeholder="Send a message..." style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 14px; color: white; outline: none; font-size: 0.88rem;">
-                                    <button onclick="sendLiveChatMsg()" style="background: #ff0000; border: none; color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 700;">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1412,13 +1489,13 @@
                     const allUsers = await usersRes.json();
 
                     grid.innerHTML = `
-                    < div style = "padding: 40px; color: white; width: 100%;" >
+                    <div style="padding: 40px; color: white; width: 100%;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
                             <h1 style="font-size: 2.5rem; font-weight: 800; margin:0;">Admin Command Center</h1>
                             <div style="background: #ff0055; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.9rem;">PLATFORM OWNER</div>
                         </div>
 
-                        <!--Quick Stats-- >
+                        <!-- Quick Stats -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
                             <div style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
                                 <div style="color: #aaa; font-size: 0.8rem; margin-bottom: 8px;">TOTAL USERS</div>
@@ -1707,36 +1784,67 @@
                 const users = ["Alex", "Deepak", "Sarah", "Raj", "Luna", "Kevin", "Zoya", "Mano", "Tyson"];
 
                 if (liveChatInterval) clearInterval(liveChatInterval);
+                if (window.streamTimer) clearInterval(window.streamTimer);
+
+                let startTime = Date.now();
+                window.streamTimer = setInterval(() => {
+                    let elapsed = Date.now() - startTime;
+                    let h = Math.floor(elapsed / 3600000);
+                    let m = Math.floor((elapsed % 3600000) / 60000);
+                    let s = Math.floor((elapsed % 60000) / 1000);
+                    let display = [h, m, s].map(v => v < 10 ? '0' + v : v).join(':');
+                    const durEl = document.getElementById('stream-duration');
+                    if (durEl) durEl.innerText = display;
+                }, 1000);
 
                 liveChatInterval = setInterval(() => {
                     if (!document.getElementById('live-chat-content')) {
                         clearInterval(liveChatInterval);
+                        clearInterval(window.streamTimer);
                         return;
                     }
                     const randomUser = users[Math.floor(Math.random() * users.length)];
                     const randomMsg = messages[Math.floor(Math.random() * messages.length)];
 
                     const msgEl = document.createElement('div');
-                    msgEl.innerHTML = `< span style = "color: #888; font-weight: 700;" > ${randomUser}:</span > ${randomMsg} `;
+                    msgEl.innerHTML = `<span style="color: #888; font-weight: 700;">${randomUser}:</span> ${randomMsg}`;
                     chatContent.appendChild(msgEl);
                     chatContent.scrollTop = chatContent.scrollHeight;
 
                     // Update views slightly
-                    const viewEl = document.getElementById('view-count');
+                    const viewEl = document.getElementById('view-count-header');
                     if (viewEl) {
-                        let current = parseFloat(viewEl.innerText.replace('k', ''));
-                        current += (Math.random() * 0.1);
-                        viewEl.innerText = current.toFixed(1) + 'k';
+                        let current = parseInt(viewEl.innerText.replace(',', '')) || 1200;
+                        current += Math.floor(Math.random() * 5);
+                        viewEl.innerText = current.toLocaleString();
+                    }
+
+                    const likeEl = document.getElementById('like-count-header');
+                    if (likeEl) {
+                        let current = parseInt(likeEl.innerText.replace(',', '')) || 450;
+                        if (Math.random() > 0.7) current += 1;
+                        likeEl.innerText = current.toLocaleString();
                     }
                 }, 3000);
             }
 
             function stopStreaming() {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (window.currentLiveId && user) {
+                    fetch('/api/video/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ video_id: window.currentLiveId, email: user.email })
+                    }).then(() => {
+                        window.currentLiveId = null;
+                    });
+                }
                 if (liveChatInterval) clearInterval(liveChatInterval);
+                if (window.streamTimer) clearInterval(window.streamTimer);
                 if (liveAlertInterval) clearInterval(liveAlertInterval);
                 if (liveHeartsInterval) clearInterval(liveHeartsInterval);
                 stopLiveMedia();
-                showToast("Stream ended successfully!");
+                showToast("Broadcast ended successfully!");
                 loadVideos();
             }
 
@@ -1901,21 +2009,27 @@
                 document.getElementById('go-live-modal').style.display = 'flex';
                 toggleCreateMenu();
 
-                try {
-                    liveStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    const videoPreview = document.getElementById('live-preview');
-                    if (videoPreview) {
-                        videoPreview.srcObject = liveStream;
-                        videoPreview.play();
-                    }
-                } catch (err) {
-                    console.error("Camera access denied:", err);
-                    showToast("Camera access required for streaming!");
-                }
+                // Set default source to Camera and trigger it
+                document.getElementById('stream-source').value = 'camera';
+                switchSource('camera');
             }
 
             async function switchSource(source) {
                 stopLiveMedia();
+                const obsConfig = document.getElementById('obs-config');
+                if (obsConfig) obsConfig.style.display = source === 'obs' ? 'block' : 'none';
+
+                if (source === 'obs') {
+                    // Show instructional image or placeholder for OBS Virtual Camera
+                    const videoPreview = document.getElementById('live-preview');
+                    if (videoPreview) {
+                        videoPreview.srcObject = null;
+                        videoPreview.poster = "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80";
+                    }
+                    showToast("Connect OBS via Virtual Camera");
+                    return;
+                }
+
                 try {
                     if (source === 'screen') {
                         liveStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -1941,8 +2055,40 @@
                 }
             }
 
+            async function uploadLiveThumbnail(input) {
+                if (!input.files || !input.files[0]) return;
+                const file = input.files[0];
+                const status = document.getElementById('thumb-upload-status');
+                const urlInput = document.getElementById('stream-thumb-input');
+
+                status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const res = await fetch('/api/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                        urlInput.value = data.url;
+                        status.innerHTML = '<span style="color: #00ff88;"><i class="fas fa-check"></i> Ready</span>';
+                        showToast("Thumbnail uploaded!");
+                    } else {
+                        status.innerHTML = '<span style="color: #ff0055;">Failed</span>';
+                        showToast(data.error || "Upload failed");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    status.innerHTML = '<span style="color: #ff0055;">Error</span>';
+                }
+            }
+
             async function startStreamingSession() {
                 const title = document.getElementById('stream-title-input').value.trim();
+                const thumb = document.getElementById('stream-thumb-input').value.trim();
                 const category = document.getElementById('stream-category').value;
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
 
@@ -1950,7 +2096,7 @@
 
                 // Register Live Stream in DB
                 try {
-                    await fetch('/api/video/upload', {
+                    const res = await fetch('/api/video/upload', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1958,11 +2104,13 @@
                             title: title,
                             description: "🔴 Live Stream via Vitox Studio",
                             video_url: "live-placeholder", // Flag for frontend
-                            thumbnail_url: "https://images.unsplash.com/photo-1628116904618-97103239a5de?auto=format&fit=crop&w=1920&q=80",
+                            thumbnail_url: thumb || "https://images.unsplash.com/photo-1628116904618-97103239a5de?auto=format&fit=crop&w=1920&q=80",
                             type: "live",
                             category: category
                         })
                     });
+                    const data = await res.json();
+                    if (data.video_id) window.currentLiveId = data.video_id;
                 } catch (e) { console.error("Failed to register stream:", e); }
 
                 document.getElementById('go-live-modal').style.display = 'none';

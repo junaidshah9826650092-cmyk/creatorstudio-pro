@@ -430,15 +430,17 @@ def upload_video():
 
         if USE_POSTGRES:
             cursor = conn.cursor()
-            cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', 
+            cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id', 
                          (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
+            video_id = cursor.fetchone()['id']
         else:
-            conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+            cursor = conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
                          (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
+            video_id = cursor.lastrowid
         conn.commit()
         conn.close()
         
-        return jsonify({'status': 'success'})
+        return jsonify({'status': 'success', 'video_id': video_id})
     except Exception as e:
         print(f"Upload Error: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -1489,6 +1491,66 @@ def get_posts():
     posts = [dict(r) for r in rows]
     conn.close()
     return jsonify(posts)
+
+@app.route('/api/video/delete', methods=['POST'])
+def cleanup_live_session():
+    data = request.json
+    video_id = data.get('video_id')
+    email = data.get('email') # Security check
+
+    if not video_id or not email:
+        return jsonify({'error': 'Missing parameters'}), 400
+
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM videos WHERE id = %s AND user_email = %s', (video_id, email))
+    else:
+        conn.execute('DELETE FROM videos WHERE id = ? AND user_email = ?', (video_id, email))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'message': 'Live session cleaned up'})
+
+@app.route('/api/image/upload', methods=['POST'])
+def upload_image_thumbnail():
+    """Proxy upload to Cloudinary so we don't expose secret on frontend."""
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image part'}), 400
+    
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    api_key = os.environ.get('CLOUDINARY_API_KEY')
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+
+    if not all([cloud_name, api_key, api_secret]):
+        return jsonify({'error': 'Cloudinary config missing'}), 500
+
+    import time
+    import hashlib
+    timestamp = int(time.time())
+    params_to_sign = f"timestamp={timestamp}{api_secret}"
+    signature = hashlib.sha1(params_to_sign.encode()).hexdigest()
+
+    url = f"https://api.cloudinary.com/v1_1/{cloud_name}/image/upload"
+    files = {'file': file}
+    data = {
+        'api_key': api_key,
+        'timestamp': timestamp,
+        'signature': signature
+    }
+
+    try:
+        response = requests.post(url, files=files, data=data)
+        res_json = response.json()
+        if 'secure_url' in res_json:
+            return jsonify({'status': 'success', 'url': res_json['secure_url']})
+        else:
+            return jsonify({'error': res_json.get('error', {}).get('message', 'Upload failed')}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Deploy ID: 1739556815
 
