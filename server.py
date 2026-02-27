@@ -430,10 +430,18 @@ def upload_video():
 
         if USE_POSTGRES:
             cursor = conn.cursor()
+            # Auto-Cleanup old live sessions for this user if starting a new one
+            if video_type == 'live':
+                cursor.execute('DELETE FROM videos WHERE user_email = %s AND type = %s', (email, 'live'))
+            
             cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id', 
                          (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
             video_id = cursor.fetchone()['id']
         else:
+            # Auto-Cleanup old live sessions for this user if starting a new one
+            if video_type == 'live':
+                conn.execute('DELETE FROM videos WHERE user_email = ? AND type = ?', (email, 'live'))
+                
             cursor = conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
                          (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
             video_id = cursor.lastrowid

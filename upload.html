@@ -10,11 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
+    <!-- No ads on upload pages - AdSense policy compliance -->
 </head>
 
 <body style="background: #000;">
-    <amp-auto-ads type="adsense" data-ad-client="ca-pub-7142476355791158"></amp-auto-ads>
+    <!-- Ads removed from upload form -->
 
     <div class="upload-container">
         <header class="upload-header">
@@ -45,7 +45,8 @@
                     <p style="font-size: 1.1rem; margin-bottom: 8px; font-weight: 600;">Vitox Creator Studio</p>
                     <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 20px;">Drag and drop video files to upload
                     </p>
-                    <button class="btn-upload">Select Files</button>
+                    <button class="btn-upload" onclick="document.getElementById('file-input').click()">Select
+                        Files</button>
                     <input type="file" id="file-input" accept="video/*" style="display: none;"
                         onchange="handleFileSelect(event)">
                 </div>

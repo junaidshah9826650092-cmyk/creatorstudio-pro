@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Vitox | The Ultimate Video Platform</title>
+    <meta name="description" content="Learn about Vitox, the next-generation video sharing and creator monetization platform. Discover our mission, values, and the team behind Vitox.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- No ads on about/policy pages - AdSense compliance -->
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            line-height: 1.7;
+        }
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(10,10,10,0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 0 40px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: 800;
+            font-size: 1.3rem;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a0010 50%, #0a0a0a 100%);
+            padding: 100px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255,0,85,0.08) 0%, transparent 60%);
+            animation: pulse-bg 8s ease-in-out infinite;
+        }
+        @keyframes pulse-bg {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+            position: relative;
+            background: linear-gradient(135deg, #fff 0%, #ff0055 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #aaa;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+        .section {
+            margin-bottom: 70px;
+        }
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            color: #fff;
+        }
+        .section h2 span {
+            color: #ff0055;
+        }
+        .section p {
+            color: #bbb;
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+        }
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+        .value-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+        .value-card:hover {
+            border-color: rgba(255,0,85,0.3);
+            transform: translateY(-4px);
+            background: rgba(255,0,85,0.03);
+        }
+        .value-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,0,85,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+            color: #ff0055;
+        }
+        .value-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .value-card p {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin: 0;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            background: rgba(255,0,85,0.03);
+            border: 1px solid rgba(255,0,85,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 32px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ff0055;
+            display: block;
+            letter-spacing: -1px;
+        }
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 60px 0;
+        }
+        footer-bar {
+            display: block;
+            background: #050505;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 30px 40px;
+            text-align: center;
+            color: #555;
+            font-size: 0.85rem;
+        }
+        footer-bar a { color: #888; text-decoration: none; margin: 0 12px; }
+        footer-bar a:hover { color: #ff0055; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .stats-row { grid-template-columns: 1fr; }
+            header { padding: 0 20px; }
+            .container { padding: 40px 20px; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <svg width="28" height="28" viewBox="0 0 64 64">
+                <defs>
+                    <linearGradient id="vGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ff0055;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ff5500;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#vGrad)" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z" />
+            </svg>
+            Vitox
+        </a>
+        <nav style="display:flex; gap:32px; align-items:center;">
+            <a href="index.html" style="color:#aaa; text-decoration:none; font-weight:500; transition:0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Home</a>
+            <a href="about.html" style="color:#ff0055; text-decoration:none; font-weight:600;">About</a>
+            <a href="privacy.html" style="color:#aaa; text-decoration:none; font-weight:500;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Privacy</a>
+            <a href="contact.html" style="color:#aaa; text-decoration:none; font-weight:500;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Contact</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <h1>About Vitox</h1>
+        <p>We're building the next generation of video sharing — a platform where creators thrive, audiences connect, and content truly matters.</p>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <h2>Our <span>Mission</span></h2>
+            <p>Vitox was founded with a simple but powerful belief: every creator deserves a fair platform. In a world where video content is the primary medium of expression, we saw an opportunity to build something different — a platform that puts creators first.</p>
+            <p>We are a video sharing and creator monetization platform designed to give creators the tools, audience, and revenue they need to do what they love full time. Whether you're a gaming streamer, a music artist, a tech educator, or a comedian, Vitox is built for you.</p>
+            <p>We believe that quality content should be rewarded, that creators should own their audience relationship, and that the internet can be a place of genuine creativity and connection — not just algorithms and ad revenue chasing.</p>
+        </div>
+
+        <div class="section">
+            <h2>What We <span>Offer</span></h2>
+            <p>Vitox provides a comprehensive creator ecosystem with features that matter:</p>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-video"></i></div>
+                    <h3>Video Publishing</h3>
+                    <p>Upload and share long-form videos with HD quality streaming, powerful thumbnails, and SEO-friendly metadata.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>V-Snaps (Shorts)</h3>
+                    <p>Create and share short-form vertical videos — perfect for quick content, highlights, and trending moments.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-tower-broadcast"></i></div>
+                    <h3>Live Streaming</h3>
+                    <p>Go live directly from your browser or connect via OBS Studio. Engage your audience in real-time.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <h3>Creator Monetization</h3>
+                    <p>Earn through our built-in points system, brand collaborations, and soon — direct fan monetization.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-users"></i></div>
+                    <h3>Squad Community</h3>
+                    <p>Build your squad — a loyal fanbase that follows your content, engages with posts, and supports your growth.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Creator Analytics</h3>
+                    <p>Real-time insights into your channel performance, viewer demographics, and content trends.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Our <span>Story</span></h2>
+            <p>Vitox started as a passion project — a vision for what a video platform could be if it truly centered the creator experience. We were tired of platforms where creators were treated as content supply for an advertising machine, where the algorithm decided who succeeded, and where genuine community building was secondary to engagement metrics.</p>
+            <p>We launched Vitox to change that. From day one, we've focused on building a platform that is transparent with creators about how it works, fair in how it distributes opportunities, and genuinely invested in the success of the people who create on it.</p>
+            <p>Today, Vitox serves creators and viewers across the globe, with a growing library of videos spanning gaming, music, education, tech, comedy, news, and much more. We are constantly improving, constantly listening to our community, and constantly working to make Vitox the best place to create and watch video content on the internet.</p>
+        </div>
+
+        <div class="section">
+            <h2>Platform <span>Numbers</span></h2>
+            <p>Vitox is growing every day. Here's a snapshot of where we are:</p>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-num">10K+</span>
+                    <div class="stat-label">Registered Creators</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">50K+</span>
+                    <div class="stat-label">Videos Uploaded</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">100K+</span>
+                    <div class="stat-label">Monthly Viewers</div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="section">
+            <h2>Our <span>Values</span></h2>
+            <p><strong style="color:#fff;">Creator First.</strong> Every decision we make at Vitox starts with the question: "How does this help creators?" We believe that when creators succeed, the platform succeeds.</p>
+            <p><strong style="color:#fff;">Transparency.</strong> We are open about how our algorithms work, how revenue is distributed, and how we make decisions that impact the community. No hidden tricks, no confusing policies.</p>
+            <p><strong style="color:#fff;">Authenticity.</strong> We celebrate genuine content and real creativity. Vitox is not a place for spam, misinformation, or low-quality content farms.</p>
+            <p><strong style="color:#fff;">Community.</strong> The relationship between creators and their audience is sacred. We build tools that strengthen that bond, not exploit it.</p>
+            <p><strong style="color:#fff;">Innovation.</strong> We are always working on new features, better tools, and smarter systems to help creators, viewers, and advertisers get more value from Vitox.</p>
+        </div>
+
+        <div class="section">
+            <h2>Content <span>Policy</span></h2>
+            <p>At Vitox, we believe in freedom of expression within a framework of responsibility. Our platform is open to all genres of content, but we maintain strict guidelines to ensure a safe, respectful, and legal environment for everyone.</p>
+            <p>We do not allow content that is: sexually explicit, hateful or discriminatory, violent or promoting harm, spam or auto-generated, or in violation of copyright law. All creators agree to our Terms of Service and Community Guidelines when signing up.</p>
+            <p>Content moderation is handled by a combination of automated systems and human review. If you believe content violates our policies, you can report it directly on the platform.</p>
+        </div>
+
+        <div class="section">
+            <h2>Contact <span>Us</span></h2>
+            <p>We'd love to hear from you. Whether you have a question about the platform, a bug to report, a partnership inquiry, or just want to say hello — reach out to us:</p>
+            <p><strong style="color:#fff;"><i class="fas fa-envelope" style="color:#ff0055; margin-right:8px;"></i>Email:</strong> <a href="mailto:support@vitox.ai" style="color:#ff0055; text-decoration:none;">support@vitox.ai</a></p>
+            <p><strong style="color:#fff;"><i class="fas fa-globe" style="color:#ff0055; margin-right:8px;"></i>Website:</strong> <a href="index.html" style="color:#ff0055; text-decoration:none;">vitox.ai</a></p>
+            <p style="margin-top:8px; color:#888;">For creator partnership and brand collaboration inquiries, please use our dedicated <a href="index.html" style="color:#ff0055; text-decoration:none;">collaboration chat</a> on the platform.</p>
+        </div>
+    </div>
+
+    <footer-bar>
+        <div>© 2024 Vitox. All rights reserved.</div>
+        <div style="margin-top:12px;">
+            <a href="about.html">About</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </footer-bar>
+</body>
+
+</html>
