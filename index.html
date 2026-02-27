@@ -541,11 +541,11 @@
                         // Bug fix: Only treat as LIVE if type is explicitly 'live'
                         const isLive = (vid.type === 'live');
 
-                        // Bug fix: Use actual video frame if thumbnail is missing (Cloudinary only)
-                        const thumbSrc = (vid.thumbnail_url && vid.thumbnail_url !== 'null' && vid.thumbnail_url !== 'undefined')
+                        // Smart Thumbnail Logic: Use thumbnail_url if exists, otherwise generate from Cloudinary video URL
+                        let thumbSrc = (vid.thumbnail_url && vid.thumbnail_url !== 'null' && vid.thumbnail_url !== 'undefined' && vid.thumbnail_url !== '')
                             ? vid.thumbnail_url
                             : (vid.video_url && vid.video_url.includes('cloudinary.com')
-                                ? vid.video_url.replace('/video/upload/', '/video/upload/c_fill,h_270,w_480,so_0/').replace(/\.[^/.]+$/, ".jpg")
+                                ? vid.video_url.replace('/video/upload/', '/video/upload/c_fill,h_270,w_480,so_auto/').replace(/\.[^/.]+$/, ".jpg")
                                 : `https://dummyimage.com/480x270/111/ff0055.png&text=${encodeURIComponent(vid.title || 'Vitox')}`);
 
                         card.innerHTML = `
