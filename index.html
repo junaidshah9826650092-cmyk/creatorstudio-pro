@@ -544,7 +544,7 @@
                         // Bug fix: Use <img> instead of <video> for thumbnails to prevent black screens
                         const thumbSrc = vid.thumbnail_url && vid.thumbnail_url !== 'null' && vid.thumbnail_url !== 'undefined'
                             ? vid.thumbnail_url
-                            : `https://via.placeholder.com/480x270/111111/ff0055?text=${encodeURIComponent(vid.title || 'Vitox')}`;
+                            : `https://dummyimage.com/480x270/111/ff0055.png&text=${encodeURIComponent(vid.title || 'Vitox')}`;
 
                         card.innerHTML = `
                             <div class="thumbnail-wrapper" style="position:relative; overflow:hidden; border-radius:12px; aspect-ratio:16/9; background:#111;">
@@ -552,7 +552,7 @@
                                     alt="${vid.title || 'Video thumbnail'}"
                                     loading="lazy"
                                     style="width:100%; height:100%; object-fit:cover; display:block;"
-                                    onerror="this.src='https://via.placeholder.com/480x270/111111/ff0055?text=Vitox'"
+                                    onerror="this.src='https://dummyimage.com/480x270/111/ff0055.png&text=Vitox'"
                                 />
                                 ${isLive ? '<div style="position:absolute; top:8px; left:8px; background:#ff0000; color:white; padding:3px 10px; font-size:0.72rem; font-weight:800; border-radius:4px; display:flex; align-items:center; gap:5px;"><span style=\'width:7px;height:7px;background:white;border-radius:50%;display:inline-block;\' ></span>LIVE</div>' : ''}
                                 <div class="play-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;background:rgba(0,0,0,0.3);">
