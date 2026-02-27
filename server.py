@@ -421,6 +421,9 @@ def upload_video():
         video_type = data.get('type', 'video') # 'video' or 'short'
         category = data.get('category', 'All')
 
+        # NEW: AI Content Moderation
+        mod_status = ai_processor.moderate(title, desc)
+
         conn = get_db_connection()
         # Double check if table exists as fallback
         try:
@@ -441,7 +444,7 @@ def upload_video():
                 cursor.execute('DELETE FROM videos WHERE user_email = %s AND type = %s', (email, 'live'))
             
             cursor.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id', 
-                         (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
+                         (email, title, desc, video_url, thumb_url, video_type, category, mod_status))
             video_id = cursor.fetchone()['id']
         else:
             # Auto-Cleanup old live sessions for this user if starting a new one
@@ -449,7 +452,7 @@ def upload_video():
                 conn.execute('DELETE FROM videos WHERE user_email = ? AND type = ?', (email, 'live'))
                 
             cursor = conn.execute('INSERT INTO videos (user_email, title, description, video_url, thumbnail_url, type, category, moderation_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
-                         (email, title, desc, video_url, thumb_url, video_type, category, 'safe'))
+                         (email, title, desc, video_url, thumb_url, video_type, category, mod_status))
             video_id = cursor.lastrowid
         conn.commit()
         conn.close()
@@ -1182,6 +1185,24 @@ def ai_ask():
 
     answer = ai_processor.ask(prompt, model)
     return jsonify({'answer': answer})
+
+@app.route('/api/ai/predict', methods=['POST'])
+def ai_predict():
+    data = request.json
+    title = data.get('title', '')
+    desc = data.get('description', '')
+    prediction = ai_processor.predict_trending({'title': title, 'description': desc})
+    return jsonify({'prediction': prediction})
+
+@app.route('/api/search/ai', methods=['POST'])
+def ai_search():
+    data = request.json
+    query = data.get('query', '')
+    
+    # Use AI to translate human intent into search keywords or categories
+    prompt = f"User Search Query: '{query}'. Based on this, suggest 3-5 space-separated keywords or a category (Gaming, Music, Tech, Comedy, News, Education) that would best match this intent. Return ONLY the keywords."
+    interpreted_query = ai_processor.ask(prompt, model_alias='gemini-flash')
+    return jsonify({'interpreted': interpreted_query})
 
 @app.route('/api/ai/chat', methods=['POST'])
 def ai_chat():

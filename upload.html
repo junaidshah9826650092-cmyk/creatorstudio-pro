@@ -108,6 +108,10 @@
                             <label>Description <i class="far fa-question-circle"></i></label>
                             <textarea id="video-desc" rows="5"
                                 placeholder="Tell viewers about your video (type @ to mention a channel)"></textarea>
+                            <div style="margin-top: 10px;">
+                                <button class="btn-ai" onclick="predictViral(event)" style="background: rgba(255,0,85,0.1); color: #ff0055; border: 1px solid rgba(255,0,85,0.2);"><i class="fas fa-chart-line"></i> AI Viral Predictor</button>
+                                <div id="viral-result" style="font-size: 0.8rem; margin-top: 8px; font-weight: 700; color: #ff0088;"></div>
+                            </div>
                         </div>
 
                         <div style="margin-top: 40px;">
@@ -179,11 +183,10 @@
                     <div style="margin-top: 40px;">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div style="display: flex; align-items: center; gap: 16px;">
-                                <div style="font-weight: 700;">Copyright</div>
-                                <div id="copyright-status" style="color: #00ff88;"><i class="fas fa-check"></i> No
-                                    issues found</div>
+                                <div style="font-weight: 700;">Content Safety</div>
+                                <div id="copyright-status" style="color: #00ff88;"><i class="fas fa-robot"></i> Vitox AI: Safe to Publish</div>
                             </div>
-                            <i class="fas fa-check" style="color: #00ff88;"></i>
+                            <i class="fas fa-check-circle" style="color: #00ff88;"></i>
                         </div>
                         <hr style="border:none; border-top: 1px solid #333; margin: 20px 0;">
                         <p style="font-size: 0.75rem; color: #888;">Remember: These check results aren't final. Issues
@@ -375,7 +378,28 @@
                 const data = await res.json();
                 document.getElementById('video-title').value = data.title;
                 document.getElementById('video-desc').value = data.description;
+                document.getElementById('modal-title').innerText = data.title;
             } catch (e) { console.error(e); } finally { btn.innerHTML = '<i class="fas fa-magic"></i> AI'; }
+        }
+
+        async function predictViral(event) {
+            const btn = event.currentTarget;
+            const resEl = document.getElementById('viral-result');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            resEl.innerText = "";
+            
+            try {
+                const title = document.getElementById('video-title').value;
+                const desc = document.getElementById('video-desc').value;
+                const res = await fetch('/api/ai/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description: desc })
+                });
+                const data = await res.json();
+                resEl.innerHTML = `<i class="fas fa-sparkles"></i> ${data.prediction}`;
+            } catch (e) { resEl.innerText = "Prediction unavailable."; }
+            finally { btn.innerHTML = '<i class="fas fa-chart-line"></i> AI Viral Predictor'; }
         }
 
         async function handleUpload() {

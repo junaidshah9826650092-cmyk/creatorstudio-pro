@@ -54,7 +54,10 @@
             <div class="search-container">
                 <div class="search-box">
                     <input type="text" id="search-input" placeholder="Search">
-                    <button class="search-btn" onclick="performSearch()"><i class="fas fa-search"></i></button>
+                    <button class="search-btn" id="ai-search-btn" onclick="performAISearch()" title="Smart AI Search" style="background: transparent; border-left: 1px solid #333; border-radius: 0; margin-left: -40px; color: #ff0055; width: 40px; height: 36px; display: flex; align-items: center; justify-content: center; z-index: 5; border:none;">
+                        <i class="fas fa-sparkles"></i>
+                    </button>
+                    <button class="search-btn" onclick="performSearch()" style="margin-left: 0;"><i class="fas fa-search"></i></button>
                 </div>
                 <button class="icon-btn mic-btn" onclick="startVoiceSearch()"><i class="fas fa-microphone"></i></button>
             </div>
@@ -1067,9 +1070,52 @@
 
                 const filtered = allVideos.filter(vid =>
                     (vid.title && vid.title.toLowerCase().includes(query)) ||
-                    (vid.description && vid.description.toLowerCase().includes(query))
+                    (vid.description && vid.description.toLowerCase().includes(query)) ||
+                    (vid.category && vid.category.toLowerCase() === query)
                 );
-                renderVideos(filtered);
+                
+                if (filtered.length === 0 && query.length > 3) {
+                    // Auto Smart Search Fallback
+                    performAISearch(true);
+                } else {
+                    renderVideos(filtered);
+                }
+            }
+
+            async function performAISearch(isFallback = false) {
+                const query = document.getElementById('search-input').value;
+                if(!query) return;
+
+                const aiBtn = document.getElementById('ai-search-btn');
+                aiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                if(isFallback) showToast("AI is finding the best match...");
+
+                try {
+                    const res = await fetch('/api/search/ai', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ query })
+                    });
+                    const data = await res.json();
+                    
+                    // Smart Filter: search for any of the keywords AI suggested
+                    const keywords = data.interpreted.toLowerCase().split(' ');
+                    const filtered = allVideos.filter(vid => {
+                        const content = (vid.title + ' ' + (vid.description || '') + ' ' + (vid.category || '')).toLowerCase();
+                        return keywords.some(k => k.length > 2 && content.includes(k));
+                    });
+                    
+                    if (filtered.length > 0) {
+                        renderVideos(filtered);
+                        showToast(`Smart AI Match: Found ${filtered.length} results`);
+                    } else {
+                        renderVideos([]);
+                    }
+                } catch (e) {
+                    console.error("AI Search Failed", e);
+                } finally {
+                    aiBtn.innerHTML = '<i class="fas fa-sparkles"></i>';
+                }
             }
 
             document.getElementById('search-input').addEventListener('keypress', (e) => {
@@ -1114,8 +1160,8 @@
                 const initialViews = views || 0;
                 const safeDesc = description || '';
 
-                // AI Feature Placeholder
-                const isAIRequest = safeTitle.toLowerCase().includes('ai') || safeTitle.toLowerCase().includes('model') || safeTitle.toLowerCase().includes('learning');
+                // AI Feature: Available for all videos now
+                const isAIRequest = true; // Always show AI assistance for a premium experience
 
                 if (isLive) {
                     // Use a placeholder public stream for the simulation if it's the specific placeholder flag
