@@ -514,18 +514,27 @@ def get_all_videos():
     
     try:
         conn = get_db_connection()
-        if video_type:
-            if USE_POSTGRES:
+        # Cleanup STALE Live Streams (older than 1 hour)
+        # This fixes the bug where videos show LIVE forever because creator closed browser
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM videos WHERE type = 'live' AND timestamp < NOW() - INTERVAL '1 hour'")
+            conn.commit()
+            
+            if video_type:
                 cursor = conn.cursor(cursor_factory=RealDictCursor)
                 cursor.execute('SELECT * FROM videos WHERE type = %s ORDER BY timestamp DESC', (video_type,))
                 videos = cursor.fetchall()
             else:
-                videos = conn.execute('SELECT * FROM videos WHERE type = ? ORDER BY timestamp DESC', (video_type,)).fetchall()
-        else:
-            if USE_POSTGRES:
                 cursor = conn.cursor(cursor_factory=RealDictCursor)
                 cursor.execute('SELECT * FROM videos ORDER BY timestamp DESC')
                 videos = cursor.fetchall()
+        else:
+            conn.execute("DELETE FROM videos WHERE type = 'live' AND timestamp < datetime('now', '-1 hour')")
+            conn.commit()
+            
+            if video_type:
+                videos = conn.execute('SELECT * FROM videos WHERE type = ? ORDER BY timestamp DESC', (video_type,)).fetchall()
             else:
                 videos = conn.execute('SELECT * FROM videos ORDER BY timestamp DESC').fetchall()
         conn.close()
@@ -534,9 +543,7 @@ def get_all_videos():
 
     if not videos or len(videos) == 0:
         # FAIL-SAFE: If DB is empty or fails, fetch direct from Cloudinary
-        print("FAIL-SAFE: Fetching direct from Cloudinary...")
         videos = _fetch_from_cloudinary(video_type if video_type else 'video')
-        # Filter by type if Cloudinary returns more than requested
         if video_type:
             videos = [v for v in videos if v.get('type') == video_type]
         return jsonify(videos)
