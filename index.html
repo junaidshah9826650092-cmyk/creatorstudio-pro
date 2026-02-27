@@ -2683,10 +2683,13 @@
                             <div style="font-size: 0.95rem; color: #ddd; font-weight: 500;">Secure OAuth 2.0 connection</div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
-                            <div style="width: 36px; height: 36px; background: rgba(0,255,136,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-wallet" style="color: #00ff88; font-size: 1.1rem;"></i>
-                            </div>
                             <div style="font-size: 0.95rem; color: #ddd; font-weight: 500;">Setup tax profile & payments</div>
+                        </div>
+
+                        <div style="margin-bottom: 24px; text-align: left;">
+                            <label style="display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 8px; font-weight: 500;">Your AdSense Publisher ID (Parents' ID if under 18)</label>
+                            <input type="text" id="adsense-pub-id" placeholder="e.g. pub-1234567890123456" style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 16px; border-radius: 8px; color: white; outline: none; font-family: 'Outfit', sans-serif; font-size: 0.95rem; transition: border-color 0.2s;" onfocus="this.style.borderColor='#00ff88'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                            <div style="font-size: 0.75rem; color: #777; margin-top: 6px;">We use this ID to show your ads on your videos.</div>
                         </div>
 
                         <button id="adsense-connect-btn" onclick="simulateAdSenseConnect(this)" style="width: 100%; padding: 16px; background: #00ff88; color: black; border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,255,136,0.3);">
@@ -2699,6 +2702,14 @@
             }
 
             function simulateAdSenseConnect(btn) {
+                const pubIdInput = document.getElementById('adsense-pub-id');
+                const pubId = pubIdInput ? pubIdInput.value.trim() : '';
+
+                if (!pubId || !pubId.startsWith('pub-')) {
+                    alert("Please enter a valid AdSense Publisher ID starting with 'pub-'. If you are under 18, please use your parents' AdSense ID here.");
+                    return;
+                }
+
                 if(btn.disabled) return;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Connecting securely...</span>';
@@ -2706,13 +2717,14 @@
                 btn.style.cursor = 'wait';
                 
                 setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-check-circle" style="font-size: 1.2rem;"></i> <span>Redirecting to setup...</span>';
+                    btn.innerHTML = '<i class="fas fa-check-circle" style="font-size: 1.2rem;"></i> <span>Account Linked!</span>';
                     btn.style.background = '#fff';
                     btn.style.color = '#000';
                     btn.style.boxShadow = '0 4px 15px rgba(255,255,255,0.3)';
                     btn.style.opacity = '1';
                     
                     setTimeout(() => {
+                        localStorage.setItem('vitox_adsense_pub', pubId);
                         window.location.href = "earn.html"; 
                     }, 1200);
                 }, 2500);

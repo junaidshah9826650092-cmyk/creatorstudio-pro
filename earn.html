@@ -253,7 +253,7 @@
             </div>
         </div>
 
-        <div class="apply-section">
+        <div class="apply-section" id="apply-section">
             <h2 style="margin-bottom: 12px;">Want to be notified when you're eligible?</h2>
             <p style="color: #aaa; margin-bottom: 32px;">We'll drop you an email when you reach these requirements.</p>
             <button class="notify-btn" id="notify-btn" onclick="requestReview()">Email me</button>
@@ -281,8 +281,29 @@
                 updateRing('sub-bar', 'sub-count', stats.subscribers, 1000);
                 updateRing('watch-bar', 'watch-count', stats.views || 0, 10000); // Changed logic to Views
 
-                // Check eligibility
-                if (stats.subscribers >= 1000 && (stats.watch_time || stats.views * 0.1) >= 4000) {
+                const isEligible = (stats.subscribers >= 1000 && (stats.watch_time || stats.views * 0.1) >= 4000);
+
+                // Check AdSense Linking
+                const adsensePub = localStorage.getItem('vitox_adsense_pub');
+                const applySection = document.getElementById('apply-section');
+
+                if (adsensePub) {
+                    if (isEligible) {
+                        applySection.innerHTML = `
+                            <h2 style="margin-bottom: 12px; color: #00ff88;"><i class="fas fa-check-circle"></i> Monetization Active</h2>
+                            <p style="color: #ccc; margin-bottom: 16px;">You are earning revenue from your videos.</p>
+                            <div style="display:inline-block; background: rgba(0,255,136,0.1); padding: 8px 16px; border-radius: 8px; font-weight: 700; color: #00ff88; border: 1px solid rgba(0,255,136,0.3);">
+                                <i class="fab fa-google"></i> Linked ID: ${adsensePub}
+                            </div>
+                        `;
+                    } else {
+                        applySection.innerHTML = `
+                            <h2 style="margin-bottom: 12px; color: #00ff88;"><i class="fas fa-link"></i> AdSense Account Linked!</h2>
+                            <p style="color: #aaa; margin-bottom: 16px;">Your account (<span style="color:#fff; font-weight:700;">${adsensePub}</span>) is securely linked. Meet the requirements above to start earning.</p>
+                            <button class="notify-btn" onclick="requestReview()">Email me when eligible</button>
+                        `;
+                    }
+                } else if (isEligible) {
                     const btn = document.getElementById('notify-btn');
                     btn.innerText = "Apply Now";
                     btn.style.background = "#fff";
