@@ -1177,6 +1177,10 @@
                                 <button onclick="askVitoxAI()" style="background: #ff0055; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">ASK AI</button>
                             </div>
                         ` : ''}
+                        <!-- Ad Transparency Label -->
+                        <div id="ad-info-box" style="margin-bottom: 12px; font-size: 0.75rem; font-weight: 600; opacity: 0.8; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-spinner fa-spin"></i> Checking monetization status...
+                        </div>
 
                         <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); position: relative;">
                             ${isLive ? '<div style="position: absolute; top: 20px; left: 20px; background: #ff0055; color: white; padding: 5px 12px; font-weight: 800; border-radius: 4px; z-index: 10; font-size: 0.8rem;">LIVE</div>' : ''}
@@ -1371,7 +1375,7 @@
                     if (snapLikeCount) snapLikeCount.innerText = stats.likes;
                     const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
                     if (snapLikeIcon) snapLikeIcon.style.color = stats.liked ? '#ff003c' : '#fff';
-
+ 
                     const subBtn = document.getElementById('sub-btn');
                     if (subBtn) {
                         subBtn.innerHTML = stats.subbed ? 'In Squad' : 'Join Squad';
@@ -1379,8 +1383,20 @@
                         subBtn.style.color = stats.subbed ? '#fff' : '#000';
                         subBtn.style.border = stats.subbed ? '1px solid rgba(255,255,255,0.1)' : 'none';
                     }
+
+                    // Dynamically Show Correct AdSense ID
+                    const adInfoBox = document.getElementById('ad-info-box');
+                    const OWNER_PUB = 'ca-pub-7142476355791158';
+                    if (adInfoBox) {
+                        if (stats.creator_adsense) {
+                            adInfoBox.innerHTML = `<i class="fas fa-certificate" style="color:#00ff88;"></i> Verified Creator Ad (100% Share): ${stats.creator_adsense}`;
+                            adInfoBox.style.color = '#00ff88';
+                        } else {
+                            adInfoBox.innerHTML = `<i class="fas fa-shield-halved" style="color:#ff0055;"></i> Platform Support Ad (Owner): ${OWNER_PUB}`;
+                            adInfoBox.style.color = '#ff0055';
+                        }
+                    }
                 } catch (e) {
-                    // Fallback for Snap views where stats might not fully load
                     console.log("Engagement stats sync skipped");
                 }
             }
@@ -2721,7 +2737,17 @@
                 btn.style.opacity = '0.7';
                 btn.style.cursor = 'wait';
                 
-                setTimeout(() => {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                
+                // Real Backend Sync
+                fetch('/api/user/adsense', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user ? user.email : '',
+                        adsense_pub: pubId
+                    })
+                }).then(() => {
                     btn.innerHTML = '<i class="fas fa-check-circle" style="font-size: 1.2rem;"></i> <span>Account Linked!</span>';
                     btn.style.background = '#fff';
                     btn.style.color = '#000';
@@ -2732,7 +2758,11 @@
                         localStorage.setItem('vitox_adsense_pub', pubId);
                         window.location.href = "earn.html"; 
                     }, 1200);
-                }, 2500);
+                }).catch(err => {
+                    console.error(err);
+                    alert("Sync failed, but linked locally.");
+                    window.location.href = "earn.html";
+                });
             }
             function shareVideo(videoId) {
                 const baseUrl = window.location.origin + window.location.pathname;

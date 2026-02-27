@@ -111,6 +111,7 @@ def init_db():
             role TEXT DEFAULT 'user',
             status TEXT DEFAULT 'active',
             is_verified_brand BOOLEAN DEFAULT FALSE,
+            adsense_pub TEXT,
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -231,8 +232,13 @@ def init_db():
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS category TEXT DEFAULT \'All\'')
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS moderation_status TEXT DEFAULT \'safe\'')
             cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT DEFAULT \'active\'')
+            cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS adsense_pub TEXT')
             conn.commit()
         except: conn.rollback()
+    
+    if not USE_POSTGRES:
+        try: cursor.execute('ALTER TABLE users ADD COLUMN adsense_pub TEXT')
+        except: pass
 
     conn.commit()
     conn.close()
@@ -798,35 +804,71 @@ def get_video_stats(video_id):
         comment_count = cursor.fetchone()['count']
         
         views = vid['views'] if vid else 0
-        likes = total_likes if total_likes > 0 else (vid['likes'] if vid else 0)
+        total_likes = vid['likes'] if vid else total_likes
         
+        # Creator AdSense Fallback Logic
+        creator_adsense = None
+        if channel_email:
+            cursor.execute('SELECT adsense_pub FROM users WHERE email = %s', (channel_email,))
+            u = cursor.fetchone()
+            if u: creator_adsense = u['adsense_pub']
+
+        conn.close()
+        return jsonify({
+            'views': views,
+            'likes': total_likes,
+            'liked': liked,
+            'subbed': subbed,
+            'subscribers': subs_count,
+            'comment_count': comment_count,
+            'creator_adsense': creator_adsense
+        })
     else:
         # SQLite
         vid = conn.execute('SELECT views, likes, user_email FROM videos WHERE id = ?', (video_id,)).fetchone()
         liked = conn.execute('SELECT 1 FROM video_likes WHERE user_email = ? AND video_id = ?', (email, str(video_id))).fetchone() is not None
         
-        channel_email = vid['user_email'] if vid else None
+        channel_email = vid['user_email'] if vid else channel_email_fallback
+        subs_count = 0
         if channel_email:
             subbed = conn.execute('SELECT 1 FROM subscriptions WHERE subscriber_email = ? AND channel_email = ?', (email, channel_email)).fetchone() is not None
             subs_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (channel_email,)).fetchone()[0]
-        else:
-            subs_count = 0
-
-        comment_count = conn.execute('SELECT COUNT(*) FROM comments WHERE video_id = ?', (str(video_id),)).fetchone()[0]
+        
         total_likes = conn.execute('SELECT COUNT(*) FROM video_likes WHERE video_id = ?', (str(video_id),)).fetchone()[0]
-        
-        views = vid['views'] if vid else 0
-        likes = total_likes if total_likes > 0 else (vid['likes'] if vid else 0)
-        
+        comment_count = conn.execute('SELECT COUNT(*) FROM comments WHERE video_id = ?', (str(video_id),)).fetchone()[0]
+
+        # Creator AdSense Fallback Logic (SQLite)
+        creator_adsense = None
+        if channel_email:
+            u = conn.execute('SELECT adsense_pub FROM users WHERE email = ?', (channel_email,)).fetchone()
+            if u: creator_adsense = u['adsense_pub']
+
+        conn.close()
+        return jsonify({
+            'views': vid['views'] if vid else 0,
+            'likes': total_likes,
+            'liked': liked,
+            'subbed': subbed,
+            'subscribers': subs_count,
+            'comment_count': comment_count,
+            'creator_adsense': creator_adsense
+        })
+
+@app.route('/api/user/adsense', methods=['POST'])
+def update_adsense():
+    data = request.json
+    email = data.get('email')
+    pub_id = data.get('adsense_pub')
+    
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET adsense_pub = %s WHERE email = %s', (pub_id, email))
+    else:
+        conn.execute('UPDATE users SET adsense_pub = ? WHERE email = ?', (pub_id, email))
+    conn.commit()
     conn.close()
-    return jsonify({
-        'views': views,
-        'likes': likes,
-        'liked': liked,
-        'subbed': subbed,
-        'subscribers': subs_count,
-        'comment_count': comment_count
-    })
+    return jsonify({'status': 'success'})
 
 # --- Admin/Stats Routes ---
 
