@@ -1031,12 +1031,12 @@
                 if (emptyState) {
                     emptyState.style.display = 'block';
                     emptyState.innerHTML = `
-                    < div style = "text-align: center; padding: 40px; color: var(--text-secondary);" >
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                         <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 20px;"></i>
                         <h2 style="color: var(--text-primary); margin-bottom: 10px;">${viewName}</h2>
                         <p>This feature is currently under development.</p>
                         <button onclick="loadVideos()" style="margin-top: 20px; padding: 10px 24px; background: var(--accent); border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: 600;">Back to Home</button>
-                    </div >
+                    </div>
                     `;
                 }
             }
@@ -1104,6 +1104,8 @@
 
                 // Increment View Logic
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
+                const isSelf = user && user.email === safeChannel;
+
                 if (safeId !== 'direct-url' && user) {
                     fetch('/api/video/view', {
                         method: 'POST',
@@ -1650,7 +1652,7 @@
 
             async function loadAdminHistory(targetEmail, isPolling = false) {
                 try {
-                    const res = await fetch(`/ api / admin / chat / history ? email = ${targetEmail} `);
+                    const res = await fetch(`/api/admin/chat/history?email=${targetEmail}`);
                     const msgs = await res.json();
                     const content = document.getElementById('admin-messages-content');
                     if (!content) return;
@@ -1663,7 +1665,7 @@
                         const isMe = m.sender_email === admin.email;
 
                         return `
-                    < div style = "align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 85%;" >
+                    <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 85%;">
                                 <div style="background: ${isSystem ? 'linear-gradient(135deg, #ffd700, #ffaa00)' : '#1a1a1a'}; 
                                             color: ${isSystem ? 'black' : 'white'}; 
                                             padding: 14px 18px; 
@@ -1679,7 +1681,7 @@
                                     ${isSystem ? '<span style="color:#ffd700; font-weight:900;">OFFICIAL</span>' : ''}
                                     ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </div>
-                            </div >
+                            </div>
                     `;
                     }).join('');
 
@@ -1747,7 +1749,7 @@
                     const posts = await res.json();
 
                     grid.innerHTML = `
-                    < div style = "padding: 40px; max-width: 800px; margin: 0 auto; width: 100%;" >
+                    <div style="padding: 40px; max-width: 800px; margin: 0 auto; width: 100%;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
                             <h1 style="font-weight: 800; font-size: 2.2rem; margin:0;">Squad Community</h1>
                             <button onclick="document.getElementById('create-post-modal').style.display='flex'" style="padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; font-weight: 700; cursor: pointer;">
@@ -1779,7 +1781,7 @@
                                 </div>
                             `).join('')}
                 </div>
-                    </div >
+                    </div>
                     `;
                 } catch (e) { console.error(e); }
             }
