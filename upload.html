@@ -119,19 +119,16 @@
                             <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 16px;">Set a thumbnail that
                                 stands out and draws viewers' attention. <a href="#"
                                     style="color: #3ea6ff; text-decoration: none;">Learn more</a></div>
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                <div class="thumb-picker active" onclick="selectThumbnail(this)">
-                                    <i class="fas fa-image"></i>
-                                    <span>Auto</span>
+                            <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+                                <div id="thumb-preview" class="thumb-preview" onclick="document.getElementById('thumb-input').click()" style="width: 100%; height: 180px; border: 2px dashed #333; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02); overflow: hidden;">
+                                    <i class="fas fa-image" style="font-size: 2rem; color: #444; margin-bottom: 12px;"></i>
+                                    <span style="font-size: 0.9rem; color: #888;">Drop or click to upload</span>
                                 </div>
-                                <div class="thumb-picker" onclick="selectThumbnail(this)">
-                                    <i class="fas fa-magic"></i>
-                                    <span>AI Gen</span>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn-ai" onclick="generateAIThumbnail(event)" style="flex: 1; background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.2); height: 44px; border-radius: 8px; font-weight: 700; cursor: pointer;"><i class="fas fa-wand-magic-sparkles"></i> AI Thumbnail Maker</button>
+                                    <button class="btn-ai" onclick="document.getElementById('thumb-input').click()" style="padding: 0 20px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #333; border-radius: 8px; cursor: pointer;"><i class="fas fa-upload"></i></button>
                                 </div>
-                                <div class="thumb-picker" onclick="selectThumbnail(this)">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Upload</span>
-                                </div>
+                                <input type="file" id="thumb-input" hidden accept="image/*" onchange="previewThumb(event)">
                             </div>
                         </div>
                     </div>
@@ -402,6 +399,35 @@
             finally { btn.innerHTML = '<i class="fas fa-chart-line"></i> AI Viral Predictor'; }
         }
 
+        async function generateAIThumbnail(event) {
+            event.preventDefault();
+            const btn = event.currentTarget;
+            const preview = document.getElementById('thumb-preview');
+            const title = document.getElementById('video-title').value;
+            
+            if(!title) { alert("Please enter a title first!"); return; }
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            preview.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i><span style="margin-top:10px;">AI is creating your masterpiece...</span>';
+
+            try {
+                const res = await fetch('/api/ai/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: title, type: 'thumbnail' })
+                });
+                const data = await res.json();
+                
+                preview.innerHTML = `<img src="${data.url}" style="width:100%; height:100%; object-fit:cover;">`;
+                preview.dataset.url = data.url; // Save for final upload
+                
+            } catch (e) {
+                preview.innerHTML = "AI Generation failed.";
+            } finally {
+                btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> AI Thumbnail Maker';
+            }
+        }
+
         async function handleUpload() {
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             if (!user) { alert("Please login first"); location.href = 'login.html'; return; }
@@ -457,14 +483,39 @@
             }
         }
 
-        async function saveToDB(videoUrl, thumbUrl) {
+        async function saveToDB(videoCloudUrl, cloudThumbUrl) { // Renamed params to avoid conflict
             const user = JSON.parse(localStorage.getItem('vitox_user'));
             const title = document.getElementById('video-title').value;
             const desc = document.getElementById('video-desc').value;
-            statusMsg.innerText = "SYNCING WITH DASHBOARD...";
-
-            const videoType = document.querySelector('input[name="video_type"]:checked').value; // Get selected type
+            const videoType = document.querySelector('input[name="video_type"]:checked').value;
             const category = document.getElementById('video-category').value;
+            const thumbPreview = document.getElementById('thumb-preview');
+            
+            let finalThumbUrl = cloudThumbUrl; // Start with Cloudinary-generated thumb
+
+            // Check if AI generated thumb or uploaded thumb was selected
+            if (thumbPreview.dataset.url) { // AI generated thumbnail
+                finalThumbUrl = thumbPreview.dataset.url;
+            } else { // User uploaded thumbnail
+                const thumbFile = document.getElementById('thumb-input').files[0];
+                if (thumbFile) {
+                    statusMsg.innerText = "UPLOADING THUMBNAIL...";
+                    const formData = new FormData();
+                    formData.append('image', thumbFile);
+                    const res = await fetch('/api/image/upload', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.url) {
+                        finalThumbUrl = data.url;
+                    } else {
+                        console.error("Thumbnail upload failed:", data.message);
+                        statusMsg.innerText = "THUMBNAIL UPLOAD FAILED: " + (data.message || "Unknown error");
+                        nextBtn.disabled = false;
+                        return;
+                    }
+                }
+            }
+
+            statusMsg.innerText = "SYNCING WITH DASHBOARD...";
 
             const dbRes = await fetch('/api/video/upload', {
                 method: 'POST',
@@ -473,8 +524,8 @@
                     email: user.email,
                     title: title,
                     description: desc,
-                    video_url: videoUrl,
-                    thumbnail_url: thumbUrl,
+                    video_url: videoCloudUrl, // Use the video URL from Cloudinary
+                    thumbnail_url: finalThumbUrl, // Use the determined final thumbnail URL
                     type: videoType,
                     category: category
                 })

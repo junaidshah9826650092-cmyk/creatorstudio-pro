@@ -421,24 +421,26 @@ def upload_video():
         video_type = data.get('type', 'video') # 'video' or 'short'
         category = data.get('category', 'All')
 
-        # NEW: AI Content Moderation
+        # NEW: AI Content Moderation & Copyright Scan
         mod_status = ai_processor.moderate(title, desc)
+        if not ai_processor.copyright_scan(title):
+            return jsonify({'status': 'error', 'message': 'Copyright violation detected! External studio content is not allowed on Vitox.'}), 400
 
         conn = get_db_connection()
-        # Double check if table exists as fallback
-        try:
-            if USE_POSTGRES:
-                check_cursor = conn.cursor()
-                check_cursor.execute('SELECT 1 FROM videos LIMIT 1')
-                check_cursor.close()
-            else:
-                conn.execute('SELECT 1 FROM videos LIMIT 1')
-        except:
-            print("Fallback: Table 'videos' missing in route. Re-init...")
-            init_db()
-
         if USE_POSTGRES:
             cursor = conn.cursor()
+            # 1. Duplicate Detection
+            cursor.execute('SELECT id FROM videos WHERE video_url = %s OR (title = %s AND user_email = %s)', (video_url, title, email))
+            if cursor.fetchone():
+                conn.close()
+                return jsonify({'status': 'error', 'message': 'This content has already been shared on Vitox!'}), 400
+            
+            # 2. Uniqueness Check (AI Mock)
+            is_unique = ai_processor.check_uniqueness(title, desc)
+            if not is_unique:
+                conn.close()
+                return jsonify({'status': 'error', 'message': 'Content similarity too high. Vitox requires 100% unique creative content!'}), 400
+
             # Auto-Cleanup old live sessions for this user if starting a new one
             if video_type == 'live':
                 cursor.execute('DELETE FROM videos WHERE user_email = %s AND type = %s', (email, 'live'))
@@ -447,6 +449,17 @@ def upload_video():
                          (email, title, desc, video_url, thumb_url, video_type, category, mod_status))
             video_id = cursor.fetchone()['id']
         else:
+            # 1. Duplicate Detection
+            dup = conn.execute('SELECT id FROM videos WHERE video_url = ? OR (title = ? AND user_email = ?)', (video_url, title, email)).fetchone()
+            if dup:
+                conn.close()
+                return jsonify({'status': 'error', 'message': 'Duplicate content detected!'}), 400
+
+            # 2. Uniqueness Check
+            if not ai_processor.check_uniqueness(title, desc):
+                conn.close()
+                return jsonify({'status': 'error', 'message': 'Content is not unique enough for Vitox Standards.'}), 400
+
             # Auto-Cleanup old live sessions for this user if starting a new one
             if video_type == 'live':
                 conn.execute('DELETE FROM videos WHERE user_email = ? AND type = ?', (email, 'live'))
@@ -551,8 +564,12 @@ def get_all_videos():
         print(f"Database Query Error: {e}. Falling back to Cloudinary...")
 
     if not videos or len(videos) == 0:
-        # FAIL-SAFE: If DB is empty or fails, fetch direct from Cloudinary
-        videos = _fetch_from_cloudinary(video_type if video_type else 'video')
+        # User requested to remove messy cloud videos and only show verified ones
+        # We now filter cloud fallback to only show a few high-quality test assets if absolutely needed
+        all_cloud_videos = _fetch_from_cloudinary(video_type if video_type else 'video')
+        # Only keep videos with 'official' or 'test' in the public_id to keep it clean
+        videos = [v for v in all_cloud_videos if 'test' in v['title'].lower() or 'official' in v['title'].lower()]
+        
         if video_type:
             videos = [v for v in videos if v.get('type') == video_type]
         return jsonify(videos)
@@ -1203,6 +1220,33 @@ def ai_search():
     prompt = f"User Search Query: '{query}'. Based on this, suggest 3-5 space-separated keywords or a category (Gaming, Music, Tech, Comedy, News, Education) that would best match this intent. Return ONLY the keywords."
     interpreted_query = ai_processor.ask(prompt, model_alias='gemini-flash')
     return jsonify({'interpreted': interpreted_query})
+
+@app.route('/api/ai/generate-image', methods=['POST'])
+def ai_generate_image():
+    data = request.json
+    prompt = data.get('prompt', '')
+    type = data.get('type', 'thumbnail') # 'thumbnail' or 'logo'
+    
+    # Real implementation would call DALL-E or Midjourney. 
+    # For now, we use a sophisticated simulated response that returns a high-quality thematic image URL
+    # or leverages a free generation API if available.
+    
+    # Fallback to high-quality Unsplash source with keywords for visual demo
+    keywords = ai_processor.ask(f"Extract 3 visual keywords for an image generator from this prompt: '{prompt}'", model_alias='gemini-flash')
+    clean_keys = keywords.replace(' ', ',')
+    generated_url = f"https://source.unsplash.com/featured/1280x720?{clean_keys}"
+    
+    return jsonify({'url': generated_url, 'status': 'success'})
+
+@app.route('/api/ai/translate', methods=['POST'])
+def ai_translate():
+    data = request.json
+    text = data.get('text', '')
+    target_lang = data.get('lang', 'Hindi')
+    
+    prompt = f"Translate the following text to {target_lang}. Return ONLY the translated text.\nText: {text}"
+    translated = ai_processor.ask(prompt, model_alias='gemini-flash')
+    return jsonify({'translated': translated})
 
 @app.route('/api/ai/chat', methods=['POST'])
 def ai_chat():

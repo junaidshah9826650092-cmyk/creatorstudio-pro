@@ -1,18 +1,20 @@
 :root {
-  --bg-main: #0f0f0f;
-  --bg-header: rgba(15, 15, 15, 0.9);
-  --bg-sidebar: #0f0f0f;
+  --bg-main: #06060c;
+  --bg-header: rgba(10, 10, 20, 0.85);
+  --bg-sidebar: rgba(12, 12, 25, 0.9);
   --accent: #ff0055;
-  --accent-glow: rgba(255, 0, 85, 0.3);
-  --text-primary: #ffffff;
-  --text-secondary: #aaaaaa;
-  --border: rgba(255, 255, 255, 0.1);
-  --glass: rgba(255, 255, 255, 0.05);
-  --hover: rgba(255, 255, 255, 0.1);
-  --card-bg: transparent;
-  --chip-bg: #222;
-  --chip-active-bg: #f2f2f2;
-  --chip-active-text: #0f0f0f;
+  --accent-secondary: #7000ff;
+  --accent-glow: rgba(255, 0, 85, 0.4);
+  --text-primary: #f0f0f5;
+  --text-secondary: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-stroke: rgba(255, 255, 255, 0.08);
+  --hover: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(20, 20, 35, 0.4);
+  --chip-bg: #1a1a2e;
+  --chip-active-bg: #fff;
+  --chip-active-text: #06060c;
 }
 
 * {
@@ -25,10 +27,14 @@
 
 body {
   background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(112, 0, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(255, 0, 85, 0.1) 0px, transparent 50%);
   color: var(--text-primary);
   overflow-x: hidden;
   letter-spacing: -0.01em;
   position: relative;
+  min-height: 100vh;
 }
 
 @keyframes haptic-pulse {
@@ -274,14 +280,15 @@ button {
   right: 0;
   height: 64px;
   background: var(--bg-header);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   z-index: 2000;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-stroke);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .logo {
@@ -419,12 +426,13 @@ button {
 .sidebar {
   width: 240px;
   background: var(--bg-sidebar);
+  backdrop-filter: blur(15px);
   padding: 12px 0;
   position: fixed;
   height: calc(100vh - 64px);
   overflow-y: auto;
-  border-right: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-right: 1px solid var(--glass-stroke);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
 }
 
@@ -524,19 +532,22 @@ button {
 /* Video Card Overhaul */
 .video-card {
   background: var(--card-bg);
-  border-radius: 16px;
+  backdrop-filter: blur(5px);
+  border-radius: 20px;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-stroke);
   animation: fade-up 0.6s ease-out backwards;
+  position: relative;
 }
 
 .video-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  border-color: rgba(255, 0, 60, 0.3);
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.6),
-    0 0 20px rgba(255, 0, 60, 0.1);
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--accent);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(255, 0, 85, 0.15);
+  background: rgba(30,30,50,0.6);
 }
 
 .thumbnail-wrapper {

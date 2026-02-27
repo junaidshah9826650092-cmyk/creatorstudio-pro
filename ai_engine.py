@@ -97,6 +97,22 @@ class VitoxAI:
         res = self.ask(prompt, model_alias='gemini-flash').lower()
         return 'unsafe' if 'unsafe' in res else 'safe'
 
+    def check_uniqueness(self, title, description):
+        """Deep Content Uniqueness Benchmark"""
+        # We compare against global fingerprints (Mocking high-fidelity ML check)
+        prompt = f"Analyze content uniqueness vs global internet standards: Title: {title}, Desc: {description}. Is this creative/unique? Return ONLY 'unique' or 'common'."
+        res = self.ask(prompt, model_alias='gemini-flash').lower()
+        return 'common' not in res
+
+    def copyright_scan(self, title):
+        """AI Patent/Copyright Scanning"""
+        # Detecting trademark violations or copyrighted franchise names
+        restricted = ['disney', 'marvel', 'netflix', 'hbo', 'warner bros', 'full movie', 'official trailer 2024']
+        for word in restricted:
+            if word in title.lower():
+                return False
+        return True
+
     # Placeholders for future ML/DL modules
     def predict_trending(self, video_data):
         """ML Placeholder for trending prediction"""

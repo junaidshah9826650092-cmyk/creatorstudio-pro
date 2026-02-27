@@ -73,8 +73,7 @@
                 </button>
                 <div class="create-dropdown" id="create-dropdown">
                     <a href="upload.html?v=8.0"><i class="fas fa-upload"></i> Upload video</a>
-                    <a href="#" onclick="openGoLiveModal(); return false;"><i class="fas fa-tower-broadcast"></i> Vitox
-                        Live</a>
+                    <a href="#" onclick="openGoLiveModal(); return false;"><i class="fas fa-tower-broadcast"></i> Vitox Broadcast</a>
                     <a href="#"
                         onclick="document.getElementById('create-post-modal').style.display='flex'; toggleCreateMenu(); return false;"><i
                             class="fas fa-pen-to-square"></i> Create post</a>
@@ -119,7 +118,7 @@
                     <span>Feed</span></a>
                 <a href="#" class="nav-item" onclick="filterByCategory('Live'); return false;"><i
                         class="fas fa-tower-broadcast" style="color:#ff0055;"></i>
-                    <span>Live</span></a>
+                    <span>Pulse</span></a>
                 <a href="#" class="nav-item" onclick="loadSnapsView(); return false;"><i class="fas fa-play-circle"></i>
                     <span>V-Snaps</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Squad'); return false;"><i
@@ -141,7 +140,7 @@
                     <span>Bookmarks</span></a>
                 <a href="#" class="nav-item" onclick="loadLikedVideosView(); return false;"><i
                         class="fas fa-thumbs-up"></i> <span>Favorites</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Creator Hub'); return false;"><i
+                <a href="#" class="nav-item" onclick="loadView('Broadcast Studio'); return false;"><i
                         class="fas fa-video"></i> <span>Creator Hub</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Vault'); return false;"><i class="fas fa-download"></i>
                     <span>Vault</span></a>
@@ -167,7 +166,7 @@
                 <button class="chip active" onclick="filterByCategory('All')">All</button>
                 <button class="chip" onclick="filterByCategory('Music')">Music</button>
                 <button class="chip" onclick="filterByCategory('Gaming')">Gaming</button>
-                <button class="chip" onclick="filterByCategory('Live')">Live</button>
+                <button class="chip" onclick="filterByCategory('Live')">Pulse</button>
                 <button class="chip" onclick="filterByCategory('Tech')">Tech</button>
                 <button class="chip" onclick="filterByCategory('News')">News</button>
                 <button class="chip" onclick="filterByCategory('Comedy')">Comedy</button>
@@ -896,7 +895,7 @@
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <div style="display: flex; align-items: center; gap: 8px; background: #ff0000; padding: 4px 12px; border-radius: 4px; font-weight: 800; font-size: 0.8rem; box-shadow: 0 0 15px rgba(255,0,0,0.3);">
                                     <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse-red 1s infinite;"></div>
-                                    LIVE
+                                    RADIATING
                                 </div>
                                 <div id="stream-duration" style="font-family: monospace; font-size: 1.1rem; color: #fff; font-weight: 600;">00:00:00</div>
                                 <div style="display: flex; gap: 16px; color: #aaa; font-size: 0.9rem;">
@@ -930,7 +929,7 @@
                                         <div style="width: 120px; height: 120px; border: 4px solid #ff0055; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,0,85,0.4);">
                                             <span id="countdown-timer" style="font-size: 3.5rem; font-weight: 900; color: #ff0055;">10</span>
                                         </div>
-                                        <h2 style="font-weight: 700; color: white; margin: 0;">Broadcast starting...</h2>
+                                        <h2 style="font-weight: 700; color: white; margin: 0;">Initializing Studio Pulse...</h2>
                                     </div>
 
                                     <!-- Bottom Control Bar -->
@@ -954,7 +953,7 @@
                             <!-- Right: Chat & Activities -->
                             <div style="width: 400px; background: #0a0a0a; display: flex; flex-direction: column;">
                                 <div style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-weight: 800; letter-spacing: 0.5px; color: #eee;">LIVE CHAT</span>
+                                    <span style="font-weight: 800; letter-spacing: 0.5px; color: #eee;">PULSE CHAT</span>
                                     <span style="font-size: 0.75rem; color: #666;">Top Messages</span>
                                 </div>
                                 <div id="live-chat-content" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
@@ -999,7 +998,7 @@
 
                     grid.innerHTML = `
                     < div style = "padding: 40px; color: white; width: 100%;" >
-                        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 30px;">Creator Hub</h1>
+                        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 30px;">Broadcast Studio</h1>
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
                             <!-- Analytics Card -->
@@ -1035,9 +1034,28 @@
                             <!-- Go Live Card -->
                             <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 20px;">
                                 <i class="fas fa-tower-broadcast" style="font-size: 2rem; color: #ff0055; margin-bottom: 20px;"></i>
-                                <h3 style="margin: 0 0 10px 0;">Go Live</h3>
+                                <h3 style="margin: 0 0 10px 0;">Radiate Now</h3>
                                 <p style="color: #aaa; margin-bottom: 20px;">Stream live to your Squad. Real-time interaction with your viewers.</p>
-                                <button onclick="openGoLiveModal()" style="padding: 10px 20px; background: #ff0055; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Start Stream</button>
+                                <button onclick="openGoLiveModal()" style="padding: 10px 20px; background: #ff0055; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Launch Broadcast</button>
+                            </div>
+
+                            <!-- NEW: AI Logo Maker Card -->
+                            <div id="logo-maker-card" style="background: linear-gradient(135deg, rgba(255,0,85,0.1), rgba(255,85,0,0.1)); border: 1px solid rgba(255,0,85,0.2); padding: 30px; border-radius: 20px; grid-column: span 2;">
+                                <div style="display: flex; gap: 30px; align-items: center;">
+                                    <div id="ai-logo-preview" style="width: 120px; height: 120px; border-radius: 50%; background: #111; border: 2px dashed #333; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                                        <i class="fas fa-robot" style="font-size: 2rem; color: #333;"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h3 style="margin: 0 0 10px 0; display: flex; align-items: center; gap: 10px;">
+                                            AI Logo Maker <span style="font-size: 0.7rem; background: #ff0055; padding: 2px 8px; border-radius: 20px;">NEW</span>
+                                        </h3>
+                                        <p style="color: #aaa; margin-bottom: 15px;">Generate a professional channel logo with AI. Type your style below.</p>
+                                        <div style="display: flex; gap: 10px;">
+                                            <input type="text" id="logo-prompt" placeholder="e.g. Minimalist gaming phoenix, Red & Black" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 8px; padding: 10px; color: white; outline: none;">
+                                            <button onclick="generateAILogo()" style="background: #ff0055; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">Generate</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div >
@@ -1052,16 +1070,103 @@
 
                 // Show Custom Message for other views
                 if (emptyState) {
-                    emptyState.style.display = 'block';
-                    emptyState.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                        <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 20px;"></i>
-                        <h2 style="color: var(--text-primary); margin-bottom: 10px;">${viewName}</h2>
-                        <p>This feature is currently under development.</p>
-                        <button onclick="loadVideos()" style="margin-top: 20px; padding: 10px 24px; background: var(--accent); border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: 600;">Back to Home</button>
-                    </div>
-                    `;
+                    const isPersonalView = ['Rewind', 'Bookmarks', 'Collections', 'Vault'].includes(viewName);
+                    
+                    if (isPersonalView) {
+                        renderPersonalView(viewName);
+                    } else {
+                        emptyState.style.display = 'block';
+                        emptyState.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                            <h2 style="color: var(--text-primary); margin-bottom: 10px;">${viewName}</h2>
+                            <p>This feature is currently under development.</p>
+                            <button onclick="loadVideos()" style="margin-top: 20px; padding: 10px 24px; background: var(--accent); border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: 600;">Back to Home</button>
+                        </div>
+                        `;
+                    }
                 }
+            }
+
+            function renderPersonalView(viewName) {
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
+                if (emptyState) emptyState.style.display = 'none';
+                
+                let items = [];
+                let icon = '';
+                let color = '';
+                
+                if (viewName === 'Rewind') {
+                    items = JSON.parse(localStorage.getItem('vitox_history') || '[]');
+                    icon = 'fas fa-history';
+                    color = '#ff0055';
+                } else if (viewName === 'Bookmarks') {
+                    items = JSON.parse(localStorage.getItem('vitox_bookmarks') || '[]');
+                    icon = 'fas fa-clock';
+                    color = '#00ff88';
+                } else if (viewName === 'Vault') {
+                    items = JSON.parse(localStorage.getItem('vitox_vault') || '[]');
+                    icon = 'fas fa-download';
+                    color = '#0088ff';
+                } else if (viewName === 'Collections') {
+                    items = []; // Future playlist support
+                    icon = 'fas fa-list';
+                    color = '#ffd700';
+                } else {
+                    items = [];
+                    icon = 'fas fa-folder';
+                }
+
+                if (items.length === 0) {
+                    grid.innerHTML = `
+                        <div style="text-align: center; padding: 100px 0; color: #666; width: 100%;">
+                            <i class="${icon}" style="font-size: 4rem; margin-bottom: 20px; color: ${color}; opacity: 0.3;"></i>
+                            <h2 style="color: white; margin-bottom: 10px;">No ${viewName} yet</h2>
+                            <p>Videos you watch or save will appear here.</p>
+                            <button onclick="loadVideos()" style="margin-top: 20px; padding: 10px 24px; background: transparent; border: 1px solid #444; color: white; border-radius: 30px; cursor: pointer;">Discover Content</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = `
+                    <div style="padding: 24px; width: 100%;">
+                        <h1 style="font-size: 2rem; font-weight: 800; color: white; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
+                            <i class="${icon}" style="color: ${color}"></i> ${viewName}
+                        </h1>
+                        <div class="video-grid">
+                            ${items.map(v => `
+                                <div class="video-card" onclick="playVideo('${v.url}', '${v.title.replace(/'/g, "\\'")}', '${v.user_email}', ${v.views || 0}, '${v.timestamp}', '', '${v.id}')">
+                                    <div class="video-thumb-container">
+                                        <video src="${v.url}" muted></video>
+                                    </div>
+                                    <div class="video-info">
+                                        <h3 class="video-title">${v.title}</h3>
+                                        <div class="video-meta">${v.user_email}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function toggleBookmark(id, url, title, user_email) {
+                let bookmarks = JSON.parse(localStorage.getItem('vitox_bookmarks') || '[]');
+                const isBookmarked = bookmarks.some(b => b.id === id);
+                
+                if (isBookmarked) {
+                    bookmarks = bookmarks.filter(b => b.id !== id);
+                    showToast("Removed from Bookmarks");
+                } else {
+                    bookmarks.push({ id, url, title, user_email, timestamp: new Date().toISOString() });
+                    showToast("Saved to Bookmarks");
+                }
+                
+                localStorage.setItem('vitox_bookmarks', JSON.stringify(bookmarks));
+                const btn = document.getElementById('bookmark-btn');
+                if (btn) btn.innerHTML = isBookmarked ? '<i class="fas fa-clock"></i> Save' : '<i class="fas fa-check" style="color: #00ff88;"></i> Saved';
             }
 
             function performSearch() {
@@ -1140,6 +1245,49 @@
                 recognition.onerror = () => showToast("Voice input failed.");
             }
 
+            async function translateDescription(videoId, lang) {
+                const descEl = document.getElementById('video-desc-text');
+                const originalText = descEl ? descEl.innerText : "";
+                if(!descEl) return;
+                
+                descEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
+                
+                try {
+                    const res = await fetch('/api/ai/translate', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ text: originalText, lang: lang })
+                    });
+                    const data = await res.json();
+                    descEl.innerText = data.translated;
+                } catch (e) {
+                    descEl.innerText = originalText;
+                    showToast("Translation failed");
+                }
+            }
+
+            async function generateAILogo() {
+                const prompt = document.getElementById('logo-prompt').value;
+                const preview = document.getElementById('ai-logo-preview');
+                if(!prompt) return alert("Please describe your logo style!");
+                
+                preview.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #ff0055;"></i>';
+                
+                try {
+                    const res = await fetch('/api/ai/generate-image', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ prompt: prompt, type: 'logo' })
+                    });
+                    const data = await res.json();
+                    preview.innerHTML = `<img src="${data.url}" style="width:100%; height:100%; object-fit:cover; border-radius: 50%;">`;
+                    showToast("Logo Generated! Right click to save.");
+                } catch (e) {
+                    preview.innerHTML = '<i class="fas fa-robot" style="font-size: 2rem;"></i>';
+                    showToast("Logo generation failed");
+                }
+            }
+
             function showToast(msg) {
                 const container = document.getElementById('toast-container');
                 if (!container) return alert(msg);
@@ -1167,6 +1315,12 @@
                     // Use a placeholder public stream for the simulation if it's the specific placeholder flag
                     if (url === 'live-placeholder') url = 'https://res.cloudinary.com/demo/video/upload/sp_auto/dog.mp4'; // Placeholder stock video
                 }
+
+                // NEW: Save to History
+                let history = JSON.parse(localStorage.getItem('vitox_history') || '[]');
+                const historyItem = { id: safeId, url, title: safeTitle, user_email: safeChannel, views: initialViews, timestamp: new Date().toISOString() };
+                history = [historyItem, ...history.filter(h => h.id !== safeId)].slice(0, 50);
+                localStorage.setItem('vitox_history', JSON.stringify(history));
 
                 // Increment View Logic
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
@@ -1224,8 +1378,7 @@
                             </div>
                         ` : ''}
                         <!-- Ad Transparency Label -->
-                        <div id="ad-info-box" style="margin-bottom: 12px; font-size: 0.75rem; font-weight: 600; opacity: 0.8; display: flex; align-items: center; gap: 6px;">
-                            <i class="fas fa-spinner fa-spin"></i> Checking monetization status...
+                        <div id="ad-info-box" style="margin-bottom: 12px; font-size: 0.7rem; font-weight: 700; opacity: 0.6; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
                         </div>
 
                         <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); position: relative;">
@@ -1272,12 +1425,21 @@
                                     <button class="action-btn secondary" onclick="shareVideo('${safeId}')" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
                                         <i class="fas fa-share"></i> Share
                                     </button>
+                                    <button class="action-btn secondary" id="bookmark-btn" onclick="toggleBookmark('${safeId}', '${url}', '${safeTitle}', '${safeChannel}')" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                                        <i class="fas fa-clock"></i> Save
+                                    </button>
                                 </div>
                             </div>
 
                                 <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; margin-top: 24px; font-size: 0.95rem;">
-                                    <div style="font-weight: 800; margin-bottom: 10px; color: #fff;"><span id="view-count">${initialViews}</span> views • Published on ${timeAgo}</div>
-                                    <p style="color: #ddd; margin: 0; white-space: pre-wrap; line-height: 1.6;">${displayDesc}</p>
+                                    <div style="font-weight: 800; margin-bottom: 10px; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                                        <span><span id="view-count">${initialViews}</span> views • Published on ${timeAgo}</span>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button onclick="translateDescription('${safeId}', 'Hindi')" style="font-size: 0.7rem; background: rgba(255,0,85,0.1); color: #ff0055; border: 1px solid rgba(255,0,85,0.2); padding: 4px 8px; border-radius: 4px; cursor: pointer;">Hindi</button>
+                                            <button onclick="translateDescription('${safeId}', 'English')" style="font-size: 0.7rem; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; cursor: pointer;">EN</button>
+                                        </div>
+                                    </div>
+                                    <p id="video-desc-text" style="color: #ddd; margin: 0; white-space: pre-wrap; line-height: 1.6;">${displayDesc}</p>
                                 </div>
 
                                 <!-- Comments Section -->
@@ -1430,20 +1592,19 @@
                         subBtn.style.border = stats.subbed ? '1px solid rgba(255,255,255,0.1)' : 'none';
                     }
 
-                    // Dynamically Show Correct AdSense ID
+                    // Dynamically Show Correct AdSense ID (Technical IDs hidden for users)
                     const adInfoBox = document.getElementById('ad-info-box');
-                    const OWNER_PUB = 'ca-pub-7142476355791158';
                     if (adInfoBox) {
                         if (stats.creator_adsense) {
-                            adInfoBox.innerHTML = `<i class="fas fa-certificate" style="color:#00ff88;"></i> Verified Creator Ad (100% Share): ${stats.creator_adsense}`;
+                            adInfoBox.innerHTML = `<i class="fas fa-certificate" style="color:#00ff88;"></i> Verified Creator Content`;
                             adInfoBox.style.color = '#00ff88';
                         } else {
-                            adInfoBox.innerHTML = `<i class="fas fa-shield-halved" style="color:#ff0055;"></i> Platform Support Ad (Owner): ${OWNER_PUB}`;
+                            adInfoBox.innerHTML = `<i class="fas fa-ad" style="color:#ff0055;"></i> Sponsored`;
                             adInfoBox.style.color = '#ff0055';
                         }
                     }
                 } catch (e) {
-                    console.log("Engagement stats sync skipped");
+                    // Silently fail engagement stats sync
                 }
             }
 
@@ -2552,8 +2713,6 @@
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 const payload = JSON.parse(window.atob(base64));
 
-                console.log("Syncing with Full Stack Backend...");
-
                 // Sync with Python Backend
                 try {
                     const res = await fetch('/api/user', {
@@ -2567,15 +2726,9 @@
                     });
 
                     const dbUser = await res.json();
-
-                    // Save complete backend user profile
                     localStorage.setItem('vitox_user', JSON.stringify(dbUser));
-
                     updateLoginUI(dbUser);
-                    alert(`Welcome back, ${dbUser.name}!`);
                 } catch (error) {
-                    console.error("Backend Sync Failed:", error);
-                    // Fallback to local only if server is down
                     localStorage.setItem('vitox_user', JSON.stringify(payload));
                     updateLoginUI(payload);
                 }
@@ -2583,7 +2736,6 @@
 
             function updateLoginUI(user) {
                 if (user) {
-                    console.log("Updating UI for:", user.name);
                     const loginContainer = document.getElementById('login-container');
                     const avatar = document.getElementById('user-avatar');
 
