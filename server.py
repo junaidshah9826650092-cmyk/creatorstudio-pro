@@ -10,6 +10,45 @@ from psycopg2.extras import RealDictCursor
 import requests
 import base64
 
+# --- VITOX RULE ENFORCEMENT CONFIG ---
+VITOX_RULES = {
+    'RED-01': {'category': 'Illegal', 'severity': 'critical', 'penalty': 'permanent_ban', 'desc': 'Terrorism/Gore/Violence'},
+    'RED-02': {'category': 'Illegal', 'severity': 'critical', 'penalty': 'permanent_ban', 'desc': 'Child Safety Violation'},
+    'RED-03': {'category': 'Illegal', 'severity': 'critical', 'penalty': 'legal_report', 'desc': 'Illegal Drugs/Weapons'},
+    'CR-01':  {'category': 'Copyright', 'severity': 'high', 'penalty': 'video_deletion', 'desc': 'Copyright Theft'},
+    'SEC-01': {'category': 'Security', 'severity': 'high', 'penalty': 'temporary_ban', 'desc': 'System Abuse/Hacking'},
+    'COM-01': {'category': 'Community', 'severity': 'medium', 'penalty': 'warning', 'desc': 'Hate Speech/Harassment'},
+    'SPM-01': {'category': 'Spam', 'severity': 'low', 'penalty': 'comment_lock', 'desc': 'Mass Spamming/Bots'}
+}
+
+DANGER_WORDS = ['terrorism', 'drugs', 'murder', 'kill', 'suicide', 'bomb', 'hacking', 'porn', 'adult']
+
+# Central Rule Enforcement Logic
+def enforce_automated_rules(target_id, target_type, content, email):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    content_lower = content.lower()
+    
+    for word in DANGER_WORDS:
+        if word in content_lower:
+            rule = VITOX_RULES['RED-01']
+            if USE_POSTGRES:
+                cursor.execute('INSERT INTO reports (target_id, target_type, reporter_email, rule_id, status, severity, penalty_applied) VALUES (%s, %s, %s, %s, %s, %s, %s)', 
+                               (str(target_id), target_type, 'SYSTEM_AI', 'RED-01', 'auto_flagged', rule['severity'], rule['penalty']))
+                if rule['penalty'] == 'permanent_ban':
+                    cursor.execute('UPDATE users SET status = %s WHERE email = %s', ('banned', email))
+            else:
+                cursor.execute('INSERT INTO reports (target_id, target_type, reporter_email, rule_id, status, severity, penalty_applied) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                               (str(target_id), target_type, 'SYSTEM_AI', 'RED-01', 'auto_flagged', rule['severity'], rule['penalty']))
+                if rule['penalty'] == 'permanent_ban':
+                    cursor.execute('UPDATE users SET status = ? WHERE email = ?', ('banned', email))
+            conn.commit()
+            conn.close()
+            return True
+            
+    conn.close()
+    return False
+
 # Security & CSRF Protection
 def admin_required(f):
     from functools import wraps
@@ -100,11 +139,6 @@ talisman = Talisman(
     force_https=is_prod,
     strict_transport_security=False 
 )
-
-@app.route('/robots.txt')
-def robots_txt_force():
-    """HIGH PRIORITY: Guarantees Google always sees the ALLOW rule."""
-    return "User-agent: *\nAllow: /\nSitemap: https://creatorstudio.pro/sitemap.xml", 200, {'Content-Type': 'text/plain'}
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
@@ -290,6 +324,22 @@ def init_db():
     ''')
 
 
+    # Rule Enforcement & Reports Table
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS reports (
+            id {id_type},
+            target_id TEXT NOT NULL,
+            target_type TEXT NOT NULL, 
+            reporter_email TEXT,
+            rule_id TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            severity TEXT DEFAULT 'low',
+            penalty_applied TEXT DEFAULT 'none',
+            notes TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
     if not USE_POSTGRES:
         # SQLite migrations
         try: cursor.execute('ALTER TABLE transactions ADD COLUMN status TEXT DEFAULT "completed"')
@@ -301,6 +351,8 @@ def init_db():
         try: cursor.execute('ALTER TABLE users ADD COLUMN status TEXT DEFAULT "active"')
         except: pass
         try: cursor.execute('ALTER TABLE videos ADD COLUMN moderation_status TEXT DEFAULT "safe"')
+        except: pass
+        try: cursor.execute('ALTER TABLE videos ADD COLUMN category TEXT DEFAULT "All"')
         except: pass
         try: cursor.execute('ALTER TABLE users ADD COLUMN adsense_pub TEXT')
         except: pass
@@ -395,7 +447,7 @@ def sitemap():
     """SEO Optimized Sitemap Generator"""
     pages = [
         '/', '/login.html', '/about.html', '/contact.html', '/privacy.html', '/terms.html',
-        '/dashboard.html', '/upload.html', '/community.html'
+        '/dashboard.html', '/upload.html', '/community.html', '/rules.html'
     ]
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -555,6 +607,11 @@ def upload_video():
             return jsonify({'status': 'error', 'message': 'Missing data'}), 400
         video_type = data.get('type', 'video') # 'video' or 'short'
         category = data.get('category', 'All')
+
+        # Automated Rule Enforcement (Local Heavy Keywords Check)
+        scanned_text = f"{title} {desc}"
+        if enforce_automated_rules('NEW_UPLOAD', 'video', scanned_text, email):
+             return jsonify({'status': 'violation', 'message': 'Upload blocked: Illegal/Dangerous keywords detected in Title or Description.'}), 403
 
         # NEW: AI Content Moderation & Copyright Scan (Budget Checked)
         email = data.get('email')
@@ -908,6 +965,11 @@ def add_comment():
     email = data.get('email')
     content = data.get('content')
     
+    # Automated Rule Enforcement
+    violated = enforce_automated_rules(video_id, 'comment', content, email)
+    if violated:
+        return jsonify({'status': 'violation', 'message': 'Content violates Vitox safety policies. Your account is being reviewed.'}), 403
+
     conn = get_db_connection()
     if USE_POSTGRES:
         cursor = conn.cursor()
@@ -929,6 +991,51 @@ def get_comments(video_id):
         comments = conn.execute('SELECT * FROM comments WHERE video_id = ? ORDER BY timestamp DESC', (video_id,)).fetchall()
     conn.close()
     return jsonify(to_json(comments))
+
+
+@app.route('/api/report', methods=['POST'])
+def report_content():
+    data = request.json
+    target_id = data.get('target_id')
+    target_type = data.get('target_type')
+    rule_id = data.get('rule_id')
+    reporter_email = data.get('reporter_email')
+    notes = data.get('notes', '')
+
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO reports (target_id, target_type, reporter_email, rule_id, notes) 
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (target_id, target_type, reporter_email, rule_id, notes))
+    else:
+        conn.execute('''
+            INSERT INTO reports (target_id, target_type, reporter_email, rule_id, notes) 
+            VALUES (?, ?, ?, ?, ?)
+        ''', (target_id, target_type, reporter_email, rule_id, notes))
+    conn.close()
+    return jsonify({'status': 'success', 'message': 'Report submitted for review.'})
+
+@app.route('/api/rules/claim_reward', methods=['POST'])
+def claim_rule_reward():
+    data = request.json
+    email = data.get('email')
+    if not email: return jsonify({'status': 'error'}), 400
+    
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET points = points + 500 WHERE email = %s', (email,))
+        cursor.execute('INSERT INTO transactions (user_email, amount, type, description) VALUES (%s, %s, %s, %s)', 
+                       (email, 500, 'reward', 'Rule Book Completion Bonus'))
+    else:
+        conn.execute('UPDATE users SET points = points + 500 WHERE email = ?', (email,))
+        conn.execute('INSERT INTO transactions (user_email, amount, type, description) VALUES (?, ?, ?, ?)', 
+                       (email, 500, 'reward', 'Rule Book Completion Bonus'))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'points_awarded': 500})
 
 @app.route('/api/video/stats/<video_id>', methods=['POST'])
 def get_video_stats(video_id):

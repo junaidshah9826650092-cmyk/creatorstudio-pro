@@ -67,7 +67,7 @@
                     </defs>
                     <path fill="url(#vGradient)" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z" />
                 </svg>
-                <span style="font-family: 'Outfit', sans-serif; letter-spacing: -0.5px; font-weight: 700;">Vitox</span>
+                <span class="logo-text">Vitox</span>
             </div>
         </div>
 
@@ -146,9 +146,14 @@
                     <span>V-Snaps</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Squad'); return false;"><i
                         class="fas fa-layer-group"></i> <span>Squad</span></a>
-                <a href="#" class="nav-item" onclick="showPricing(); return false;" style="background: linear-gradient(45deg, #121212, #252525); border: 1px solid #ffd700; margin: 8px; border-radius: 8px;">
+                <a href="#" class="nav-item" onclick="showPricing(); return false;" style="background: linear-gradient(45deg, #121212, #252525); border: 1px solid #ffd700; margin: 12px 8px; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
                     <i class="fas fa-gem" style="color: #ffd700;"></i> <span style="color: #ffd700; font-weight: 700;">Join Premium</span></a>
+                <div style="height: 8px;"></div>
                 <hr>
+                <a href="rules.html" class="nav-item">
+                    <i class="fas fa-book-open" style="color: #ff0055;"></i>
+                    <span style="font-weight: 600;">Vitox Rule Book</span>
+                </a>
 
                 <!-- You Section -->
                 <div class="nav-section-title"
@@ -201,6 +206,7 @@
             <div class="categories-bar">
                 <button class="chip active" onclick="filterByCategory('All')">All</button>
                 <button class="chip" onclick="filterByCategory('Music')">Music</button>
+                <button class="chip" onclick="filterByCategory('AI')">AI Studio</button>
                 <button class="chip" onclick="filterByCategory('Gaming')">Gaming</button>
                 <button class="chip" onclick="filterByCategory('Live')">Pulse</button>
                 <button class="chip" onclick="filterByCategory('Tech')">Tech</button>
