@@ -9,9 +9,10 @@ class VitoxAI:
     Separated from server.py for better scalability.
     """
     
-    def __init__(self):
+    def __init__(self, budget_mode=True):
         self.gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/"
         self.openrouter_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.budget_mode = budget_mode
 
     def _get_gemini_key(self):
         return os.environ.get('GOOGLE_API_KEY', '').strip()
@@ -22,6 +23,7 @@ class VitoxAI:
     def ask(self, prompt, model_alias='gemini-flash'):
         """Unified method for LLM queries (including ML/DL/Generative tasks)"""
         
+        # Define models with their types
         models = {
             'gemini-flash': 'gemini-1.5-flash',
             'gemini-pro': 'gemini-1.5-pro',
@@ -30,8 +32,20 @@ class VitoxAI:
             'google-gemma-free': 'google/gemma-7b-it:free'
         }
         
+        # If in budget mode, force free models for generic aliases
+        if self.budget_mode:
+            if model_alias == 'gemini-pro':
+                model_alias = 'gemini-flash' # Downgrade to free-ish tier
+            elif model_alias not in models:
+                model_alias = 'llama-3-free'
+        
         selected_model = models.get(model_alias, 'gemini-1.5-flash')
         
+        # Security: Prevent usage of unauthorized expensive models via string injection
+        if self.budget_mode and not any(m in selected_model for m in [':free', 'flash', 'gemma']):
+             # If someone tries to pass a paid model name directly and we are in budget mode, fallback
+             selected_model = 'meta-llama/llama-3-8b-instruct:free'
+
         if 'gemini' in selected_model:
             return self._call_gemini(prompt, selected_model)
         else:

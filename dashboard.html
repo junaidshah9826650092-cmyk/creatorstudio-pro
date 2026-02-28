@@ -746,11 +746,12 @@
             responseDiv.innerText = "Thinking...";
             input.value = "";
 
+            const user = JSON.parse(localStorage.getItem('vitox_user'));
             try {
                 const res = await fetch('/api/ai/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
+                    body: JSON.stringify({ prompt, email: user ? user.email : null })
                 });
                 const data = await res.json();
                 responseDiv.innerText = data.answer || "Sorry, I couldn't process that.";

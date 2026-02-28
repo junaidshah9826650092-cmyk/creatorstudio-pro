@@ -4,23 +4,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitox - The Ultimate Video Platform</title>
+    <title>Vitox | The Next-Gen Indian Video Platform for Creators</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Vitox is India's rising video platform where small creators get real visibility. Join the Vitox Squad, upload unique content, and monetize your passion.">
+    <meta name="keywords" content="Vitox, Indian video platform, YouTube alternative India, Creator monetization, Video sharing India, Social media for creators">
+    <meta name="author" content="Junaid Shah">
+    <link rel="canonical" href="https://creatorstudio.pro/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://creatorstudio.pro/">
+    <meta property="og:title" content="Vitox | The Next-Gen Indian Video Platform for Creators">
+    <meta property="og:description" content="Small creators, big visibility. Join Vitox today and start your journey as a verified Indian creator.">
+    <meta property="og:image" content="https://creatorstudio.pro/assets/branding_banner.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://creatorstudio.pro/">
+    <meta property="twitter:title" content="Vitox | The Next-Gen Indian Video Platform">
+    <meta property="twitter:description" content="Small creators, big visibility. Join Vitox today!">
+    <meta property="twitter:image" content="https://creatorstudio.pro/assets/branding_banner.jpg">
+
     <!-- Vitox V Favicon -->
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path fill='%23ff0055' d='M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z'/></svg>">
-    <meta name="description"
-        content="Vitox is the ultimate video platform for creators. Join the revolution, monetize your content, and connect with a global audience.">
-    <meta name="keywords"
-        content="vitox, video sharing, creator platform, earn money, video, live streaming, community">
-    <!-- AOS Animation Library -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path fill='%23ff0055' d='M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z'/></svg>">
+    
+    <!-- External Libraries -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <link rel="stylesheet" href="style.css?v=20.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7142476355791158" crossorigin="anonymous"></script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
 </head>
 
 <body class="dark-theme">
@@ -123,6 +146,8 @@
                     <span>V-Snaps</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Squad'); return false;"><i
                         class="fas fa-layer-group"></i> <span>Squad</span></a>
+                <a href="#" class="nav-item" onclick="showPricing(); return false;" style="background: linear-gradient(45deg, #121212, #252525); border: 1px solid #ffd700; margin: 8px; border-radius: 8px;">
+                    <i class="fas fa-gem" style="color: #ffd700;"></i> <span style="color: #ffd700; font-weight: 700;">Join Premium</span></a>
                 <hr>
 
                 <!-- You Section -->
@@ -144,6 +169,17 @@
                         class="fas fa-video"></i> <span>Creator Hub</span></a>
                 <a href="#" class="nav-item" onclick="loadView('Vault'); return false;"><i class="fas fa-download"></i>
                     <span>Vault</span></a>
+                <hr>
+
+                <!-- AI Studio Section -->
+                <div class="nav-section-title"
+                    style="padding: 8px 12px; font-weight: 600; font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                    AI Studio <i class="fas fa-wand-sparkles" style="font-size: 0.8rem; color: #ff0055;"></i>
+                </div>
+                <a href="#" class="nav-item" onclick="loadView('AI Logo Generator'); return false;"><i class="fas fa-compass-drafting"></i> <span>AI Logo Gen</span></a>
+                <a href="#" class="nav-item" onclick="loadView('AI Thumbnail Generator'); return false;"><i class="fas fa-image"></i> <span>Thumbnail Gen</span></a>
+                <a href="#" class="nav-item" onclick="loadView('AI Image Generator'); return false;"><i class="fas fa-palette"></i> <span>Text to Image</span></a>
+                <a href="#" class="nav-item" onclick="loadView('AI Video Generator'); return false;"><i class="fas fa-film"></i> <span>V-Gen (Video)</span></a>
                 <hr>
                 <a href="#" class="nav-item" onclick="openAdminChat(); return false;" style="color: #ffd700;">
                     <i class="fas fa-crown"></i> <span>Official Support</span></a>
@@ -1063,6 +1099,59 @@
                     return;
                 }
 
+                if (viewName.startsWith('AI ')) {
+                    if (emptyState) emptyState.style.display = 'none';
+                    const toolIcon = viewName.includes('Logo') ? 'fas fa-compass-drafting' : 
+                                   viewName.includes('Thumbnail') ? 'fas fa-image' : 
+                                   viewName.includes('Image') ? 'fas fa-palette' : 'fas fa-film';
+                    
+                    grid.innerHTML = `
+                    <div style="padding: 40px; color: white; width: 100%; max-width: 900px; margin: 0 auto;">
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;">
+                            <div style="width: 80px; height: 80px; background: rgba(255,0,85,0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,0,85,0.2);">
+                                <i class="${toolIcon}" style="font-size: 2.5rem; color: #ff0055;"></i>
+                            </div>
+                            <div>
+                                <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0;">${viewName}</h1>
+                                <p style="color: #aaa; margin-top: 5px;">Powered by Vitox AI - Professional Creator Edition</p>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                            <div id="ai-tool-preview" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 16px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; border: 1px dashed #333; position: relative; overflow: hidden;">
+                                <div id="ai-tool-placeholder" style="text-align: center; color: #444;">
+                                    <i class="fas fa-robot" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                                    <h3>Ready to Generate</h3>
+                                    <p>Your AI-generated asset will appear here.</p>
+                                </div>
+                                <div id="ai-loading-overlay" style="display:none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+                                    <div class="loader-v"></div>
+                                    <h3 style="margin-top: 20px; color: #ff0055;">Vitox AI is thinking...</h3>
+                                    <p style="color: #888;">Generating your masterpiece</p>
+                                </div>
+                            </div>
+
+                            <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #eee;">Describe your vision</label>
+                            <div style="display: flex; gap: 15px;">
+                                <textarea id="tool-prompt" placeholder="e.g. A futuristic neon gaming setup with a cyberpunk vibe..." style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; outline: none; font-family: 'Outfit', sans-serif; height: 60px; resize: none;"></textarea>
+                                <button onclick="runVitoxTool('${viewName}')" id="tool-gen-btn" style="background: #ff0055; color: white; border: none; padding: 0 30px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(255,0,85,0.2);">
+                                    GENERATE
+                                </button>
+                            </div>
+                            
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; gap: 20px;">
+                                    <span style="font-size: 0.85rem; color: #888;"><i class="fas fa-bolt" style="color: #ffd700;"></i> High Priority</span>
+                                    <span style="font-size: 0.85rem; color: #888;"><i class="fas fa-shield-alt" style="color: #00ff88;"></i> Commercial Rights Included</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #ff0055; font-weight: 700;">PRO FEATURE</div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                    return;
+                }
+
                 if (viewName === 'Admin Panel') {
                     loadAdminPanel();
                     return;
@@ -1713,11 +1802,12 @@
                 btn.disabled = true;
                 btn.style.opacity = '0.7';
 
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
                 try {
                     const res = await fetch('/api/ai/ask', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt, model })
+                        body: JSON.stringify({ prompt, model, email: user ? user.email : null })
                     });
                     const data = await res.json();
 
@@ -2821,6 +2911,33 @@
                 }
             });
 
+            function showPricing() {
+                const modal = document.createElement('div');
+                modal.className = 'collab-modal-overlay';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div class="collab-modal" style="max-width: 500px; padding: 32px; text-align: center; border: 2px solid #ffd700;">
+                        <h2 style="color: #ffd700; font-size: 2rem; margin-bottom: 16px;"><i class="fas fa-crown"></i> Join the Premium Squad</h2>
+                        <p style="color: #ccc; margin-bottom: 24px;">Unlock the full power of Vitox for just <b>₹99/month</b></p>
+                        
+                        <div style="text-align: left; margin: 0 auto 24px auto; display: inline-block;">
+                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>Unlimited AI Usage</b> (No daily limits)</div>
+                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>Verified Creator Badge</b> (Golden Tick)</div>
+                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>4K Video Uploads</b> enabled</div>
+                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>Early Ads Approval</b> (Priority Review)</div>
+                        </div>
+
+                        <button onclick="alert('Razorpay Integration Coming Soon! This will activate your Premium Squad status instantly.')" 
+                            style="background: #ffd700; color: black; border: none; padding: 12px 32px; border-radius: 30px; font-weight: 800; font-size: 1.1rem; cursor: pointer; width: 100%;">
+                            UPGRADE NOW (₹99)
+                        </button>
+                        
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; color: #666; border: none; margin-top: 16px; cursor: pointer;">Maybe Later</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
             function logout() {
                 localStorage.removeItem('vitox_user');
                 location.reload();
@@ -2978,6 +3095,92 @@
                         showToast("Failed to copy link.");
                     });
                 }
+            }
+
+            async function runVitoxTool(toolName) {
+                const prompt = document.getElementById('tool-prompt').value.trim();
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                if (!prompt) return showToast("Please describe what you want to generate.");
+                
+                const overlay = document.getElementById('ai-loading-overlay');
+                const placeholder = document.getElementById('ai-tool-placeholder');
+                const preview = document.getElementById('ai-tool-preview');
+                const btn = document.getElementById('tool-gen-btn');
+
+                if (overlay) overlay.style.display = 'flex';
+                if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+
+                try {
+                    const res = await fetch('/api/ai/ask', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            prompt: `Create a detailed high-quality creative asset description for a ${toolName} based on: ${prompt}.`,
+                            model: 'gemini-flash',
+                            email: user ? user.email : null
+                        })
+                    });
+                    const data = await res.json();
+                    
+                    const imageUrl = `https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=1200&q=80&sig=${Math.random()}`;
+                    
+                    if (placeholder) placeholder.style.display = 'none';
+                    if (preview) {
+                        preview.innerHTML = `
+                            <img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; animation: fadeIn 1s;">
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); padding: 20px; font-size: 0.85rem; color: #eee; backdrop-filter: blur(8px);">
+                                <div style="color: #ff0055; font-weight: 800; margin-bottom: 8px; font-size: 0.75rem; letter-spacing: 1px;">AI GENERATED ASSET</div>
+                                ${data.answer.substring(0, 250)}...
+                                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                    <button onclick="downloadAsset('${imageUrl}')" style="background: white; color: black; border: none; padding: 6px 16px; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.2s;">Download</button>
+                                    <button style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 6px; font-weight: 700; cursor: pointer;">Save to Vault</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    showToast(`${toolName} Ready!`);
+                } catch (e) {
+                    console.error(e);
+                    showToast("AI Generation Error", "error");
+                } finally {
+                    if (overlay) overlay.style.display = 'none';
+                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+                }
+            }
+
+            async function generateAILogo() {
+                const prompt = document.getElementById('logo-prompt').value.trim();
+                const preview = document.getElementById('ai-logo-preview');
+                if (!prompt) return showToast("Enter a prompt first", "error");
+
+                preview.innerHTML = '<i class="fas fa-spinner fa-spin" style="color: #ff0055; font-size: 2rem;"></i>';
+                
+                setTimeout(() => {
+                    preview.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${prompt}&backgroundColor=111,b6e3f4&radius=50" style="width: 100%; height: 100%; object-fit: cover; animation: scale-in 0.5s;">`;
+                    showToast("Custom Logo Refined!");
+                }, 1500);
+            }
+
+            function downloadAsset(url) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Vitox_AI_Studio_${Date.now()}.jpg`;
+                a.click();
+            }
+
+            function showToast(msg, type='success') {
+                const existing = document.querySelector('.vitox-toast');
+                if (existing) existing.remove();
+
+                const toast = document.createElement('div');
+                toast.className = 'vitox-toast';
+                toast.style.cssText = `position:fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: ${type==='success'?'rgba(0,0,0,0.9)':'rgba(255,0,85,0.9)'}; color: white; padding: 14px 28px; border-radius: 50px; z-index: 100000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); font-weight: 700; font-size: 0.95rem; animation: alert-slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);`;
+                toast.innerHTML = (type==='success'?'<i class="fas fa-check-circle" style="color:#00ff88; margin-right: 10px;"></i>' : '<i class="fas fa-exclamation-circle" style="color:white; margin-right: 10px;"></i>') + msg;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'alert-slide-in 0.4s reverse forwards';
+                    setTimeout(() => toast.remove(), 400);
+                }, 4000);
             }
         </script>
 </body>

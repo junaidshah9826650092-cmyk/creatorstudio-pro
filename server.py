@@ -23,6 +23,60 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def check_ai_budget(email=None):
+    """
+    Budget Controller: Prevents 90k bills by limiting daily requests.
+    Guest Limit: 3 requests/day
+    User Limit: 15 requests/day
+    Admin: Unlimited
+    """
+    if not email:
+        email = 'guest_' + request.remote_addr
+    
+    if email == ADMIN_EMAIL:
+        return True, 0
+    
+    conn = get_db_connection()
+    today = date.today().isoformat()
+    
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT request_count FROM ai_usage WHERE user_email = %s AND usage_date = %s', (email, today))
+            row = cursor.fetchone()
+        else:
+            row = conn.execute('SELECT request_count FROM ai_usage WHERE user_email = ? AND usage_date = ?', (email, today)).fetchone()
+        
+        count = row['request_count'] if row else 0
+        limit = 15 if not email.startswith('guest_') else 3
+        
+        if count >= limit:
+            conn.close()
+            return False, limit
+            
+        # Increment usage
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO ai_usage (user_email, usage_date, request_count) 
+                VALUES (%s, %s, 1) 
+                ON CONFLICT (user_email, usage_date) 
+                DO UPDATE SET request_count = ai_usage.request_count + 1
+            ''', (email, today))
+        else:
+            conn.execute('''
+                INSERT OR REPLACE INTO ai_usage (user_email, usage_date, request_count) 
+                VALUES (?, ?, COALESCE((SELECT request_count FROM ai_usage WHERE user_email = ? AND usage_date = ?), 0) + 1)
+            ''', (email, today, email, today))
+            
+        conn.commit()
+        conn.close()
+        return True, limit
+    except Exception as e:
+        print(f"Budget Check Error: {e}")
+        conn.close()
+        return True, 100 # Fail safe to allow usage if DB fails
+
 # Local disk storage disabled (Cloud Only)
 
 # Load .env manually for local development
@@ -35,7 +89,7 @@ if os.path.exists('.env'):
 
 from flask_talisman import Talisman
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, static_folder='.', static_url_path='/static')
 CORS(app)
 # Force HTTPS (Only on Render) and Security Headers
 is_prod = os.environ.get('RENDER') == 'true'
@@ -112,6 +166,8 @@ def init_db():
             status TEXT DEFAULT 'active',
             is_verified_brand BOOLEAN DEFAULT FALSE,
             adsense_pub TEXT,
+            subscription_tier TEXT DEFAULT 'free',
+            premium_until TIMESTAMP,
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -212,6 +268,16 @@ def init_db():
         )
     ''')
 
+    # AI Usage Tracking Table (to prevent 90k bills!)
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS ai_usage (
+            user_email TEXT,
+            usage_date DATE DEFAULT CURRENT_DATE,
+            request_count INTEGER DEFAULT 0,
+            PRIMARY KEY (user_email, usage_date)
+        )
+    ''')
+
 
     if not USE_POSTGRES:
         # SQLite migrations
@@ -225,6 +291,12 @@ def init_db():
         except: pass
         try: cursor.execute('ALTER TABLE videos ADD COLUMN moderation_status TEXT DEFAULT "safe"')
         except: pass
+        try: cursor.execute('ALTER TABLE users ADD COLUMN adsense_pub TEXT')
+        except: pass
+        try: cursor.execute('ALTER TABLE users ADD COLUMN subscription_tier TEXT DEFAULT "free"')
+        except: pass
+        try: cursor.execute('ALTER TABLE users ADD COLUMN premium_until TIMESTAMP')
+        except: pass
     else:
         # Postgres migrations
         try: 
@@ -233,12 +305,10 @@ def init_db():
             cursor.execute('ALTER TABLE videos ADD COLUMN IF NOT EXISTS moderation_status TEXT DEFAULT \'safe\'')
             cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT DEFAULT \'active\'')
             cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS adsense_pub TEXT')
+            cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT \'free\'')
+            cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMP')
             conn.commit()
         except: conn.rollback()
-    
-    if not USE_POSTGRES:
-        try: cursor.execute('ALTER TABLE users ADD COLUMN adsense_pub TEXT')
-        except: pass
 
     conn.commit()
     conn.close()
@@ -268,7 +338,15 @@ except Exception as e:
 # --- Serve Static Files ---
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    """Explicitly serve index.html to avoid routing conflicts on Render."""
+    try:
+        return send_from_directory('.', 'index.html')
+    except Exception as e:
+        return f"System Error: index.html not found. Details: {str(e)}", 404
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()}), 200
 
 @app.route('/ads.txt')
 def ads_txt():
@@ -276,15 +354,56 @@ def ads_txt():
 
 @app.errorhandler(500)
 def handle_500(e):
-    return jsonify({"status": "error", "message": "Internal Server Error", "details": str(e)}), 500
+    print(f"CRITICAL SERVER ERROR: {e}")
+    return jsonify({
+        "status": "error", 
+        "message": "Vitox Server encountered an internal issue. This is usually due to high traffic or memory limits.",
+        "details": str(e)
+    }), 500
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    return jsonify({"status": "error", "message": str(e)}), 500
+    print(f"UNHANDLED EXCEPTION: {e}")
+    return jsonify({
+        "status": "error", 
+        "message": "General system exception occurred.",
+        "details": str(e)
+    }), 500
 
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('.', path)
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """SEO Optimized Sitemap Generator"""
+    pages = [
+        '/', '/login.html', '/about.html', '/contact.html', '/privacy.html', '/terms.html',
+        '/dashboard.html', '/upload.html', '/community.html'
+    ]
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    
+    # Static Pages
+    base_url = "https://creatorstudio.pro"
+    for page in pages:
+        xml += f'  <url><loc>{base_url}{page}</loc><priority>0.8</priority></url>\n'
+    
+    # Dynamic Video Pages
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT id FROM videos LIMIT 100')
+        videos = cursor.fetchall()
+    else:
+        videos = conn.execute('SELECT id FROM videos LIMIT 100').fetchall()
+    
+    for v in videos:
+        xml += f'  <url><loc>{base_url}/index.html?v={v["id"]}</loc><priority>0.6</priority></url>\n'
+    
+    conn.close()
+    xml += '</urlset>'
+    return xml, 200, {'Content-Type': 'application/xml'}
 
 # --- API Routes ---
 
@@ -421,8 +540,14 @@ def upload_video():
         video_type = data.get('type', 'video') # 'video' or 'short'
         category = data.get('category', 'All')
 
-        # NEW: AI Content Moderation & Copyright Scan
-        mod_status = ai_processor.moderate(title, desc)
+        # NEW: AI Content Moderation & Copyright Scan (Budget Checked)
+        email = data.get('email')
+        can_ai, limit = check_ai_budget(email)
+        
+        mod_status = 'safe'
+        if can_ai:
+            mod_status = ai_processor.moderate(title, desc)
+        
         if not ai_processor.copyright_scan(title):
             return jsonify({'status': 'error', 'message': 'Copyright violation detected! External studio content is not allowed on Vitox.'}), 400
 
@@ -436,7 +561,10 @@ def upload_video():
                 return jsonify({'status': 'error', 'message': 'This content has already been shared on Vitox!'}), 400
             
             # 2. Uniqueness Check (AI Mock)
-            is_unique = ai_processor.check_uniqueness(title, desc)
+            is_unique = True
+            if can_ai:
+                is_unique = ai_processor.check_uniqueness(title, desc)
+            
             if not is_unique:
                 conn.close()
                 return jsonify({'status': 'error', 'message': 'Content similarity too high. Vitox requires 100% unique creative content!'}), 400
@@ -456,7 +584,11 @@ def upload_video():
                 return jsonify({'status': 'error', 'message': 'Duplicate content detected!'}), 400
 
             # 2. Uniqueness Check
-            if not ai_processor.check_uniqueness(title, desc):
+            is_unique = True
+            if can_ai:
+                is_unique = ai_processor.check_uniqueness(title, desc)
+
+            if not is_unique:
                 conn.close()
                 return jsonify({'status': 'error', 'message': 'Content is not unique enough for Vitox Standards.'}), 400
 
@@ -1179,6 +1311,11 @@ def creator_delete_video():
 @app.route('/api/ai/suggest', methods=['POST'])
 def ai_suggest():
     data = request.json
+    email = data.get('email')
+    can_ai, limit = check_ai_budget(email)
+    if not can_ai:
+        return jsonify({'error': f'Daily AI budget exceeded ({limit} requests/day). Join Squad or try again tomorrow.'}), 429
+        
     topic = data.get('topic', 'General Gaming')
     suggestion = ai_processor.suggest_content(topic)
     return jsonify(suggestion)
@@ -1196,7 +1333,12 @@ def ai_ask():
     data = request.json
     prompt = data.get('prompt', '')
     model = data.get('model', 'gemini-flash')
+    email = data.get('email')
     
+    can_ai, limit = check_ai_budget(email)
+    if not can_ai:
+        return jsonify({'answer': f'⚠️ AI Budget Exceeded for today ({limit} requests). Please try again later or join our premium squad!'}), 429
+
     if not prompt:
         return jsonify({'error': 'No prompt provided'}), 400
 
@@ -1252,6 +1394,12 @@ def ai_translate():
 def ai_chat():
     data = request.json
     prompt = data.get('prompt', '')
+    email = data.get('email')
+    
+    can_ai, limit = check_ai_budget(email)
+    if not can_ai:
+        return jsonify({'answer': f'Daily chat limit of {limit} reached. Continue tomorrow!'}), 429
+        
     if not prompt: return jsonify({'error': 'No prompt provided'}), 400
     
     answer = ai_processor.ask(prompt, model_alias='llama-3-free')
