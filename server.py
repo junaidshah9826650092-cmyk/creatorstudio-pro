@@ -1105,6 +1105,53 @@ def update_adsense():
     conn.close()
     return jsonify({'status': 'success'})
 
+@app.route('/api/upgrade-premium', methods=['POST'])
+def upgrade_premium():
+    data = request.json
+    email = data.get('email')
+    payment_id = data.get('payment_id') # In real production, verify this with Razorpay API
+    
+    if not email or not payment_id:
+        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+        
+    conn = get_db_connection()
+    try:
+        from datetime import datetime, timedelta
+        # Calculate premium until (1 month from now)
+        premium_until = (datetime.now() + timedelta(days=30)).isoformat()
+        
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE users 
+                SET subscription_tier = %s, premium_until = %s 
+                WHERE email = %s
+            ''', ('premium', premium_until, email))
+            # Log transaction
+            cursor.execute('''
+                INSERT INTO transactions (user_email, amount, type, description, status)
+                VALUES (%s, %s, %s, %s, %s)
+            ''', (email, 99, 'premium_upgrade', f'Razorpay ID: {payment_id}', 'completed'))
+        else:
+            conn.execute('''
+                UPDATE users 
+                SET subscription_tier = ?, premium_until = ? 
+                WHERE email = ?
+            ''', ('premium', premium_until, email))
+            # Log transaction
+            conn.execute('''
+                INSERT INTO transactions (user_email, amount, type, description, status)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (email, 99, 'premium_upgrade', f'Razorpay ID: {payment_id}', 'completed'))
+            
+        conn.commit()
+        return jsonify({'status': 'success', 'message': 'Welcome to Premium Squad!'})
+    except Exception as e:
+        print(f"Upgrade Error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    finally:
+        conn.close()
+
 # --- Admin/Stats Routes ---
 
 @app.route('/api/admin/stats', methods=['POST'])

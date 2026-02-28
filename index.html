@@ -51,6 +51,8 @@
     <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.0.0/videojs-contrib-ads.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.min.js"></script>
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 
 <body class="dark-theme">
@@ -75,6 +77,10 @@
                     <path fill="url(#vGradient)" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z" />
                 </svg>
                 <span class="logo-text">Vitox</span>
+                <div id="streak-indicator" style="display: none; align-items: center; gap: 4px; background: rgba(255,165,0,0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,165,0,0.3); margin-left: 12px; height: 26px;">
+                    <i class="fas fa-fire" style="color: #ffa500; font-size: 0.8rem;"></i>
+                    <span id="streak-count" style="color: #ffa500; font-size: 0.8rem; font-weight: 800;">1 Day Streak</span>
+                </div>
             </div>
         </div>
 
@@ -207,6 +213,7 @@
                     <a href="terms.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms of Service</a>
                     <a href="contact.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Contact Us</a>
                     <a href="disclaimer.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Disclaimer</a>
+                    <a href="licenses.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Licenses</a>
                     <div style="width: 100%; margin-top: 8px; color: #666; font-weight: 500;">© 2026 Vitox Media Pvt Ltd</div>
                 </div>
             </nav>
@@ -231,7 +238,7 @@
             <!-- Hook: Gamification, FOMO, Progress Tracking -->
             <div id="retention-hooks-container" style="display: none; animation: scale-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); margin-bottom: 24px;">
                 <!-- FOMO Banner (Only visible for 24 hours/to specific users) -->
-                <div id="fomo-banner" style="background: linear-gradient(90deg, #ff0055, #ff5500); padding: 14px 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(255,0,85,0.3); margin-bottom: 16px; cursor: pointer;" onclick="document.querySelector('.chip[onclick*=\\'Drama\\']').click()">
+                <div id="fomo-banner" style="background: linear-gradient(90deg, #ff0055, #ff5500); padding: 14px 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(255,0,85,0.3); margin-bottom: 16px; cursor: pointer;" onclick="const chip = document.querySelector('.chip[onclick*=\'Drama\']') || document.querySelector('.chip:nth-child(2)'); if(chip) chip.click();">
                     <div style="color: white; font-weight: 800; display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-fire fa-lg"></i>
                         <span>Trending Drama: Top 5 Clips of the Day</span>
@@ -597,7 +604,7 @@
                 } catch (e) { console.error(e); }
             }
 
-            function renderVideos(videosToRender) {
+            function renderVideos(videosToRender, isSimulatedDrama = false) {
                 if (typeof initRetentionHooks === 'function') initRetentionHooks();
                 const grid = document.getElementById('main-video-grid');
                 const emptyState = document.getElementById('empty-state');
@@ -2844,7 +2851,7 @@
                 const chips = document.querySelectorAll('.chip');
                 chips.forEach(c => {
                     c.classList.remove('active');
-                    if (c.innerText === cat) c.classList.add('active');
+                    if (c.innerText.includes(cat)) c.classList.add('active');
                 });
 
                 if (cat === 'All') {
@@ -2852,9 +2859,26 @@
                     return;
                 }
 
+                if (cat === 'Drama') {
+                   // "Spicy Drama" Logic: Search for specific viral/drama keywords
+                   const dramaKeywords = ['drama', 'fight', 'roast', 'exposed', 'shocking', 'wrong', 'viral'];
+                   const dramaVideos = allVideos.filter(v => {
+                       const content = (v.title + ' ' + (v.description || '')).toLowerCase();
+                       return dramaKeywords.some(k => content.includes(k)) || (v.category && v.category.includes('Drama'));
+                   });
+                   
+                   if (dramaVideos.length === 0) {
+                       // Fallback: Show trending videos with a 'Drama' badge simulation
+                       renderVideos(allVideos.slice(0, 5), true); 
+                   } else {
+                       renderVideos(dramaVideos, true);
+                   }
+                   return;
+                }
+
                 const filtered = allVideos.filter(vid => {
                     if (cat === 'Live') return vid.type === 'live';
-                    return (vid.category && vid.category === cat) ||
+                    return (vid.category && (vid.category === cat || vid.category.includes(cat))) ||
                         (vid.title && vid.title.toLowerCase().includes(cat.toLowerCase()));
                 });
                 renderVideos(filtered);
@@ -2958,11 +2982,110 @@
                 const chips = document.querySelectorAll('.chip');
                 chips.forEach(chip => {
                     chip.onclick = () => {
-                        chips.forEach(c => c.classList.remove('active'));
-                        chip.classList.add('active');
+                        const originalOnclick = chip.getAttribute('onclick');
+                        if (!originalOnclick) {
+                            chips.forEach(c => c.classList.remove('active'));
+                            chip.classList.add('active');
+                            const category = chip.innerText.replace(' Spicy ', '');
+                            filterByCategory(category);
+                        }
                     };
                 });
+
+                // User Retention Hooks Initialization
+                setTimeout(() => {
+                    if (typeof initRetentionHooks === 'function') initRetentionHooks();
+                    checkDailyReward();
+                    updateStreakUI();
+                }, 1500);
             });
+
+            function updateStreakUI() {
+                const indicator = document.getElementById('streak-indicator');
+                const countText = document.getElementById('streak-count');
+                if (!indicator || !countText) return;
+
+                let streak = parseInt(localStorage.getItem('vitox_streak') || '0');
+                const lastUpdated = localStorage.getItem('vitox_streak_last_date');
+                const today = new Date().toDateString();
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+                if (lastUpdated === today) {
+                    // Already counted today
+                } else if (lastUpdated === yesterday) {
+                    // Consecutive day
+                    streak += 1;
+                    localStorage.setItem('vitox_streak', streak);
+                    localStorage.setItem('vitox_streak_last_date', today);
+                } else {
+                    // Streak broken or brand new
+                    streak = 1;
+                    localStorage.setItem('vitox_streak', streak);
+                    localStorage.setItem('vitox_streak_last_date', today);
+                }
+
+                if (streak >= 1) {
+                    indicator.style.display = 'flex';
+                    countText.innerText = streak + (streak === 1 ? ' Day Streak' : ' Day Streak');
+                }
+            }
+
+            function checkDailyReward() {
+                const lastLogin = localStorage.getItem('vitox_last_daily_reward');
+                const today = new Date().toDateString();
+                
+                if (lastLogin !== today) {
+                    setTimeout(() => {
+                        showDailyRewardModal();
+                    }, 2000);
+                }
+            }
+
+            function showDailyRewardModal() {
+                const modal = document.createElement('div');
+                modal.id = 'daily-reward-modal';
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.85); z-index: 100000;
+                    display: flex; align-items: center; justify-content: center;
+                    backdrop-filter: blur(10px); animation: fadeIn 0.3s forwards;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #111; border: 2px solid #ff0055; border-radius: 24px; padding: 40px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 0 50px rgba(255,0,85,0.3); animation: scale-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🎁</div>
+                        <h2 style="color: white; font-weight: 800; margin-bottom: 10px;">Daily Streak Reward!</h2>
+                        <p style="color: #aaa; line-height: 1.6; margin-bottom: 25px;">You've returned to Vitox! Claim your daily 50 points and 2x Badge Progress for the next hour.</p>
+                        <button id="claim-reward-btn" style="background: #ff0055; color: white; border: none; padding: 15px 40px; border-radius: 40px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(255,0,85,0.2);">
+                            CLAIM REWARD
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                document.getElementById('claim-reward-btn').onclick = () => {
+                    localStorage.setItem('vitox_last_daily_reward', new Date().toDateString());
+                    
+                    // Logic to add points
+                    const userStr = localStorage.getItem('vitox_user');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        fetch('/api/add-points', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ email: user.email, amount: 50, description: 'Daily Login Reward' })
+                        });
+                    }
+                    
+                    showToast("🎁 50 Points Added! 2x Progress Active.");
+                    modal.style.animation = 'scale-in 0.3s reverse forwards';
+                    setTimeout(() => modal.remove(), 300);
+                    
+                    // Visual feedback for progression
+                    if (typeof incrementWatchCount === 'function') incrementWatchCount(); 
+                };
+            }
 
             function toggleUserMenu() {
                 const menu = document.getElementById('user-menu');
@@ -2992,30 +3115,95 @@
             });
 
             function showPricing() {
+                const user = JSON.parse(localStorage.getItem('vitox_user') || 'null');
+                if (!user) {
+                    showToast("Please login first to join Premium Squad!");
+                    return;
+                }
+
                 const modal = document.createElement('div');
                 modal.className = 'collab-modal-overlay';
                 modal.style.display = 'flex';
+                modal.style.zIndex = '200000';
                 modal.innerHTML = `
-                    <div class="collab-modal" style="max-width: 500px; padding: 32px; text-align: center; border: 2px solid #ffd700;">
-                        <h2 style="color: #ffd700; font-size: 2rem; margin-bottom: 16px;"><i class="fas fa-crown"></i> Join the Premium Squad</h2>
-                        <p style="color: #ccc; margin-bottom: 24px;">Unlock the full power of Vitox for just <b>₹99/month</b></p>
+                    <div class="collab-modal" style="max-width: 500px; padding: 40px; text-align: center; border: 2px solid #ffd700; background: #0a0a0a; border-radius: 32px; box-shadow: 0 0 50px rgba(255,215,0,0.15);">
+                        <div style="width: 80px; height: 80px; background: rgba(255,215,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 2px solid #ffd700;">
+                            <i class="fas fa-gem" style="color: #ffd700; font-size: 2.5rem;"></i>
+                        </div>
+                        <h2 style="color: #ffd700; font-size: 2rem; margin-bottom: 8px; font-weight: 800;">Vitox Premium</h2>
+                        <p style="color: #888; margin-bottom: 32px; font-size: 1.1rem;">Unlock the elite creator experience</p>
                         
-                        <div style="text-align: left; margin: 0 auto 24px auto; display: inline-block;">
-                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>Unlimited AI Usage</b> (No daily limits)</div>
-                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>Verified Creator Badge</b> (Golden Tick)</div>
-                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>4K Video Uploads</b> enabled</div>
-                            <div style="margin-bottom: 12px;"><i class="fas fa-check-circle" style="color: #00ff88;"></i> <b>Early Ads Approval</b> (Priority Review)</div>
+                        <div style="text-align: left; margin: 0 auto 32px auto; display: block; background: rgba(255,255,255,0.03); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;"><i class="fas fa-bolt" style="color: #ffd700;"></i> <span><b>Unlimited AI Usage</b> (No daily limits)</span></div>
+                            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;"><i class="fas fa-check-circle" style="color: #ffd700;"></i> <span><b>Golden Tick</b> Verified Badge</span></div>
+                            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;"><i class="fas fa-cloud-upload" style="color: #ffd700;"></i> <span><b>4K Video Support</b> (Up to 2GB)</span></div>
+                            <div style="display: flex; align-items: center; gap: 12px;"><i class="fas fa-crown" style="color: #ffd700;"></i> <span><b>Priority Support</b> & Ad Revenue</span></div>
                         </div>
 
-                        <button onclick="alert('Razorpay Integration Coming Soon! This will activate your Premium Squad status instantly.')" 
-                            style="background: #ffd700; color: black; border: none; padding: 12px 32px; border-radius: 30px; font-weight: 800; font-size: 1.1rem; cursor: pointer; width: 100%;">
-                            UPGRADE NOW (₹99)
+                        <div style="font-size: 2rem; font-weight: 800; color: white; margin-bottom: 24px;">₹99<span style="font-size: 1rem; color: #666; font-weight: 400;">/month</span></div>
+
+                        <button id="rzp-button1" style="background: linear-gradient(45deg, #ffd700, #ffaa00); color: black; border: none; padding: 18px 32px; border-radius: 40px; font-weight: 800; font-size: 1.2rem; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 10px 20px rgba(255,215,0,0.2);">
+                            UPGRADE TO PREMIUM
                         </button>
                         
-                        <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; color: #666; border: none; margin-top: 16px; cursor: pointer;">Maybe Later</button>
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; color: #555; border: none; margin-top: 20px; cursor: pointer; font-weight: 600;">Close</button>
                     </div>
                 `;
                 document.body.appendChild(modal);
+
+                document.getElementById('rzp-button1').onclick = function(e) {
+                    modal.remove();
+                    startRazorpayPayment();
+                    e.preventDefault();
+                }
+            }
+
+            function startRazorpayPayment() {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                
+                const options = {
+                    "key": "rzp_test_YOUR_KEY_HERE", // Replace with real key when ready
+                    "amount": "9900", // 99.00 INR
+                    "currency": "INR",
+                    "name": "Vitox Media",
+                    "description": "Monthly Premium Subscription",
+                    "image": "https://creatorstudio-pro.onrender.com/favicon.svg",
+                    "handler": function (response){
+                        // Payment Success
+                        showToast(`🚀 Success! Payment ID: ${response.razorpay_payment_id}`);
+                        upgradeUserToPremium(response.razorpay_payment_id);
+                    },
+                    "prefill": {
+                        "name": user.name || "Vitox User",
+                        "email": user.email
+                    },
+                    "theme": {
+                        "color": "#ff0055"
+                    }
+                };
+                
+                const rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response){
+                    showToast("❌ Payment Failed: " + response.error.description);
+                });
+                rzp1.open();
+            }
+
+            async function upgradeUserToPremium(paymentId) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                try {
+                    const res = await fetch('/api/upgrade-premium', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ email: user.email, payment_id: paymentId })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        showToast("👑 Welcome to the Squad! You are now Premium.");
+                        // Update UI to show gold theme/badge
+                        location.reload(); 
+                    }
+                } catch (e) { console.error(e); }
             }
 
             function logout() {
@@ -3359,8 +3547,8 @@
                 badgeProgress.style.background = color;
                 badgeIcon.style.color = color;
                 badgeIcon.parentElement.style.borderColor = color;
-                badgeIcon.parentElement.style.boxShadow = \`0 0 15px \${color}44\`;
-                badgeIcon.parentElement.style.background = \`\${color}11\`;
+                badgeIcon.parentElement.style.boxShadow = `0 0 15px ${color}44`;
+                badgeIcon.parentElement.style.background = `${color}11`;
             }
         </script>
 </body>

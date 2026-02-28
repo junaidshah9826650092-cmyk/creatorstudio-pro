@@ -1038,18 +1038,24 @@ button {
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);
-  }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 0, 85, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 85, 0); }
+}
 
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(255, 0, 85, 0);
-  }
+.dot-pulse {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #ff0055;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff0055;
+  animation: pulse 1.5s infinite;
+  border: 1px solid white;
+}
 
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);
-  }
+.chip {
+  position: relative; /* Ensure dot positions correctly */
 }

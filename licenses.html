@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Licenses - Vitox</title>
+    <meta name="description" content="Vitox Legal Licenses — Transparency regarding the software licenses and third-party assets used on the Vitox platform.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0a; color: #ddd; font-family: 'Outfit', sans-serif; line-height: 1.8; }
+        header {
+            position: sticky; top: 0;
+            background: rgba(10,10,10,0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 0 40px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between; z-index: 100;
+        }
+        .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:white; font-weight:800; font-size:1.3rem; }
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 40px; }
+        h1 { font-size: 2.5rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
+        .updated { color: #666; font-size: 0.9rem; margin-bottom: 48px; display: block; }
+        h2 { font-size: 1.4rem; font-weight: 700; color: #fff; margin: 40px 0 16px 0; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06); }
+        h2:first-of-type { border-top: none; padding-top: 0; }
+        p { color: #bbb; margin-bottom: 16px; font-size: 0.98rem; }
+        pre {
+            background: #111;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #888;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-bottom: 24px;
+        }
+        .highlight-box {
+            background: rgba(255,0,85,0.05); border: 1px solid rgba(255,0,85,0.15);
+            border-radius: 12px; padding: 20px 24px; margin: 24px 0;
+        }
+        .highlight-box p { margin: 0; color: #ccc; }
+        footer-bar { display:block; background:#050505; border-top:1px solid rgba(255,255,255,0.06); padding:30px 40px; text-align:center; color:#555; font-size:0.85rem; }
+        footer-bar a { color:#888; text-decoration:none; margin:0 12px; }
+        @media (max-width: 768px) { header { padding: 0 20px; } .container { padding: 40px 20px; } h1 { font-size: 1.8rem; } }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <svg width="28" height="28" viewBox="0 0 64 64">
+                <defs><linearGradient id="vG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0055"/><stop offset="100%" style="stop-color:#ff5500"/></linearGradient></defs>
+                <path fill="url(#vG)" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z"/>
+            </svg>
+            Vitox
+        </a>
+        <nav style="display:flex; gap:32px;">
+            <a href="index.html" style="color:#aaa; text-decoration:none; font-weight:500;">Home</a>
+            <a href="about.html" style="color:#aaa; text-decoration:none; font-weight:500;">About</a>
+            <a href="licenses.html" style="color:#ff0055; text-decoration:none; font-weight:600;">License</a>
+            <a href="contact.html" style="color:#aaa; text-decoration:none; font-weight:500;">Contact</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Platform Licenses</h1>
+        <span class="updated">Effective: February 28, 2026</span>
+
+        <div class="highlight-box">
+            <p><strong style="color:#fff;">Legal Compliance.</strong> This document lists the software licenses and intellectual property information for the Vitox platform. We respect the work of open-source developers and license our own software under the MIT License.</p>
+        </div>
+
+        <h2>1. Vitox Platform License (MIT)</h2>
+        <p>The core software and user interface for the Vitox platform is licensed under the MIT License.</p>
+        <pre>
+MIT License
+Copyright (c) 2026 Vitox Media Pvt Ltd
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre>
+
+        <h2>2. Third-Party Software Licenses</h2>
+        <p>Vitox utilizes several open-source libraries and APIs. Each is governed by its own license:</p>
+        
+        <p><strong>Video.js</strong> (LGPL v3 / MIT License)<br>Used for high-performance video playback handling.</p>
+        
+        <p><strong>FontAwesome</strong> (Font Awesome Free License)<br>Used for modern UI icons and interactive elements.</p>
+        
+        <p><strong>AOS - Animate On Scroll</strong> (MIT License)<br>Used for premium scroll-based animations.</p>
+        
+        <p><strong>Google Fonts (Outfit, Inter)</strong> (Open Font License)<br>Used for all typography across the platform.</p>
+        
+        <p><strong>Unsplash API</strong> (Unsplash License)<br>Used for high-quality placeholder images and AI studio backdrops.</p>
+        
+        <p><strong>Dicebear API</strong> (MIT License)<br>Used for dynamic profile avatar generation.</p>
+
+        <h2>3. Content Licensing</h2>
+        <p>Users who upload content to Vitox retain their ownership rights. By uploading, you grant Vitox a non-exclusive, worldwide license to host and serve the content to our users. For detailed content rules, please see our <a href="rules.html">Rule Book</a>.</p>
+        
+        <h2>4. Contact Legal Team</h2>
+        <p>For any legal inquiries, DMCA notices, or licensing questions, please reach out to us:</p>
+        <p><strong style="color:#fff;">Email:</strong> <a href="mailto:junaidshah78634@gmail.com">junaidshah78634@gmail.com</a></p>
+    </div>
+
+    <footer-bar>
+        <div>© 2026 Vitox Media Pvt Ltd. All rights reserved.</div>
+        <div style="margin-top:12px;">
+            <a href="about.html">About</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="licenses.html">Licenses</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </footer-bar>
+</body>
+
+</html>
