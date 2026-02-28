@@ -101,11 +101,10 @@ talisman = Talisman(
     strict_transport_security=False 
 )
 
-@app.before_request
-def handle_robots_https():
-    """Ensure Google Bot can access robots.txt even if HTTPS redirection is behaving oddly."""
-    if request.path == '/robots.txt':
-        return None
+@app.route('/robots.txt')
+def robots_txt_force():
+    """HIGH PRIORITY: Guarantees Google always sees the ALLOW rule."""
+    return "User-agent: *\nAllow: /\nSitemap: https://creatorstudio.pro/sitemap.xml", 200, {'Content-Type': 'text/plain'}
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
@@ -363,11 +362,6 @@ def health():
 @app.route('/ads.txt')
 def ads_txt():
     return send_from_directory('.', 'ads.txt')
-
-@app.route('/robots.txt')
-def robots_txt():
-    """Direct string response to ensure Google Bot always sees the 'Allow' directive."""
-    return "User-agent: *\nAllow: /\nSitemap: https://creatorstudio.pro/sitemap.xml", 200, {'Content-Type': 'text/plain'}
 
 @app.errorhandler(500)
 def handle_500(e):
