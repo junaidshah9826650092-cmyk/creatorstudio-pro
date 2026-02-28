@@ -352,6 +352,10 @@ def health():
 def ads_txt():
     return send_from_directory('.', 'ads.txt')
 
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory('.', 'robots.txt')
+
 @app.errorhandler(500)
 def handle_500(e):
     print(f"CRITICAL SERVER ERROR: {e}")
