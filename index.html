@@ -44,6 +44,13 @@
       gtag('js', new Date());
       gtag('config', 'G-XXXXXXXXXX');
     </script>
+    <!-- Video.js and Google IMA SDK -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.0.0/videojs-contrib-ads.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.min.js"></script>
 </head>
 
 <body class="dark-theme">
@@ -194,9 +201,14 @@
                         <i class="fas fa-shield-halved"></i> <span>Admin Panel</span></a>
                 </div>
                 <hr>
-                <a href="#" class="nav-item" onclick="showPagesModal(); return false;"><i
-                        class="fas fa-info-circle"></i>
-                    <span>About & Privacy</span></a>
+                <div style="padding: 12px; font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 8px; line-height: 1.5;">
+                    <a href="about.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">About Us</a>
+                    <a href="privacy.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Privacy Policy</a>
+                    <a href="terms.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms of Service</a>
+                    <a href="contact.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Contact Us</a>
+                    <a href="disclaimer.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Disclaimer</a>
+                    <div style="width: 100%; margin-top: 8px; color: #666; font-weight: 500;">© 2026 Vitox Media Pvt Ltd</div>
+                </div>
             </nav>
         </aside>
 
@@ -205,6 +217,7 @@
             <!-- Categories -->
             <div class="categories-bar">
                 <button class="chip active" onclick="filterByCategory('All')">All</button>
+                <button class="chip" onclick="filterByCategory('Drama')" style="color: #ff0055; font-weight: bold; border-color: rgba(255,0,85,0.5);"><i class="fas fa-fire"></i> Spicy Drama</button>
                 <button class="chip" onclick="filterByCategory('Music')">Music</button>
                 <button class="chip" onclick="filterByCategory('AI')">AI Studio</button>
                 <button class="chip" onclick="filterByCategory('Gaming')">Gaming</button>
@@ -1476,9 +1489,11 @@
                         <div id="ad-info-box" style="margin-bottom: 12px; font-size: 0.7rem; font-weight: 700; opacity: 0.6; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
                         </div>
 
-                        <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); position: relative;">
+                        <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); position: relative;" id="video-container">
                             ${isLive ? '<div style="position: absolute; top: 20px; left: 20px; background: #ff0055; color: white; padding: 5px 12px; font-weight: 800; border-radius: 4px; z-index: 10; font-size: 0.8rem;">LIVE</div>' : ''}
-                            <video src="${url}" controls autoplay playsinline preload="auto" style="width: 100%; height: 100%; object-fit: contain;" webkit-playsinline ${isLive ? 'loop' : ''}></video>
+                            <video id="content_video" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" style="width: 100%; height: 100%; object-fit: contain;">
+                                <source src="${url}" type="video/mp4">
+                            </video>
                         </div>
 
                         <div style="margin-top: 24px;">
@@ -1586,6 +1601,19 @@
                 document.body.appendChild(playerOverlay);
                 document.body.style.overflow = 'hidden';
 
+                // Initialize Video.js and IMA
+                let player = videojs('content_video');
+                let options = {
+                    id: 'content_video',
+                    adTagUrl: 'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator='
+                };
+                player.ima(options);
+
+                // Auto-play the content after ad or if ad fails
+                player.ready(() => {
+                    player.play();
+                });
+
                 // Add simple logic to fill recommendations for visual flair
                 const relatedGrid = document.getElementById('related-videos');
                 fetch('/api/videos')
@@ -1642,6 +1670,9 @@
 
                 const originalRemove = playerOverlay.remove.bind(playerOverlay);
                 playerOverlay.remove = function () {
+                    if (player) {
+                        player.dispose();
+                    }
                     document.body.style.overflow = '';
                     originalRemove();
                     loadVideos(); // Refresh home grid views

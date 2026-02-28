@@ -11,7 +11,8 @@
         *{margin:0;padding:0;box-sizing:border-box;}
 
         body {
-            background: radial-gradient(ellipse at 30% 40%, #1a0828 0%, #06060c 60%);
+            background: radial-gradient(circle at center, #1b0a2a 0%, #06060c 80%);
+            background-color: #06060c;
             font-family:'Outfit',sans-serif;
             display:flex;justify-content:center;align-items:center;
             min-height:100vh;overflow:hidden;
@@ -119,31 +120,32 @@
         .front, .back {
             width:100%; height:100%;
             position:absolute; top:0; left:0;
-            /* CRITICAL: must be on direct parent with transform-style:preserve-3d */
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             padding: 22px 22px 22px 24px;
             overflow-y: auto;
+            transform-style: preserve-3d;
         }
         .front::-webkit-scrollbar,.back::-webkit-scrollbar{display:none;}
 
         .front {
             border-radius: 0 4px 4px 0;
-            /* Paper texture */
             background-color: var(--paper);
             background-image:
                 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-            /* Right-side page curl shadow */
             box-shadow: inset -20px 0 40px rgba(0,0,0,0.06), 3px 0 10px rgba(0,0,0,0.12);
-            border-left: 3px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-left: none;
+            transform: translateZ(1px);
         }
         .back {
-            transform:rotateY(180deg);
+            transform:rotateY(180deg) translateZ(1px);
             border-radius:4px 0 0 4px;
             background-color: var(--paper);
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
             box-shadow: inset 20px 0 40px rgba(0,0,0,0.06);
-            border-right: 3px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-right: none;
         }
 
         .flipped{transform:rotateY(-180deg);}
@@ -154,17 +156,24 @@
 
         /* ── Cover (Leather) ── */
         .front.cover {
+            background-color: var(--leather) !important;
             background:
                 linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%),
                 linear-gradient(180deg, #1c0800 0%, #2d1000 30%, #1c0800 60%, #261000 100%) !important;
             border-left: 14px solid #0d0500;
-            background-image: none !important;
             box-shadow: inset -8px 0 25px rgba(0,0,0,0.4), inset 4px 0 10px rgba(255,80,0,0.06);
             display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;
             outline: 2px dashed rgba(255,100,0,0.12);
             outline-offset: -12px;
+            border-radius: 0 8px 8px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 14px solid #0d0500;
+            padding-left: 36px;
+            overflow: hidden;
+            transform: translateZ(2px) !important;
+            backface-visibility: hidden;
         }
-        .cvt{font-size:3rem;font-weight:800;background:linear-gradient(90deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+        .cvt{font-size:3rem;font-weight:800;background:linear-gradient(90deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;transform:translateZ(10px);backface-visibility:hidden;}
 
         /* ── Page colors ── */
         .pw .front, .pw .back { background-color: #fdf9f2; }
@@ -509,8 +518,8 @@
 
     <!-- Claim Reward Button lives here -->
     <div style="margin-top:16px;text-align:center;">
-      <button id="claimBtn" class="ctrl" style="background:var(--gold);color:#000;opacity:.35;cursor:not-allowed;" disabled onclick="claimReward()">🏆 Claim 500 Points</button>
-      <p id="claimHint" style="color:#444;font-size:.6rem;margin-top:6px;">Read all pages first to unlock</p>
+      <button class="claimBtn ctrl" style="background:var(--gold);color:#000;opacity:.35;cursor:not-allowed;" disabled onclick="claimReward()">🏆 Claim 500 Points</button>
+      <p class="claimHint" style="color:#444;font-size:.6rem;margin-top:6px;">Read all pages first to unlock</p>
     </div>
   </div>
 </div>
@@ -727,14 +736,14 @@
       </div>
     </div>
     <div style="margin-top:14px;text-align:center;">
-      <button id="claimBtn" class="ctrl" style="background:var(--gold);color:#000;opacity:.35;cursor:not-allowed;" disabled onclick="claimReward()">🏆 Claim 500 Points</button>
-      <p id="claimHint" style="color:#444;font-size:.6rem;margin-top:6px;">Read all 14 pages to unlock</p>
+      <button class="claimBtn ctrl" style="background:var(--gold);color:#000;opacity:.35;cursor:not-allowed;" disabled onclick="claimReward()">🏆 Claim 500 Points</button>
+      <p class="claimHint" style="color:#444;font-size:.6rem;margin-top:6px;">Read all 15 pages to unlock</p>
     </div>
   </div>
 </div>
 
 <!-- ══ PAGE 15: BACK COVER ══ -->
-<div class="page">
+<div class="page" onclick="flip(this,15)">
   <div class="front pd" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;">
     <div style="font-size:3rem;">⚖️</div>
     <h1 style="color:white;font-size:2.2rem;font-weight:800;">FINIS</h1>
@@ -765,7 +774,7 @@
 </div>
 
 <script>
-const TOTAL = 14;
+const TOTAL = 15;
 let flipped = new Set();
 
 function flip(page, idx) {
@@ -779,10 +788,13 @@ function updateUI() {
   document.getElementById('pbar').style.width = pct + '%';
   document.getElementById('pct').textContent = pct;
   if (flipped.size >= TOTAL) {
-    const btn = document.getElementById('claimBtn');
-    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
-    document.getElementById('claimHint').textContent = '🎉 Unlocked! Claim your reward!';
-    document.getElementById('claimHint').style.color = 'var(--gold)';
+    document.querySelectorAll('.claimBtn').forEach(btn => {
+      btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+    });
+    document.querySelectorAll('.claimHint').forEach(hint => {
+      hint.textContent = '🎉 Unlocked! Claim your reward!';
+      hint.style.color = 'var(--gold)';
+    });
   }
 }
 
@@ -823,8 +835,8 @@ document.addEventListener('mousemove', e => {
   const rect = wrapper.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
-  const rx = (cy - e.clientY) / 50;
-  const ry = (e.clientX - cx) / 60;
+  const rx = (cy - e.clientY) / 80;
+  const ry = (e.clientX - cx) / 100;
   document.querySelector('.scene').style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 });
 </script>
