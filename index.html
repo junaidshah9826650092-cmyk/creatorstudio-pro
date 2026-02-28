@@ -228,9 +228,50 @@
                 <button class="chip" onclick="filterByCategory('Education')">Education</button>
             </div>
 
-            <!-- Video Grid -->
+            <!-- Hook: Gamification, FOMO, Progress Tracking -->
+            <div id="retention-hooks-container" style="display: none; animation: scale-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); margin-bottom: 24px;">
+                <!-- FOMO Banner (Only visible for 24 hours/to specific users) -->
+                <div id="fomo-banner" style="background: linear-gradient(90deg, #ff0055, #ff5500); padding: 14px 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(255,0,85,0.3); margin-bottom: 16px; cursor: pointer;" onclick="document.querySelector('.chip[onclick*=\\'Drama\\']').click()">
+                    <div style="color: white; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-fire fa-lg"></i>
+                        <span>Trending Drama: Top 5 Clips of the Day</span>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; color: white;">Expires in 24h</div>
+                </div>
 
-            <!-- Video Grid -->
+                <!-- Progress/Continue Hook -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <!-- Continue Watching -->
+                    <div id="continue-watching-card" style="background: #151515; padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: none; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='#151515'">
+                        <h4 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #888; text-transform: uppercase; font-weight: 800;"><i class="fas fa-history" style="color: #ff0055;"></i> Continue where you left off</h4>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <div style="width: 100px; height: 56px; background: #000; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+                                <img id="cw-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div style="position: absolute; bottom: 0; left: 0; height: 3px; background: #ff0055; width: 60%;"></div>
+                            </div>
+                            <div style="flex: 1; overflow: hidden;">
+                                <div id="cw-title" style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Video Title</div>
+                                <div id="cw-channel" style="color: #666; font-size: 0.8rem;">Channel Name</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gamification Badge -->
+                    <div id="gamification-badge" style="background: #151515; padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 56px; height: 56px; background: rgba(255,215,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.2);">
+                            <i id="badge-icon" class="fas fa-star" style="color: #ffd700; font-size: 1.5rem;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div id="badge-level" style="font-weight: 800; font-size: 1rem; color: #ffd700;">Novice</div>
+                            <div style="color: #aaa; font-size: 0.85rem; margin-top: 4px;">Watch videos to unlock perks!</div>
+                            <div style="margin-top: 8px; width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden;">
+                                <div id="badge-progress" style="height: 100%; width: 0%; background: #ffd700; border-radius: 3px; transition: 0.4s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="video-grid" id="main-video-grid">
                 <!-- Real videos will be injected here via JavaScript -->
             </div>
@@ -557,6 +598,7 @@
             }
 
             function renderVideos(videosToRender) {
+                if (typeof initRetentionHooks === 'function') initRetentionHooks();
                 const grid = document.getElementById('main-video-grid');
                 const emptyState = document.getElementById('empty-state');
 
@@ -1431,6 +1473,7 @@
                 localStorage.setItem('vitox_history', JSON.stringify(history));
 
                 // Increment View Logic
+                if (typeof incrementWatchCount === 'function') incrementWatchCount();
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
                 const isSelf = user && user.email === safeChannel;
 
@@ -3218,6 +3261,106 @@
                     toast.style.animation = 'alert-slide-in 0.4s reverse forwards';
                     setTimeout(() => toast.remove(), 400);
                 }, 4000);
+            }
+            // User Retention / Psychology Hooks
+            function initRetentionHooks() {
+                const hooksContainer = document.getElementById('retention-hooks-container');
+                if (!hooksContainer) return;
+                
+                // Only show on 'All' category or Feed
+                const activeCategory = document.querySelector('.categories-bar .chip.active');
+                if (activeCategory && activeCategory.innerText !== 'All') {
+                    hooksContainer.style.display = 'none';
+                    return;
+                }
+                
+                hooksContainer.style.display = 'block';
+
+                // 1. Progress Hook (Continue logic)
+                const historyStr = localStorage.getItem('vitox_history');
+                const cwCard = document.getElementById('continue-watching-card');
+                if (historyStr && historyStr !== '[]') {
+                    const history = JSON.parse(historyStr);
+                    if (history.length > 0) {
+                        const lastVideo = history[0];
+                        document.getElementById('cw-title').innerText = lastVideo.title || 'Untitled';
+                        document.getElementById('cw-channel').innerText = '@' + (lastVideo.user_email ? lastVideo.user_email.split('@')[0] : 'user');
+                        let thumbUrl = lastVideo.url && lastVideo.url.includes('cloudinary') ? 
+                            lastVideo.url.replace('/video/upload/', '/video/upload/c_fill,h_100,w_180,so_auto/').replace(/\.[^/.]+$/, ".jpg") : 
+                            'https://dummyimage.com/180x100/111/ff0055.png';
+                        // Keep live stream placeholder nice
+                        if (lastVideo.url === 'live-placeholder') thumbUrl = 'https://dummyimage.com/180x100/111/ff0000.png&text=LIVE';
+                        document.getElementById('cw-img').src = thumbUrl;
+                        cwCard.style.display = 'block';
+                        cwCard.onclick = () => {
+                            const found = allVideos.find(v => String(v.id) === String(lastVideo.id));
+                            if (found) {
+                                playVideo(found.video_url, found.title, found.user_email, found.views, found.timestamp, found.description, found.id, found.type);
+                            } else {
+                                playVideo(lastVideo.url, lastVideo.title, lastVideo.user_email, lastVideo.views, lastVideo.timestamp, '', lastVideo.id, 'video');
+                            }
+                        };
+                    }
+                } else {
+                    cwCard.style.display = 'none';
+                }
+
+                // 2. Gamification Logic
+                updateGamificationUI();
+            }
+
+            function incrementWatchCount() {
+                let count = parseInt(localStorage.getItem('vitox_watch_count') || '0');
+                if (count < 0 || isNaN(count)) {
+                    count = 0;
+                }
+                
+                count += 1;
+                localStorage.setItem('vitox_watch_count', count);
+                
+                // Dopamine hits
+                if (count === 1) { showToast("🎉 Badge Unlocked: First Blood!"); }
+                if (count === 5) { showToast("🏆 Badge Unlocked: Avid Watcher!"); }
+                if (count === 10) { showToast("👑 Badge Unlocked: Vitox Master!"); }
+                
+                updateGamificationUI();
+            }
+
+            function updateGamificationUI() {
+                const count = parseInt(localStorage.getItem('vitox_watch_count') || '0');
+                const badgeLevel = document.getElementById('badge-level');
+                const badgeProgress = document.getElementById('badge-progress');
+                const badgeIcon = document.getElementById('badge-icon');
+                if (!badgeLevel) return;
+
+                let levelName = "Rookie";
+                let progress = 0;
+                let color = "#cd7f32"; // Bronze
+
+                if (count < 5) {
+                    levelName = "Rookie (Lvl 1)";
+                    progress = (count / 5) * 100;
+                    badgeIcon.className = "fas fa-seedling";
+                } else if (count < 10) {
+                    levelName = "Explorer (Lvl 2)";
+                    progress = ((count - 5) / 5) * 100;
+                    color = "#c0c0c0"; // Silver
+                    badgeIcon.className = "fas fa-compass";
+                } else {
+                    levelName = "Vitox Master";
+                    progress = 100;
+                    color = "#ffd700"; // Gold
+                    badgeIcon.className = "fas fa-crown";
+                }
+
+                badgeLevel.innerText = levelName;
+                badgeLevel.style.color = color;
+                badgeProgress.style.width = progress + '%';
+                badgeProgress.style.background = color;
+                badgeIcon.style.color = color;
+                badgeIcon.parentElement.style.borderColor = color;
+                badgeIcon.parentElement.style.boxShadow = \`0 0 15px \${color}44\`;
+                badgeIcon.parentElement.style.background = \`\${color}11\`;
             }
         </script>
 </body>
