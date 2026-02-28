@@ -354,7 +354,8 @@ def ads_txt():
 
 @app.route('/robots.txt')
 def robots_txt():
-    return send_from_directory('.', 'robots.txt')
+    """Direct string response to ensure Google Bot always sees the 'Allow' directive."""
+    return "User-agent: *\nAllow: /\nSitemap: https://creatorstudio.pro/sitemap.xml", 200, {'Content-Type': 'text/plain'}
 
 @app.errorhandler(500)
 def handle_500(e):
