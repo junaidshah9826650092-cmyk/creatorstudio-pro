@@ -7,50 +7,216 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --red:#ff0055; --org:#ff5500; --gold:#ffd700; --bg:#06060c; }
+        :root { --red:#ff0055; --org:#ff5500; --gold:#ffd700; --bg:#06060c; --paper:#fdf8f0; --leather:#1a0a00; }
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:radial-gradient(circle at 50% 50%,#1a0a2a,#06060c);font-family:'Outfit',sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow:hidden;perspective:3000px;}
-        .ptop{position:fixed;top:12px;left:50%;transform:translateX(-50%);width:320px;z-index:999;text-align:center;}
-        .ptop span{color:#777;font-size:.58rem;letter-spacing:2px;}
-        .ptrack{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-top:3px;}
-        .pfill{height:100%;width:0%;background:linear-gradient(90deg,var(--red),var(--org));transition:.5s;}
-        .scene{width:500px;height:660px;position:relative;transform-style:preserve-3d;transform:translateX(125px);transition:transform 1s;}
+
+        body {
+            background: radial-gradient(ellipse at 30% 40%, #1a0828 0%, #06060c 60%);
+            font-family:'Outfit',sans-serif;
+            display:flex;justify-content:center;align-items:center;
+            min-height:100vh;overflow:hidden;
+            perspective:2200px;
+        }
+
+        /* ── Progress bar ── */
+        .ptop{position:fixed;top:14px;left:50%;transform:translateX(-50%);width:300px;z-index:999;text-align:center;}
+        .ptop span{color:#666;font-size:.55rem;letter-spacing:2.5px;}
+        .ptrack{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:3px;}
+        .pfill{height:100%;width:0%;background:linear-gradient(90deg,var(--red),var(--gold));transition:.5s;}
+
+        /* ── Book wrapper ── */
+        .book-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            /* Realistic ambient shadow below book */
+        }
+        .book-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: -30px; left: 10%; right: 8%;
+            height: 40px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.7) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ── Book SPINE ── */
+        .spine {
+            width: 28px;
+            height: 660px;
+            background: linear-gradient(180deg, #1a0000 0%, #3d0000 20%, #2a0000 50%, #3d0000 80%, #1a0000 100%);
+            border-radius: 4px 0 0 4px;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.8), inset -3px 0 8px rgba(0,0,0,0.5), inset 3px 0 4px rgba(255,80,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .spine-text {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: .48rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: rgba(255,80,0,0.7);
+            text-transform: uppercase;
+        }
+        .spine-line {
+            width: 16px; height: 1px;
+            background: rgba(255,100,0,0.25);
+        }
+
+        /* ── Page edge stack (right side – shows thickness) ── */
+        .page-edge {
+            width: 18px;
+            height: 640px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #f5ede0 0px, #ede3d4 1px,
+                #f0e8da 1px, #f0e8da 3px
+            );
+            border-radius: 0 3px 3px 0;
+            box-shadow: 3px 0 8px rgba(0,0,0,0.4), inset -2px 0 4px rgba(0,0,0,0.1);
+            align-self: center;
+            margin-left: -4px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-edge::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.08) 0%, transparent 40%, rgba(0,0,0,0.06) 100%);
+        }
+
+        /* ── Scene & 3D setup ── */
+        .scene{
+            width:500px; height:660px;
+            position:relative; transform-style:preserve-3d;
+            transition:transform 1s;
+            /* NO filter here — filter breaks backface-visibility in CSS 3D! */
+        }
         .book{width:100%;height:100%;position:relative;transform-style:preserve-3d;}
-        .page{width:100%;height:100%;position:absolute;top:0;left:0;transform-origin:left center;transition:transform .8s cubic-bezier(.645,.045,.355,1);transform-style:preserve-3d;user-select:none;}
-        .front,.back{width:100%;height:100%;position:absolute;top:0;left:0;backface-visibility:hidden;padding:20px;overflow-y:auto;border-radius:0 5px 5px 0;}
+
+        /* ── Pages ── */
+        .page{
+            width:100%; height:100%;
+            position:absolute; top:0; left:0;
+            transform-origin: left center;
+            transition: transform 0.85s cubic-bezier(.645,.045,.355,1);
+            transform-style: preserve-3d;
+            user-select: none;
+        }
+        /* Hover hint — slight right-side shadow to show page is clickable */
+        .page:hover:not(.flipped) > .front {
+            box-shadow: inset -30px 0 60px rgba(0,0,0,0.10), 5px 0 20px rgba(0,0,0,0.2);
+        }
+
+        .front, .back {
+            width:100%; height:100%;
+            position:absolute; top:0; left:0;
+            /* CRITICAL: must be on direct parent with transform-style:preserve-3d */
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            padding: 22px 22px 22px 24px;
+            overflow-y: auto;
+        }
         .front::-webkit-scrollbar,.back::-webkit-scrollbar{display:none;}
-        .back{transform:rotateY(180deg);border-radius:5px 0 0 5px;}
+
+        .front {
+            border-radius: 0 4px 4px 0;
+            /* Paper texture */
+            background-color: var(--paper);
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            /* Right-side page curl shadow */
+            box-shadow: inset -20px 0 40px rgba(0,0,0,0.06), 3px 0 10px rgba(0,0,0,0.12);
+            border-left: 3px solid rgba(0,0,0,0.05);
+        }
+        .back {
+            transform:rotateY(180deg);
+            border-radius:4px 0 0 4px;
+            background-color: var(--paper);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            box-shadow: inset 20px 0 40px rgba(0,0,0,0.06);
+            border-right: 3px solid rgba(0,0,0,0.05);
+        }
+
         .flipped{transform:rotateY(-180deg);}
-        .page:nth-child(1){z-index:36;} .page:nth-child(2){z-index:34;} .page:nth-child(3){z-index:32;} .page:nth-child(4){z-index:30;} .page:nth-child(5){z-index:28;} .page:nth-child(6){z-index:26;} .page:nth-child(7){z-index:24;} .page:nth-child(8){z-index:22;} .page:nth-child(9){z-index:20;} .page:nth-child(10){z-index:18;}
-        .page.flipped:nth-child(1){z-index:18;} .page.flipped:nth-child(2){z-index:20;} .page.flipped:nth-child(3){z-index:22;} .page.flipped:nth-child(4){z-index:24;} .page.flipped:nth-child(5){z-index:26;} .page.flipped:nth-child(6){z-index:28;} .page.flipped:nth-child(7){z-index:30;} .page.flipped:nth-child(8){z-index:32;} .page.flipped:nth-child(9){z-index:34;} .page.flipped:nth-child(10){z-index:36;}
-        .cover{background:linear-gradient(145deg,#0d0d18,#1a0a0a);border-left:14px solid #000;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;}
-        .cvt{font-size:3rem;font-weight:800;background:linear-gradient(90deg,var(--red),var(--org));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-        .pw{background:#fff;} .pc{background:#fffdf8;} .pl{background:#f8f9fa;} .pd{background:#0f0f18;}
-        @keyframes rp{0%,100%{background:#3a0000;}50%{background:#5c0000;}}
-        .pr{background:#3a0000;animation:rp 2.5s infinite;}
-        h2{font-size:1rem;color:var(--red);margin-bottom:10px;border-bottom:2px solid #eee;padding-bottom:4px;display:flex;align-items:center;gap:6px;}
-        /* Rule Detail Card */
-        .rcard{border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:10px;background:#fafafa;position:relative;}
-        .rcard.danger{background:#fff5f5;border-color:#ffcdd2;}
-        .rcard-title{font-size:.78rem;font-weight:700;color:#111;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
-        .rcard-title .icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;}
+
+        /* z-index stack for 15 pages */
+        .page:nth-child(1){z-index:46;} .page:nth-child(2){z-index:44;} .page:nth-child(3){z-index:42;} .page:nth-child(4){z-index:40;} .page:nth-child(5){z-index:38;} .page:nth-child(6){z-index:36;} .page:nth-child(7){z-index:34;} .page:nth-child(8){z-index:32;} .page:nth-child(9){z-index:30;} .page:nth-child(10){z-index:28;} .page:nth-child(11){z-index:26;} .page:nth-child(12){z-index:24;} .page:nth-child(13){z-index:22;} .page:nth-child(14){z-index:20;} .page:nth-child(15){z-index:18;}
+        .page.flipped:nth-child(1){z-index:18;} .page.flipped:nth-child(2){z-index:20;} .page.flipped:nth-child(3){z-index:22;} .page.flipped:nth-child(4){z-index:24;} .page.flipped:nth-child(5){z-index:26;} .page.flipped:nth-child(6){z-index:28;} .page.flipped:nth-child(7){z-index:30;} .page.flipped:nth-child(8){z-index:32;} .page.flipped:nth-child(9){z-index:34;} .page.flipped:nth-child(10){z-index:36;} .page.flipped:nth-child(11){z-index:38;} .page.flipped:nth-child(12){z-index:40;} .page.flipped:nth-child(13){z-index:42;} .page.flipped:nth-child(14){z-index:44;} .page.flipped:nth-child(15){z-index:46;}
+
+        /* ── Cover (Leather) ── */
+        .front.cover {
+            background:
+                linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%),
+                linear-gradient(180deg, #1c0800 0%, #2d1000 30%, #1c0800 60%, #261000 100%) !important;
+            border-left: 14px solid #0d0500;
+            background-image: none !important;
+            box-shadow: inset -8px 0 25px rgba(0,0,0,0.4), inset 4px 0 10px rgba(255,80,0,0.06);
+            display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;
+            outline: 2px dashed rgba(255,100,0,0.12);
+            outline-offset: -12px;
+        }
+        .cvt{font-size:3rem;font-weight:800;background:linear-gradient(90deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+
+        /* ── Page colors ── */
+        .pw .front, .pw .back { background-color: #fdf9f2; }
+        .pc .front, .pc .back { background-color: #fdfaf2; }
+        .pl .front, .pl .back { background-color: #f8f5ee; }
+        .pd .front, .pd .back { background-color: #0f0f18 !important; background-image: none !important; }
+
+        @keyframes rp{0%,100%{background-color:#3a0000;}50%{background-color:#5c0000;}}
+        .pr .front { background-color:#3a0000 !important; background-image: none !important; animation:rp 2.5s infinite; }
+        .pr .back  { background-color:#3a0000 !important; background-image: none !important; animation:rp 2.5s infinite; }
+
+        /* ── Page number ── */
+        .pgnum {
+            position: absolute; bottom: 10px; right: 14px;
+            font-size: .52rem; color: #bbb; letter-spacing: 1px;
+        }
+        .back .pgnum { left: 14px; right: auto; }
+
+        /* ── Content typography ── */
+        h2{font-size:.95rem;color:#c0392b;margin-bottom:10px;border-bottom:1px solid #d5c5b0;padding-bottom:4px;display:flex;align-items:center;gap:6px;}
+        .pd h2 { color: #ff4444; border-color: #222; }
+
+        /* ── Rule Detail Card ── */
+        .rcard{border:1px solid #e8ddd0;border-radius:6px;padding:9px;margin-bottom:9px;background:rgba(255,255,255,0.6);position:relative;backdrop-filter:blur(2px);}
+        .rcard.danger{background:rgba(255,235,235,0.7);border-color:#e8c0c0;}
+        .rcard-title{font-size:.75rem;font-weight:700;color:#111;margin-bottom:3px;display:flex;align-items:center;gap:5px;}
+        .rcard-title .icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.58rem;flex-shrink:0;}
         .ok-icon{background:#dcfce7;color:#16a34a;} .bad-icon{background:#fee2e2;color:#dc2626;}
-        .rcard-exp{font-size:.68rem;color:#555;line-height:1.35;margin-bottom:4px;}
-        .rcard-ex{font-size:.63rem;background:#f0f4ff;border-left:3px solid #6366f1;padding:4px 6px;border-radius:0 4px 4px 0;color:#3730a3;margin-bottom:4px;}
-        .rcard-penalty{font-size:.63rem;background:#fff0f0;border-left:3px solid var(--red);padding:4px 6px;border-radius:0 4px 4px 0;color:#991b1b;margin-bottom:4px;}
-        .rcard-tip{font-size:.62rem;background:#fffbeb;border-left:3px solid var(--gold);padding:4px 6px;border-radius:0 4px 4px 0;color:#78350f;}
-        .pr .rcard{background:rgba(255,255,255,.08);border-color:rgba(255,100,100,.3);}
-        .pr .rcard-title{color:#ffcccc;} .pr .rcard-exp{color:#ffa0a0;} .pr h2{color:#ff4444;border-color:#660000;}
-        /* Quiz */
-        .quiz{background:rgba(0,0,0,.04);border:1px dashed #ddd;border-radius:8px;padding:8px;margin-top:8px;}
-        .quiz p{font-size:.68rem;font-weight:700;color:#333;margin-bottom:5px;}
-        .qbtn{border:1px solid #ddd;background:#fff;padding:4px 9px;font-size:.67rem;border-radius:4px;margin:2px;cursor:pointer;transition:.2s;font-family:'Outfit',sans-serif;}
-        .qbtn.ok{background:#16a34a!important;color:#fff;} .qbtn.bad{background:#dc2626!important;color:#fff;}
-        .reward-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);z-index:3000;display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff;gap:12px;text-align:center;}
-        .ctrl{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;padding:9px 18px;border-radius:25px;cursor:pointer;font-weight:600;font-size:.82rem;backdrop-filter:blur(8px);transition:.3s;font-family:'Outfit',sans-serif;}
-        .ctrl:hover{background:var(--red);transform:translateY(-2px);}
-        .controls{position:fixed;bottom:26px;display:flex;gap:10px;z-index:1000;}
-        .badge{background:var(--red);color:#fff;padding:1px 6px;border-radius:3px;font-size:.52rem;font-weight:800;text-transform:uppercase;}
+        .rcard-exp{font-size:.66rem;color:#4a4035;line-height:1.35;margin-bottom:3px;}
+        .rcard-ex{font-size:.61rem;background:rgba(99,102,241,0.07);border-left:2px solid #6366f1;padding:3px 6px;border-radius:0 3px 3px 0;color:#3730a3;margin-bottom:3px;}
+        .rcard-penalty{font-size:.61rem;background:rgba(220,0,0,0.06);border-left:2px solid var(--red);padding:3px 6px;border-radius:0 3px 3px 0;color:#7f0000;margin-bottom:3px;}
+        .rcard-tip{font-size:.6rem;background:rgba(255,200,0,0.07);border-left:2px solid var(--gold);padding:3px 6px;border-radius:0 3px 3px 0;color:#6b4500;}
+        .pr .rcard{background:rgba(255,255,255,.07);border-color:rgba(255,100,100,.25);}
+        .pr .rcard-title{color:#ffcccc;} .pr .rcard-exp{color:#e0a0a0;} .pr h2{color:#ff4444;border-color:#5c0000;}
+        .pr .rcard-ex, .pr .rcard-penalty, .pr .rcard-tip { color: #ffaaaa; }
+
+        /* ── Quiz ── */
+        .quiz{background:rgba(0,0,0,.04);border:1px dashed #c8b89a;border-radius:6px;padding:7px;margin-top:7px;}
+        .quiz p{font-size:.65rem;font-weight:700;color:#3a3020;margin-bottom:4px;}
+        .qbtn{border:1px solid #d5c5af;background:rgba(255,255,255,0.8);padding:3px 8px;font-size:.64rem;border-radius:3px;margin:2px;cursor:pointer;transition:.2s;font-family:'Outfit',sans-serif;color:#333;}
+        .qbtn:hover{background:rgba(255,255,255,1);}
+        .qbtn.ok{background:#16a34a!important;color:#fff;border-color:#15803d;}
+        .qbtn.bad{background:#dc2626!important;color:#fff;border-color:#b91c1c;}
+
+        /* ── Reward overlay ── */
+        .reward-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(14px);z-index:3000;display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff;gap:12px;text-align:center;}
+
+        /* ── Controls ── */
+        .ctrl{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#fff;padding:9px 18px;border-radius:25px;cursor:pointer;font-weight:600;font-size:.8rem;backdrop-filter:blur(8px);transition:.3s;font-family:'Outfit',sans-serif;}
+        .ctrl:hover{background:var(--red);transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,0,85,.3);}
+        .controls{position:fixed;bottom:24px;display:flex;gap:10px;z-index:1000;}
+        .badge{background:var(--red);color:#fff;padding:1px 6px;border-radius:3px;font-size:.5rem;font-weight:800;text-transform:uppercase;}
     </style>
 </head>
 <body>
@@ -58,7 +224,20 @@
   <span>VITOX CONSTITUTION — <span id="pct">0</span>% COMPLETE</span>
   <div class="ptrack"><div class="pfill" id="pbar"></div></div>
 </div>
-<div class="scene"><div class="book" id="book">
+
+<div class="book-wrapper">
+  <!-- Book Spine -->
+  <div class="spine">
+    <div class="spine-line"></div>
+    <div class="spine-text">VITOX · CONSTITUTION · 2026</div>
+    <div class="spine-line"></div>
+    <div style="font-size:1rem;">⚖️</div>
+    <div class="spine-line"></div>
+  </div>
+
+  <!-- Main book scene -->
+  <div class="scene">
+    <div class="book" id="book">
 
 <!-- ══ PAGE 1: COVER ══ -->
 <div class="page" onclick="flip(this,1)">
@@ -369,7 +548,192 @@
   </div>
 </div>
 
-<!-- ══ PAGE 10: BACK COVER ══ -->
+<!-- ══ PAGE 10: PRIVACY ══ -->
+<div class="page" onclick="flip(this,10)">
+  <div class="front pw">
+    <h2><i class="fas fa-user-secret"></i> PRIVACY RULES</h2>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Recording Without Consent</div>
+      <div class="rcard-exp">Filming, recording, or streaming another person — in public or private — without their knowledge or permission, and publishing that footage, is a violation of their personal privacy rights under Indian law.</div>
+      <div class="rcard-ex">📌 Example: Hidden camera in a shared room, or filming a private conversation via smartphone without the other person knowing.</div>
+      <div class="rcard-penalty">🚫 Penalty: Video removed immediately + Strike 2 + FIR under IT Act Section 66E (Privacy Violation).</div>
+      <div class="rcard-tip">💡 Tip: In public spaces, blurring bystanders' faces is the safest approach. Always get written consent for private recordings.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Doxxing (Sharing Private Info)</div>
+      <div class="rcard-exp">Publishing another person's home address, phone number, workplace, family details, or any personal information they have not made public is doxxing — a serious form of cyber harassment.</div>
+      <div class="rcard-ex">📌 Example: A creator posts a rival's home address in the comments, inciting fans to visit or harass them physically.</div>
+      <div class="rcard-penalty">🚫 Penalty: Permanent ban + FIR under IPC Section 507 + data handed to Cyber Crime Cell.</div>
+    </div>
+  </div>
+  <div class="back pc">
+    <h2><i class="fas fa-lock"></i> DATA PROTECTION</h2>
+    <div class="rcard">
+      <div class="rcard-title"><span class="icon ok-icon">🔒</span>Your Data Rights</div>
+      <div class="rcard-exp">Vitox complies with India's Digital Personal Data Protection Act 2023 (DPDPA). You have the right to access, correct, and permanently delete all your personal data from our systems at any time.</div>
+      <div class="rcard-ex">📌 Example: Go to Settings → Privacy → Delete My Data to remove all your content, profile info, and activity logs.</div>
+      <div class="rcard-tip">💡 Tip: Data deletion requests are processed within 30 days. Download a backup of your data first via Settings → Export Data.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Scraping User PII</div>
+      <div class="rcard-exp">Using automated scripts or tools to mass-collect other users' personal data (emails, phone numbers, profile data) from Vitox for any external purpose is strictly illegal.</div>
+      <div class="rcard-penalty">🚫 Penalty: Permanent ban + legal action for data theft under DPDPA 2023.</div>
+    </div>
+    <div class="quiz">
+      <p>QUIZ: Someone posts your home address online. This is called:</p>
+      <button class="qbtn" onclick="ans(this,false)">Fair use</button>
+      <button class="qbtn" onclick="ans(this,true)">Doxxing — punishable by law</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 11: PREMIUM & PAYMENTS ══ -->
+<div class="page" onclick="flip(this,11)">
+  <div class="front pw">
+    <h2><i class="fas fa-star"></i> PREMIUM RULES</h2>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Account Sharing for Premium</div>
+      <div class="rcard-exp">A Vitox Premium subscription is valid for one person only. Sharing your login credentials with others so they can access premium features for free is a breach of contract and Terms of Service.</div>
+      <div class="rcard-ex">📌 Example: A group of 5 friends share one Premium account by logging in and out.</div>
+      <div class="rcard-penalty">⚠️ Penalty: Premium suspended without refund. All devices logged out. Second offence = account termination.</div>
+      <div class="rcard-tip">💡 Tip: Vitox offers a family plan at a discounted rate. Use that for sharing within a household legally.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Free Trial Abuse</div>
+      <div class="rcard-exp">Creating new accounts repeatedly using temporary or disposable email services to exploit the free trial system defrauds the platform and deprives it of fair revenue.</div>
+      <div class="rcard-ex">📌 Example: User creates 10 accounts using temp-mail.org to get 10 consecutive free trials.</div>
+      <div class="rcard-penalty">🚫 Penalty: Hardware ban preventing any future trial. All associated accounts flagged.</div>
+    </div>
+  </div>
+  <div class="back pc">
+    <h2><i class="fas fa-wallet"></i> PAYMENT INTEGRITY</h2>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Stolen Card Payments</div>
+      <div class="rcard-exp">Making payments to Vitox using a stolen, cloned, or unauthorised credit/debit card is payment fraud — a criminal offence under IPC Section 420 (Cheating) and the Payment and Settlement Systems Act.</div>
+      <div class="rcard-ex">📌 Example: Using a cloned card purchased from a darknet marketplace to buy Vitox Premium.</div>
+      <div class="rcard-penalty">🚫 Penalty: Account permanently banned + FIR + full cooperation with bank authorities and Cyber Cell.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Fraudulent Chargebacks</div>
+      <div class="rcard-exp">Filing a chargeback (reversal) with your bank after fully using a Vitox Premium subscription or service is chargeback fraud. Vitox maintains usage logs as evidence against false claims.</div>
+      <div class="rcard-penalty">🚫 Penalty: Account permanently banned + debt recovery proceedings + future payments declined.</div>
+      <div class="rcard-tip">💡 Tip: If genuinely unsatisfied, contact support@vitox.ai for a fair refund review within 7 days of purchase.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 12: COLLABORATIONS ══ -->
+<div class="page" onclick="flip(this,12)">
+  <div class="front pw">
+    <h2><i class="fas fa-handshake-simple"></i> COLLABORATION RULES</h2>
+    <div class="rcard">
+      <div class="rcard-title"><span class="icon ok-icon">🤝</span>Revenue Split Must Be Agreed in Writing</div>
+      <div class="rcard-exp">When two or more creators collaborate on content and plan to share monetization revenue, the exact percentage split must be agreed in writing (email or Vitox Collab Agreement) before the content goes live.</div>
+      <div class="rcard-ex">📌 Example: Two creators do a collab video. Creator A keeps 100% of revenue without telling Creator B. This is contractual fraud.</div>
+      <div class="rcard-penalty">⚠️ Penalty: Monetization frozen on the video. Dispute reviewed by Vitox Creator Board. Repeat offence = demonetization.</div>
+      <div class="rcard-tip">💡 Tip: Use Vitox's built-in Collab Agreement tool in the Studio Dashboard to set revenue splits officially.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Removing Co-Creator Credits</div>
+      <div class="rcard-exp">Removing, hiding, or altering a collaborating creator's name, contribution tag, or credit from joint content after it is published is intellectual theft and a platform rule violation.</div>
+      <div class="rcard-ex">📌 Example: After a collab video gets 1M views, Creator A edits the description to remove Creator B's mention and claims solo credit.</div>
+      <div class="rcard-penalty">🚫 Penalty: Strike + forced reinstatement of credits + temp upload ban.</div>
+    </div>
+  </div>
+  <div class="back pc">
+    <h2><i class="fas fa-certificate"></i> VERIFICATION RULES</h2>
+    <div class="rcard">
+      <div class="rcard-title"><span class="icon ok-icon">✅</span>Blue Tick — How to Earn It</div>
+      <div class="rcard-exp">The Vitox Blue Verification Badge is awarded to creators who have 100,000+ genuine subscribers AND submit a valid government-issued photo ID through Settings → Verification. It cannot be purchased.</div>
+      <div class="rcard-ex">📌 Example: A creator with 105k subs submits their Aadhaar card for verification and receives the blue tick within 5 business days.</div>
+      <div class="rcard-tip">💡 Tip: The blue tick will be revoked if subscriber count drops significantly or if you receive a Strike 2 or higher violation.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Forged ID Documents</div>
+      <div class="rcard-exp">Submitting edited, photocopied, or AI-generated fake government ID documents for verification is identity fraud — a serious criminal offence under IPC Section 468.</div>
+      <div class="rcard-penalty">🚫 Penalty: Permanent ban + FIR for document fraud + all earnings confiscated.</div>
+    </div>
+    <div class="quiz">
+      <p>QUIZ: Can you buy a Vitox Blue Tick?</p>
+      <button class="qbtn" onclick="ans(this,false)">Yes, it's available in settings</button>
+      <button class="qbtn" onclick="ans(this,true)">No — it's earned, not bought</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 13: SYSTEM SECURITY ══ -->
+<div class="page" onclick="flip(this,13)">
+  <div class="front pw">
+    <h2><i class="fas fa-terminal"></i> SYSTEM SECURITY RULES</h2>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Hacking or Server Attacks</div>
+      <div class="rcard-exp">Any attempt to probe, scan, inject code into, or disrupt Vitox's servers, APIs, or databases — including SQL injection, XSS, brute force, or DDoS — is a serious cybercrime under IT Act Section 66.</div>
+      <div class="rcard-ex">📌 Example: A user runs a script that sends 10,000 login requests per second to crack a creator's account password.</div>
+      <div class="rcard-penalty">🚫 Penalty: Immediate hardware ban + FIR under IT Act Section 66 + server logs shared with Cyber Crime Cell.</div>
+      <div class="rcard-tip">💡 Tip: Found a genuine security vulnerability? Report it responsibly at bug@vitox.ai and earn up to ₹50,000 bounty.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No API Reverse Engineering</div>
+      <div class="rcard-exp">Decompiling, reverse engineering, or systematically probing Vitox's private APIs to extract proprietary logic, user data, or algorithm behaviour is intellectual property theft and platform abuse.</div>
+      <div class="rcard-ex">📌 Example: Writing a Python script that reverse-engineers the recommendation algorithm by sending thousands of test queries.</div>
+      <div class="rcard-penalty">🚫 Penalty: Permanent IP ban + legal action for IP theft.</div>
+    </div>
+  </div>
+  <div class="back pc">
+    <h2><i class="fas fa-bug"></i> BUG BOUNTY PROGRAM</h2>
+    <div class="rcard">
+      <div class="rcard-title"><span class="icon ok-icon">🐛</span>Responsible Disclosure</div>
+      <div class="rcard-exp">If you discover a genuine security vulnerability in Vitox's systems, you are encouraged to report it responsibly rather than exploit it. Vitox rewards ethical security researchers generously.</div>
+      <div class="rcard-ex">📌 Bounty Scale:<br>• Low severity: ₹2,000<br>• Medium severity: ₹10,000<br>• High severity: ₹25,000<br>• Critical (data breach level): ₹50,000</div>
+      <div class="rcard-tip">💡 Tip: Email bug@vitox.ai with full details, steps to reproduce, and your account info. Do NOT exploit the bug or share it publicly before a fix is deployed.</div>
+    </div>
+    <div class="rcard danger">
+      <div class="rcard-title"><span class="icon bad-icon">✕</span>No Point System Glitch Abuse</div>
+      <div class="rcard-exp">Discovering and exploiting a glitch in the Vitox points or rewards system to artificially inflate your balance is fraud, even if the bug is Vitox's fault. You must report it, not exploit it.</div>
+      <div class="rcard-penalty">🚫 Penalty: Points balance reset to zero + 30-day account freeze.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 14: ENFORCEMENT SUMMARY ══ -->
+<div class="page" onclick="flip(this,14)">
+  <div class="front pw">
+    <h2><i class="fas fa-shield-halved"></i> VITOX MONITORING BOARD</h2>
+    <div class="rcard">
+      <div class="rcard-title"><span class="icon ok-icon">🤖</span>Layer 1: AI Scanner (Automated)</div>
+      <div class="rcard-exp">The first line of defence. Our AI scans every uploaded video title, description, thumbnail, and comment in real-time for dangerous keywords, known copyrighted material signatures, and bot-like behaviour patterns.</div>
+      <div class="rcard-tip">💡 Response time: Less than 60 seconds from upload to first scan result.</div>
+    </div>
+    <div class="rcard">
+      <div class="rcard-title"><span class="icon ok-icon">👁️</span>Layer 2: Human Moderators</div>
+      <div class="rcard-exp">Content flagged by the AI — or reported by users — is reviewed by a trained human moderator who verifies the violation and assigns the appropriate penalty from the standardised penalty guide.</div>
+      <div class="rcard-tip">💡 Response time: Within 24 hours for HIGH/CRITICAL. 72 hours for LOW/MEDIUM.</div>
+    </div>
+    <div class="rcard">
+      <div class="rcard-title"><span class="icon ok-icon">⚖️</span>Layer 3: Creator Board (Appeals)</div>
+      <div class="rcard-exp">If a creator disputes a penalty, the Creator Enforcement Board — consisting of senior moderators and a legal advisor — reviews the case. Their decision is final for non-criminal matters.</div>
+    </div>
+  </div>
+  <div class="back pd">
+    <h2 style="color:white;border-color:#222;"><i class="fas fa-list-ol"></i> PENALTY QUICK REFERENCE</h2>
+    <div class="rcard" style="background:rgba(255,255,255,.06);border-color:#222;">
+      <div class="rcard-title" style="color:#eee;">📊 Complete Penalty Table</div>
+      <div class="rcard-exp" style="color:#aaa;">
+        <b style="color:#ffd700;">LOW:</b> Warning in dashboard · Logged in record.<br><br>
+        <b style="color:#ff9800;">MEDIUM:</b> Content removed · 7-day comment lock.<br><br>
+        <b style="color:#ff5500;">HIGH:</b> Upload frozen 30 days · Demonetized · Strikes added.<br><br>
+        <b style="color:#ff0055;">CRITICAL:</b> Permanent hardware ban · FIR filed · Earnings confiscated.<br><br>
+        <b style="color:#aa00ff;">REPEAT OFFENCE:</b> Penalty upgraded one level automatically.
+      </div>
+    </div>
+    <div style="margin-top:14px;text-align:center;">
+      <button id="claimBtn" class="ctrl" style="background:var(--gold);color:#000;opacity:.35;cursor:not-allowed;" disabled onclick="claimReward()">🏆 Claim 500 Points</button>
+      <p id="claimHint" style="color:#444;font-size:.6rem;margin-top:6px;">Read all 14 pages to unlock</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 15: BACK COVER ══ -->
 <div class="page">
   <div class="front pd" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;">
     <div style="font-size:3rem;">⚖️</div>
@@ -380,7 +744,11 @@
   <div class="back" style="background:#000;"></div>
 </div>
 
-</div></div><!-- /book /scene -->
+</div><!-- /book -->
+</div><!-- /scene -->
+<!-- Page edge (right side thickness) -->
+<div class="page-edge"></div>
+</div><!-- /book-wrapper -->
 
 <div class="reward-overlay" id="rewardDlg">
   <div style="font-size:4rem;">🏆</div>
@@ -397,7 +765,7 @@
 </div>
 
 <script>
-const TOTAL = 9;
+const TOTAL = 14;
 let flipped = new Set();
 
 function flip(page, idx) {
@@ -450,9 +818,14 @@ function closeAll() {
 }
 
 document.addEventListener('mousemove', e => {
-  const rx = (window.innerWidth/2 - e.pageX) / 48;
-  const ry = (window.innerHeight/2 - e.pageY) / 48;
-  document.querySelector('.scene').style.transform = `translateX(125px) rotateY(${rx}deg) rotateX(${ry}deg)`;
+  // Relative to book-wrapper center
+  const wrapper = document.querySelector('.book-wrapper');
+  const rect = wrapper.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const rx = (cy - e.clientY) / 50;
+  const ry = (e.clientX - cx) / 60;
+  document.querySelector('.scene').style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 });
 </script>
 </body>

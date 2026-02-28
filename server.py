@@ -1945,7 +1945,81 @@ def upload_image_thumbnail():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ===========================================================
+# GOOGLE ADSENSE COMPLIANCE ROUTES
+# Required for AdSense approval and policy compliance
+# ===========================================================
+
+@app.route('/ads.txt')
+def ads_txt():
+    """
+    ads.txt — Authorized Digital Sellers file.
+    CRITICAL for AdSense: Google checks this before allowing ads.
+    Replace 'pub-XXXXXXXXXXXXXXXX' with your real AdSense Publisher ID.
+    """
+    publisher_id = os.environ.get('ADSENSE_PUBLISHER_ID', 'pub-0000000000000000')
+    content = f"google.com, {publisher_id}, DIRECT, f08c47fec0942fa0\n"
+    return content, 200, {
+        'Content-Type': 'text/plain',
+        'Cache-Control': 'public, max-age=86400'
+    }
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    """
+    XML Sitemap — helps Google crawl all pages.
+    Required for AdSense review and SEO ranking.
+    """
+    base = os.environ.get('SITE_URL', 'https://creatorstudio-pro.onrender.com')
+    pages = [
+        ('/', '1.0', 'daily'),
+        ('/index.html', '1.0', 'daily'),
+        ('/about.html', '0.8', 'monthly'),
+        ('/contact.html', '0.8', 'monthly'),
+        ('/privacy.html', '0.9', 'monthly'),
+        ('/terms.html', '0.9', 'monthly'),
+        ('/rules.html', '0.8', 'weekly'),
+        ('/earn.html', '0.7', 'weekly'),
+        ('/community.html', '0.7', 'daily'),
+        ('/upload.html', '0.7', 'weekly'),
+        ('/login.html', '0.6', 'monthly'),
+        ('/dashboard.html', '0.6', 'weekly'),
+        ('/analytics.html', '0.6', 'weekly'),
+        ('/swiftcash.html', '0.6', 'weekly'),
+        ('/copyright.html', '0.7', 'monthly'),
+        ('/disclaimer.html', '0.7', 'monthly'),
+    ]
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for path, priority, freq in pages:
+        xml += f'''  <url>
+    <loc>{base}{path}</loc>
+    <changefreq>{freq}</changefreq>
+    <priority>{priority}</priority>
+  </url>\n'''
+    xml += '</urlset>'
+    return xml, 200, {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600'
+    }
+
+@app.route('/api/cookie-consent', methods=['POST'])
+def log_cookie_consent():
+    """
+    GDPR/Privacy compliance: Log user cookie consent.
+    AdSense requires publishers to get consent in EU/EEA.
+    """
+    data = request.json or {}
+    email = data.get('email', 'anonymous')
+    consent_type = data.get('type', 'basic')  # basic, personalized, rejected
+    # In production: store in DB
+    return jsonify({'status': 'ok', 'consent': consent_type})
+
+# ===========================================================
 # Deploy ID: 1739556815
+# AdSense Publisher ID: Set ADSENSE_PUBLISHER_ID env variable
+# Site URL: Set SITE_URL env variable
+# ===========================================================
 
 # Initial DB Setup on Start
 try:
