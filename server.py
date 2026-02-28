@@ -91,9 +91,21 @@ from flask_talisman import Talisman
 
 app = Flask(__name__, static_folder='.', static_url_path='/static')
 CORS(app)
-# Force HTTPS (Only on Render) and Security Headers
+
+# Force HTTPS (Only on Render) but EXEMPT robots.txt for Google Bot
 is_prod = os.environ.get('RENDER') == 'true'
-Talisman(app, content_security_policy=None, force_https=is_prod)
+talisman = Talisman(
+    app, 
+    content_security_policy=None, 
+    force_https=is_prod,
+    strict_transport_security=False 
+)
+
+@app.before_request
+def handle_robots_https():
+    """Ensure Google Bot can access robots.txt even if HTTPS redirection is behaving oddly."""
+    if request.path == '/robots.txt':
+        return None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'vitox.db')
