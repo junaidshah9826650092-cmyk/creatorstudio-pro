@@ -399,21 +399,11 @@ except Exception as e:
     init_db() # Try initializing SQLite instead so server can at least start
 
 # --- Serve Static Files ---
-@app.route('/')
-def index():
-    """Explicitly serve index.html to avoid routing conflicts on Render."""
-    try:
-        return send_from_directory('.', 'index.html')
-    except Exception as e:
-        return f"System Error: index.html not found. Details: {str(e)}", 404
 
 @app.route('/health')
 def health():
     return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()}), 200
 
-@app.route('/ads.txt')
-def ads_txt():
-    return send_from_directory('.', 'ads.txt')
 
 @app.errorhandler(500)
 def handle_500(e):
@@ -442,36 +432,6 @@ def robots_txt_force():
     """HIGH PRIORITY: Guarantees Google always sees the ALLOW rule with the correct Render URL."""
     return "User-agent: *\nAllow: /\nSitemap: https://creatorstudio-pro.onrender.com/sitemap.xml", 200, {'Content-Type': 'text/plain'}
 
-@app.route('/sitemap.xml')
-def sitemap():
-    """SEO Optimized Sitemap Generator"""
-    pages = [
-        '/', '/login.html', '/about.html', '/contact.html', '/privacy.html', '/terms.html',
-        '/dashboard.html', '/upload.html', '/community.html', '/rules.html'
-    ]
-    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    
-    # Static Pages
-    base_url = "https://creatorstudio-pro.onrender.com"
-    for page in pages:
-        xml += f'  <url><loc>{base_url}{page}</loc><priority>0.8</priority></url>\n'
-    
-    # Dynamic Video Pages
-    conn = get_db_connection()
-    if USE_POSTGRES:
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute('SELECT id FROM videos LIMIT 100')
-        videos = cursor.fetchall()
-    else:
-        videos = conn.execute('SELECT id FROM videos LIMIT 100').fetchall()
-    
-    for v in videos:
-        xml += f'  <url><loc>{base_url}/index.html?v={v["id"]}</loc><priority>0.6</priority></url>\n'
-    
-    conn.close()
-    xml += '</urlset>'
-    return xml, 200, {'Content-Type': 'application/xml'}
 
 # --- API Routes ---
 
