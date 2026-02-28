@@ -385,6 +385,11 @@ def handle_exception(e):
 def serve_static(path):
     return send_from_directory('.', path)
 
+@app.route('/robots.txt')
+def robots_txt_force():
+    """HIGH PRIORITY: Guarantees Google always sees the ALLOW rule with the correct Render URL."""
+    return "User-agent: *\nAllow: /\nSitemap: https://creatorstudio-pro.onrender.com/sitemap.xml", 200, {'Content-Type': 'text/plain'}
+
 @app.route('/sitemap.xml')
 def sitemap():
     """SEO Optimized Sitemap Generator"""
@@ -396,7 +401,7 @@ def sitemap():
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     
     # Static Pages
-    base_url = "https://creatorstudio.pro"
+    base_url = "https://creatorstudio-pro.onrender.com"
     for page in pages:
         xml += f'  <url><loc>{base_url}{page}</loc><priority>0.8</priority></url>\n'
     
