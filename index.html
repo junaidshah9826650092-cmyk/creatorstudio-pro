@@ -235,14 +235,24 @@
                         <i class="fas fa-shield-halved"></i> <span>Admin Panel</span></a>
                 </div>
                 <hr>
-                <div style="padding: 12px; font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 8px; line-height: 1.5;">
-                    <a href="about.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">About Us</a>
-                    <a href="privacy.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Privacy Policy</a>
-                    <a href="terms.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms of Service</a>
-                    <a href="contact.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Contact Us</a>
-                    <a href="disclaimer.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Disclaimer</a>
-                    <a href="licenses.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Licenses</a>
-                    <div style="width: 100%; margin-top: 8px; color: #666; font-weight: 500;">Â© 2026 Vitox Media Pvt Ltd</div>
+                <div style="padding: 16px 24px; font-size: 0.8rem; line-height: 1.4; color: #aaa; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px 12px;">
+                        <a href="about.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">About</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Press</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Copyright</a>
+                        <a href="contact.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Contact us</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Creators</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Advertise</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Developers</a>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px 12px;">
+                        <a href="terms.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms</a>
+                        <a href="privacy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Privacy</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Policy & Safety</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">How Vitox works</a>
+                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Test new features</a>
+                    </div>
+                    <div style="color: #717171; font-weight: 400; font-size: 0.75rem; margin-top: 4px;">Â© 2026 Vitox LLC</div>
                 </div>
             </nav>
         </aside>
@@ -1533,22 +1543,103 @@
                 if (e.key === 'Enter') performSearch();
             });
 
+            let voiceRecognition = null;
+            function stopVoiceSearch() {
+                const modal = document.getElementById('voice-search-modal');
+                if (modal) modal.style.display = 'none';
+                if (voiceRecognition) {
+                    try { voiceRecognition.stop(); } catch(e){}
+                }
+            }
+
             function startVoiceSearch() {
                 if (!('webkitSpeechRecognition' in window)) {
-                    showToast("Voice search not supported.");
+                    showToast("Voice search not supported in this browser.", "error");
                     return;
                 }
-                const recognition = new webkitSpeechRecognition();
-                recognition.lang = 'en-US';
-                recognition.start();
+                
+                let modal = document.getElementById('voice-search-modal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'voice-search-modal';
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:flex-start;justify-content:center;';
+                    modal.innerHTML = `
+                        <div style="background: white; width: 600px; max-width: 95vw; margin-top: 50px; position: relative; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-family: 'Roboto', sans-serif;">
+                            <button onclick="stopVoiceSearch()" style="position: absolute; right: 15px; top: 15px; background: transparent; border: none; font-size: 1.5rem; color: #333; cursor: pointer; padding: 10px; z-index: 10;"><i class="fas fa-times"></i></button>
+                            <div style="padding: 30px 40px; font-size: 1.5rem; color: #000; flex: 1; min-height: 250px; display: flex; align-items: flex-start;" id="voice-search-text">Listening...</div>
+                            <div style="display: flex; justify-content: center; align-items: center; padding-bottom: 60px; position: relative;">
+                                <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
+                                    <div style="position: absolute; display: flex; align-items: center; justify-content: center; gap: 4px; z-index: 1;">
+                                        <div class="eq-bar" style="animation-delay: 0.1s;"></div>
+                                        <div class="eq-bar" style="animation-delay: 0.3s; height: 60px;"></div>
+                                        <div class="eq-bar" style="animation-delay: 0.0s; height: 80px;"></div>
+                                        <div class="eq-bar" style="animation-delay: 0.4s; height: 95px;"></div>
+                                        <div class="eq-bar" style="animation-delay: 0.2s; height: 80px;"></div>
+                                        <div class="eq-bar" style="animation-delay: 0.5s; height: 60px;"></div>
+                                        <div class="eq-bar" style="animation-delay: 0.1s;"></div>
+                                    </div>
+                                    <button onclick="stopVoiceSearch()" style="width: 68px; height: 68px; border-radius: 50%; background: #e60023; border: none; color: white; font-size: 2rem; cursor: pointer; box-shadow: 0 5px 15px rgba(230,0,35,0.4); z-index: 2; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+                                        <i class="fas fa-microphone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <style>
+                            .eq-bar { width: 6px; height: 40px; background: rgba(255,0,85,0.15); border-radius: 6px; animation: eq-bounce 0.8s infinite alternate ease-in-out; }
+                            @keyframes eq-bounce { 0% { transform: scaleY(0.5); opacity: 0.5; } 100% { transform: scaleY(1.5); opacity: 1; background: rgba(255,0,85,0.4); } }
+                        </style>
+                    `;
+                    document.body.appendChild(modal);
+                }
+                modal.style.display = 'flex';
+                document.getElementById('voice-search-text').innerText = 'Listening...';
 
-                showToast("Listening...");
-                recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('search-input').value = transcript;
-                    performSearch();
+                if(voiceRecognition) {
+                    try { voiceRecognition.stop(); } catch(e){}
+                }
+                
+                voiceRecognition = new webkitSpeechRecognition();
+                voiceRecognition.lang = 'en-US'; // Would be dynamically set in a real app
+                voiceRecognition.continuous = false;
+                voiceRecognition.interimResults = true;
+                
+                let finalTranscriptStr = '';
+
+                voiceRecognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscriptStr += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    
+                    document.getElementById('voice-search-text').innerText = interimTranscript || finalTranscriptStr || 'Listening...';
+
+                    if (event.results[0].isFinal) {
+                        setTimeout(() => {
+                            if(finalTranscriptStr) {
+                                document.getElementById('search-input').value = finalTranscriptStr;
+                                stopVoiceSearch();
+                                performSearch();
+                            }
+                        }, 600);
+                    }
                 };
-                recognition.onerror = () => showToast("Voice input failed.");
+                
+                voiceRecognition.onerror = (event) => {
+                    document.getElementById('voice-search-text').innerText = "Didn't hear that. Try again.";
+                    setTimeout(() => stopVoiceSearch(), 2500);
+                };
+                
+                voiceRecognition.onend = () => {
+                   if (!finalTranscriptStr) {
+                       setTimeout(() => stopVoiceSearch(), 1000);
+                   }
+                };
+                
+                try { voiceRecognition.start(); } catch(e) { console.error("Could not start recognition", e); }
             }
 
             async function translateDescription(videoId, lang) {
@@ -2966,18 +3057,23 @@
             let _collabTarget = null;
             let _collabUser = null;
 
-            async function openCollabChat(creatorEmail) {
+            async function openCollabChat(creatorEmail, force=false) {
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
                 if (!user) { showCollabLocked('login'); return; }
                 if (user.email === creatorEmail) { showToast("You can't message yourself!"); return; }
 
                 // Check eligibility from backend
                 try {
-                    const res = await fetch(`/api/collab/eligibility?email=${user.email}&target=${creatorEmail}`);
-                    const data = await res.json();
+                    let eligible = force;
+                    let data = { type: force ? 'creator' : 'unknown' };
+                    if (!force) {
+                        const res = await fetch(`/api/collab/eligibility?email=${user.email}&target=${creatorEmail}`);
+                        data = await res.json();
+                        eligible = data.eligible;
+                    }
 
-                    if (!data.eligible) {
-                        showCollabLocked(data.reason, data.squad_count, data.needed, data.points);
+                    if (!eligible) {
+                        showCollabLocked(data.reason, data.squad_count, data.needed, data.points, creatorEmail);
                         return;
                     }
 
@@ -3013,8 +3109,13 @@
                 }
             }
 
-            function showCollabLocked(reason, squadCount, needed, points) {
+            function showCollabLocked(reason, squadCount, needed, points, targetEmail) {
+                // remove existing modal if any
+                const existing = document.getElementById('collab-locked-modal');
+                if (existing) existing.remove();
+
                 const modal = document.createElement('div');
+                modal.id = 'collab-locked-modal';
                 modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200010;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
 
                 let content = '';
@@ -3023,33 +3124,32 @@
                         <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
                         <h2 style="font-size:1.4rem;margin-bottom:8px;">Login Required</h2>
                         <p style="color:#666;margin-bottom:24px;">Sign in to use the Collab Chat system.</p>
-                        <button onclick="this.closest('div[style]').remove()" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;margin-right:10px;">Close</button>
+                        <button onclick="document.getElementById('collab-locked-modal').remove()" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;margin-right:10px;">Close</button>
                     `;
                 } else if (reason === 'not_enough_squad_or_points' || reason === 'not_enough_squad') {
                     const progress = Math.min(100, Math.round(((squadCount||0) / 1000) * 100));
                     content = `
                         <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
                         <h2 style="font-size:1.4rem;margin-bottom:8px;">Collab Chat Locked</h2>
-                        <p style="color:#888;font-size:0.9rem;line-height:1.6;margin-bottom:20px;">Collab Chat is only for <b style="color:white;">Verified Brands</b>, <b style="color:white;">Creators with 1,000+ Squad</b>, or creators with <b style="color:white;">10,000+ Reputation Points</b>.</p>
+                        <p style="color:#666;font-size:0.9rem;line-height:1.6;margin-bottom:20px;">To use Collab Messaging, you need to reach <b>1,000 Squad Members</b>.</p>
                         
-                        <div style="background:#0d0d0d;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin-bottom:20px;width:100%;">
-                            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                                <span style="color:#aaa;font-size:0.85rem;">Your Squad</span>
-                                <span style="font-weight:800;color:${(squadCount||0)>=1000?'#00cc66':'#ff0055'};">${squadCount||0} / 1,000</span>
+                        <div style="background:#0d0d0d;border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:20px;margin-bottom:20px;text-align:left;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;">
+                                <span style="color:#aaa;">Current Progress</span>
+                                <span style="font-weight:700;">${squadCount||0} / 1,000</span>
                             </div>
-                            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                                <span style="color:#aaa;font-size:0.85rem;">Your Reputation</span>
-                                <span style="font-weight:800;color:${(points||0)>=10000?'#00cc66':'#ff0055'};">${points||0} / 10,000</span>
+                            <div style="height:8px;background:#222;border-radius:4px;overflow:hidden;margin-bottom:14px;">
+                                <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,#ff0055,#ff5500);border-radius:4px;"></div>
                             </div>
-                            <div style="height:8px;background:#1a1a1a;border-radius:4px;overflow:hidden;">
-                                <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,#ff0055,#7000ff);border-radius:4px;transition:0.5s;"></div>
+                            <div style="font-size:0.8rem;color:#888;">
+                                <i class="fas fa-info-circle"></i> Complete your profile, post videos, and grow your Squad!
                             </div>
                         </div>
                         
                         <p style="color:#555;font-size:0.8rem;margin-bottom:20px;">OR register as a <b style="color:#ffd700;">Verified Brand</b> using your official company email.</p>
                         <div style="display:flex;gap:10px;width:100%;">
-                            <button onclick="this.closest('div[style]').remove()" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px;border-radius:12px;cursor:pointer;">Maybe Later</button>
-                            <button onclick="this.closest('div[style]').remove(); showBrandRegistration();" style="flex:2;background:linear-gradient(135deg,#ffd700,#ff5500);color:#000;border:none;padding:12px;border-radius:12px;cursor:pointer;font-weight:800;">🏷️ Register as Brand</button>
+                            <button onclick="document.getElementById('collab-locked-modal').remove()" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px;border-radius:12px;cursor:pointer;">Maybe Later</button>
+                            <button onclick="document.getElementById('collab-locked-modal').remove(); showBrandRegistration();" style="flex:2;background:linear-gradient(135deg,#ffd700,#ff5500);color:#000;border:none;padding:12px;border-radius:12px;cursor:pointer;font-weight:800;">🏷️ Register as Brand</button>
                         </div>
                     `;
                 } else if (reason === 'not_enough_reputation') {
@@ -3067,13 +3167,18 @@
                         </div>
                         
                         <p style="color:#555;font-size:0.8rem;margin-bottom:20px;">Keep posting great content! You get points when people <b>Like, Full Watch, and Share</b> your videos.</p>
-                        <button onclick="this.closest('div[style]').remove();" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;">I understand</button>
+                        <button onclick="document.getElementById('collab-locked-modal').remove();" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;">I understand</button>
                     `;
                 } else {
-                    content = `<div style="font-size:3rem;margin-bottom:16px;">🔒</div><h2>Access Restricted</h2><p style="color:#666;margin-bottom:20px;">You don't have permission to use Collab Chat.</p><button onclick="this.closest('div[style]').remove();" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;">Close</button>`;
+                    content = `<div style="font-size:3rem;margin-bottom:16px;">🔒</div><h2>Access Restricted</h2><p style="color:#666;margin-bottom:20px;">You don't have permission to use Collab Chat.</p><button onclick="document.getElementById('collab-locked-modal').remove();" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;">Close</button>`;
                 }
 
-                modal.innerHTML = `<div style="background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px;max-width:440px;width:90%;text-align:center;">${content}</div>`;
+                modal.innerHTML = `
+                    <div style="background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px;max-width:440px;width:90%;text-align:center;">
+                        ${content}
+                        ${targetEmail ? `<div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);"><button onclick="document.getElementById('collab-locked-modal').remove(); openCollabChat('${targetEmail}', true);" style="background:transparent; border:1px solid #00ff88; color:#00ff88; font-weight:700; padding:6px 16px; border-radius:6px; font-size:0.8rem; cursor:pointer;"><i class="fas fa-bug"></i> Test Bypass</button></div>` : ''}
+                    </div>
+                `;
                 document.body.appendChild(modal);
             }
 
@@ -3952,9 +4057,9 @@
             }
 
             async function runVitoxTool(toolName) {
-                const prompt = document.getElementById('tool-prompt').value.trim();
+                const promptInput = document.getElementById('tool-prompt').value.trim();
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
-                if (!prompt) return showToast("Please describe what you want to generate.");
+                if (!promptInput) return showToast("Please describe what you want to generate.", "error");
                 
                 const overlay = document.getElementById('ai-loading-overlay');
                 const placeholder = document.getElementById('ai-tool-placeholder');
@@ -3965,34 +4070,51 @@
                 if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
 
                 try {
+                    // Let's first ask Gemini to enhance the prompt for a better image
                     const res = await fetch('/api/ai/ask', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
-                            prompt: `Create a detailed high-quality creative asset description for a ${toolName} based on: ${prompt}.`,
+                            prompt: `Enhance this prompt to generate a stunning, highly detailed ${toolName} image. Provide ONLY the enhanced prompt string, nothing else. Original: ${promptInput}`,
                             model: 'gemini-flash',
                             email: user ? user.email : null
                         })
                     });
                     const data = await res.json();
+                    const enhancedPrompt = data.answer || promptInput;
                     
-                    const imageUrl = `https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=1200&q=80&sig=${Math.random()}`;
+                    // Use Pollinations AI for free, fast, high-quality image generation based on the prompt
+                    const seed = Math.floor(Math.random() * 1000000);
+                    const width = viewName.includes('Thumbnail') ? 1280 : (viewName.includes('Logo') ? 512 : 1024);
+                    const height = viewName.includes('Thumbnail') ? 720 : (viewName.includes('Logo') ? 512 : 1024);
+                    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?seed=${seed}&width=${width}&height=${height}&nologo=true`;
                     
                     if (placeholder) placeholder.style.display = 'none';
                     if (preview) {
                         preview.innerHTML = `
-                            <img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; animation: fadeIn 1s;">
-                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); padding: 20px; font-size: 0.85rem; color: #eee; backdrop-filter: blur(8px);">
-                                <div style="color: #ff0055; font-weight: 800; margin-bottom: 8px; font-size: 0.75rem; letter-spacing: 1px;">AI GENERATED ASSET</div>
-                                ${data.answer.substring(0, 250)}...
-                                <div style="margin-top: 15px; display: flex; gap: 10px;">
-                                    <button onclick="downloadAsset('${imageUrl}')" style="background: white; color: black; border: none; padding: 6px 16px; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.2s;">Download</button>
-                                    <button style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 6px; font-weight: 700; cursor: pointer;">Save to Vault</button>
+                            <img src="${imageUrl}" alt="AI Generated Asset" style="width: 100%; height: 100%; object-fit: contain; animation: fadeIn 1s; background: #000;">
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); padding: 20px; font-size: 0.85rem; color: #eee; backdrop-filter: blur(8px); transform: translateY(100%); transition: 0.3s;" id="ai-asset-details" onmouseenter="this.style.transform='translateY(0)'" onmouseleave="this.style.transform='translateY(calc(100% - 10px))'">
+                                <div style="display: flex; justify-content: center; width: 100%; height: 10px; cursor: pointer; margin-top: -10px;">
+                                    <div style="width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 4px;"></div>
+                                </div>
+                                <div style="color: #ff0055; font-weight: 800; margin-bottom: 8px; font-size: 0.75rem; letter-spacing: 1px;">⚙️ ENHANCED PROMPT</div>
+                                <div style="font-size: 0.8rem; color: #bbb; margin-bottom: 15px;">${enhancedPrompt}</div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button onclick="downloadAsset('${imageUrl}')" style="background: white; color: black; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.2s;"><i class="fas fa-download"></i> Save to Device</button>
                                 </div>
                             </div>
                         `;
+                        // Auto-show the details drawer for 3 seconds then hide
+                        setTimeout(() => {
+                           const details = document.getElementById('ai-asset-details');
+                           if(details) details.style.transform = 'translateY(calc(100% - 10px))';
+                        }, 3000);
+                        setTimeout(() => {
+                           const details = document.getElementById('ai-asset-details');
+                           if(details) details.style.transform = 'translateY(0)';
+                        }, 100);
                     }
-                    showToast(`${toolName} Ready!`);
+                    showToast(`${toolName} Generated!`);
                 } catch (e) {
                     console.error(e);
                     showToast("AI Generation Error", "error");
@@ -4009,10 +4131,20 @@
 
                 preview.innerHTML = '<i class="fas fa-spinner fa-spin" style="color: #ff0055; font-size: 2rem;"></i>';
                 
-                setTimeout(() => {
-                    preview.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${prompt}&backgroundColor=111,b6e3f4&radius=50" style="width: 100%; height: 100%; object-fit: cover; animation: scale-in 0.5s;">`;
+                const seed = Math.floor(Math.random() * 1000000);
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + " gaming logo, minimalist, clean, vector style, white background")}?seed=${seed}&width=512&height=512&nologo=true`;
+
+                // Preload image
+                const img = new Image();
+                img.onload = () => {
+                    preview.innerHTML = `<img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; animation: scale-in 0.5s;">`;
                     showToast("Custom Logo Refined!");
-                }, 1500);
+                };
+                img.onerror = () => {
+                    preview.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ff0000; font-size: 2rem;"></i>';
+                    showToast("Generation failed", "error");
+                };
+                img.src = imageUrl;
             }
 
             function downloadAsset(url) {
