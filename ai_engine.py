@@ -121,7 +121,7 @@ class VitoxAI:
     def copyright_scan(self, title):
         """AI Patent/Copyright Scanning"""
         # Detecting trademark violations or copyrighted franchise names
-        restricted = ['disney', 'marvel', 'netflix', 'hbo', 'warner bros', 'full movie', 'official trailer 2024']
+        restricted = ['disney', 'marvel', 'netflix', 'hbo', 'warner bros', 'full movie', 'official trailer 2026']
         for word in restricted:
             if word in title.lower():
                 return False

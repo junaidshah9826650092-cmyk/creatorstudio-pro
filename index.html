@@ -610,7 +610,17 @@
                 const emptyState = document.getElementById('empty-state');
 
                 if (!videosToRender || videosToRender.length === 0) {
-                    if (emptyState) emptyState.style.display = 'block';
+                    if (emptyState) {
+                        emptyState.style.display = 'block';
+                        emptyState.innerHTML = `
+                            <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                                <i class="fas fa-video-slash" style="font-size: 3.5rem; margin-bottom: 24px; color: #333;"></i>
+                                <h2 style="color: var(--text-primary); margin-bottom: 12px; font-weight: 800;">No videos found</h2>
+                                <p style="font-size: 1.1rem; max-width: 400px; margin: 0 auto 30px;">Be the first one to share something amazing with the Vitox Squad!</p>
+                                <button onclick="location.href='upload.html'" style="padding: 12px 30px; background: var(--accent); border: none; color: white; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 15px rgba(255,0,85,0.3);">Upload Now</button>
+                            </div>
+                        `;
+                    }
                     if (grid) grid.style.display = 'none';
                     return;
                 }
@@ -952,6 +962,19 @@
             }
 
             function loadView(viewName, data = {}) {
+                // Update active state in sidebar
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                const links = Array.from(document.querySelectorAll('.nav-item'));
+                const link = links.find(a => {
+                    const text = a.innerText.trim().toLowerCase();
+                    return text === viewName.toLowerCase() || 
+                           (viewName === 'V-Snaps' && text.includes('v-snaps')) ||
+                           (viewName === 'Squad' && text === 'squad') ||
+                           (viewName === 'Feed' && text === 'feed') ||
+                           (viewName === 'Live Stream' && text === 'pulse');
+                });
+                if (link) link.classList.add('active');
+
                 const grid = document.getElementById('main-video-grid');
                 const emptyState = document.getElementById('empty-state');
                 const sidebar = document.querySelector('.sidebar');
@@ -962,6 +985,12 @@
                 if (grid) {
                     grid.innerHTML = '';
                     grid.style.display = 'block';
+                }
+                if (emptyState) emptyState.style.display = 'none';
+
+                if (viewName === 'Feed') {
+                    loadVideos();
+                    return;
                 }
 
                 // Default show common UI elements

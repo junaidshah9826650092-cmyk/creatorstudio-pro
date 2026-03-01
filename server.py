@@ -729,15 +729,11 @@ def get_all_videos():
         print(f"Database Query Error: {e}. Falling back to Cloudinary...")
 
     if not videos or len(videos) == 0:
-        # User requested to remove messy cloud videos and only show verified ones
-        # We now filter cloud fallback to only show a few high-quality test assets if absolutely needed
+        # Fallback: Fetch from Cloudinary if DB is empty
         all_cloud_videos = _fetch_from_cloudinary(video_type if video_type else 'video')
-        # Only keep videos with 'official' or 'test' in the public_id to keep it clean
-        videos = [v for v in all_cloud_videos if 'test' in v['title'].lower() or 'official' in v['title'].lower()]
-        
         if video_type:
-            videos = [v for v in videos if v.get('type') == video_type]
-        return jsonify(videos)
+            all_cloud_videos = [v for v in all_cloud_videos if v.get('type') == video_type]
+        return jsonify(all_cloud_videos)
 
     return jsonify(to_json(videos))
 
