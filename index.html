@@ -2806,38 +2806,223 @@
                 } catch (e) { console.error(e); }
             }
 
+
             // Collab Chat Logic
             let collabChatPoller = null;
             let _collabTarget = null;
             let _collabUser = null;
 
-            function openCollabChat(creatorEmail) {
+            async function openCollabChat(creatorEmail) {
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
-                if (!user) { showToast("Login required to Collab 🤝"); return; }
+                if (!user) { showCollabLocked('login'); return; }
                 if (user.email === creatorEmail) { showToast("You can't message yourself!"); return; }
 
-                _collabUser = user;
-                _collabTarget = creatorEmail;
+                // Check eligibility from backend
+                try {
+                    const res = await fetch(`/api/collab/eligibility?email=${user.email}`);
+                    const data = await res.json();
 
-                const drawer = document.getElementById('collab-chat-drawer');
-                drawer.style.right = '0';
+                    if (!data.eligible) {
+                        showCollabLocked(data.reason, data.squad_count, data.needed);
+                        return;
+                    }
 
-                // Set avatar initial
-                const avatarEl = document.getElementById('collab-avatar');
-                if (avatarEl) avatarEl.innerText = creatorEmail.charAt(0).toUpperCase();
+                    // Eligible! Open the chat
+                    _collabUser = user;
+                    _collabTarget = creatorEmail;
 
-                document.getElementById('collab-chat-target').innerText = '@' + creatorEmail.split('@')[0];
+                    const drawer = document.getElementById('collab-chat-drawer');
+                    drawer.style.right = '0';
 
-                loadCollabHistory(user.email, creatorEmail);
+                    // Set avatar + badge
+                    const avatarEl = document.getElementById('collab-avatar');
+                    if (avatarEl) {
+                        avatarEl.innerText = creatorEmail.charAt(0).toUpperCase();
+                        if (data.type === 'brand') avatarEl.style.background = 'linear-gradient(135deg,#ffd700,#ff5500)';
+                        else if (data.type === 'creator') avatarEl.style.background = 'linear-gradient(135deg,#00cc66,#0088ff)';
+                    }
 
-                // setup send button
-                const sendBtn = document.getElementById('collab-chat-send');
-                sendBtn.onclick = () => sendCollabMsg(user.email, creatorEmail);
+                    const targetEl = document.getElementById('collab-chat-target');
+                    if (targetEl) targetEl.innerHTML = '@' + creatorEmail.split('@')[0] +
+                        (data.type === 'brand' ? ' <span style="background:#ffd700;color:#000;font-size:0.6rem;padding:2px 6px;border-radius:4px;font-weight:800;vertical-align:middle;">🏷️ BRAND</span>' : '');
 
-                // Poll for new messages every 3 seconds
-                if (collabChatPoller) clearInterval(collabChatPoller);
-                collabChatPoller = setInterval(() => loadCollabHistory(user.email, creatorEmail, true), 3000);
+                    loadCollabHistory(user.email, creatorEmail);
+
+                    const sendBtn = document.getElementById('collab-chat-send');
+                    sendBtn.onclick = () => sendCollabMsg(user.email, creatorEmail);
+
+                    if (collabChatPoller) clearInterval(collabChatPoller);
+                    collabChatPoller = setInterval(() => loadCollabHistory(user.email, creatorEmail, true), 3000);
+                } catch(e) {
+                    showToast('Error checking eligibility. Please try again.');
+                }
             }
+
+            function showCollabLocked(reason, squadCount, needed) {
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200010;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
+
+                let content = '';
+                if (reason === 'login') {
+                    content = `
+                        <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+                        <h2 style="font-size:1.4rem;margin-bottom:8px;">Login Required</h2>
+                        <p style="color:#666;margin-bottom:24px;">Sign in to use the Collab Chat system.</p>
+                        <button onclick="this.closest('div[style]').remove()" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;margin-right:10px;">Close</button>
+                    `;
+                } else if (reason === 'not_enough_squad') {
+                    const user = JSON.parse(localStorage.getItem('vitox_user') || 'null');
+                    const progress = Math.min(100, Math.round((squadCount / needed) * 100));
+                    content = `
+                        <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+                        <h2 style="font-size:1.4rem;margin-bottom:8px;">Collab Chat Locked</h2>
+                        <p style="color:#888;font-size:0.9rem;line-height:1.6;margin-bottom:20px;">Collab Chat is only for <b style="color:white;">Verified Brands</b> and <b style="color:white;">Creators with 1,000+ Squad</b> members.</p>
+                        
+                        <div style="background:#0d0d0d;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin-bottom:20px;width:100%;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                                <span style="color:#aaa;font-size:0.85rem;">Your Squad</span>
+                                <span style="font-weight:800;color:${(squadCount||0)>=1000?'#00cc66':'#ff0055'};">${squadCount||0} / 1,000</span>
+                            </div>
+                            <div style="height:8px;background:#1a1a1a;border-radius:4px;overflow:hidden;">
+                                <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,#ff0055,#7000ff);border-radius:4px;transition:0.5s;"></div>
+                            </div>
+                        </div>
+                        
+                        <p style="color:#555;font-size:0.8rem;margin-bottom:20px;">OR register as a <b style="color:#ffd700;">Verified Brand</b> using your official company email.</p>
+                        <div style="display:flex;gap:10px;width:100%;">
+                            <button onclick="this.closest('div[style]').remove()" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px;border-radius:12px;cursor:pointer;">Maybe Later</button>
+                            <button onclick="this.closest('div[style]').remove(); showBrandRegistration();" style="flex:2;background:linear-gradient(135deg,#ffd700,#ff5500);color:#000;border:none;padding:12px;border-radius:12px;cursor:pointer;font-weight:800;">🏷️ Register as Brand</button>
+                        </div>
+                    `;
+                } else {
+                    content = `<div style="font-size:3rem;margin-bottom:16px;">🔒</div><h2>Access Restricted</h2><p style="color:#666;margin-bottom:20px;">You don't have permission to use Collab Chat.</p><button onclick="this.closest('div[style]').remove();" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;">Close</button>`;
+                }
+
+                modal.innerHTML = `<div style="background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px;max-width:440px;width:90%;text-align:center;">${content}</div>`;
+                document.body.appendChild(modal);
+            }
+
+            function showBrandRegistration() {
+                const user = JSON.parse(localStorage.getItem('vitox_user') || 'null');
+                if (!user) { showToast('Please login first!'); return; }
+
+                const modal = document.createElement('div');
+                modal.id = 'brand-reg-modal';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200011;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
+                modal.innerHTML = `
+                    <div style="background:#111;border:1px solid rgba(255,215,0,0.2);border-radius:24px;padding:32px;max-width:460px;width:90%;">
+                        <div style="text-align:center;margin-bottom:24px;">
+                            <div style="font-size:2.5rem;margin-bottom:8px;">🏷️</div>
+                            <h2 style="font-size:1.3rem;margin-bottom:4px;">Brand Verification</h2>
+                            <p style="color:#666;font-size:0.85rem;">Register your brand to unlock Collab Chat</p>
+                        </div>
+                        <div id="brand-reg-result"></div>
+                        <div id="brand-reg-form">
+                            <div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.15);border-radius:12px;padding:14px;margin-bottom:16px;font-size:0.8rem;color:#aaa;line-height:1.6;">
+                                ⚡ <b style="color:#ffd700;">Auto-Checker:</b> Brands must use their official company email (e.g. marketing@yourcompany.com). Gmail/Yahoo/Hotmail are NOT accepted.
+                            </div>
+                            <div style="margin-bottom:12px;">
+                                <label style="color:#aaa;font-size:0.8rem;display:block;margin-bottom:6px;">Company Name *</label>
+                                <input id="b-name" placeholder="e.g. Zomato India Pvt Ltd" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;font-size:0.9rem;">
+                            </div>
+                            <div style="margin-bottom:12px;">
+                                <label style="color:#aaa;font-size:0.8rem;display:block;margin-bottom:6px;">Official Company Email * <small style="color:#555;">(must match your business domain)</small></label>
+                                <input id="b-email" value="${user.email}" placeholder="marketing@company.com" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;font-size:0.9rem;">
+                            </div>
+                            <div style="margin-bottom:12px;">
+                                <label style="color:#aaa;font-size:0.8rem;display:block;margin-bottom:6px;">Company Website</label>
+                                <input id="b-website" placeholder="https://yourcompany.com" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;font-size:0.9rem;">
+                            </div>
+                            <div style="margin-bottom:20px;">
+                                <label style="color:#aaa;font-size:0.8rem;display:block;margin-bottom:6px;">Brand Category</label>
+                                <select id="b-cat" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;font-size:0.9rem;">
+                                    <option value="tech">Tech & Electronics</option>
+                                    <option value="fashion">Fashion & Lifestyle</option>
+                                    <option value="food">Food & Beverage</option>
+                                    <option value="gaming">Gaming</option>
+                                    <option value="finance">Finance & Fintech</option>
+                                    <option value="education">Education</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div style="display:flex;gap:10px;">
+                                <button onclick="document.getElementById('brand-reg-modal').remove()" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px;border-radius:12px;cursor:pointer;">Cancel</button>
+                                <button onclick="submitBrandRegistration()" style="flex:2;background:linear-gradient(135deg,#ffd700,#ff5500);color:#000;border:none;padding:12px;border-radius:12px;cursor:pointer;font-weight:800;">⚡ Auto-Verify Brand</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            async function submitBrandRegistration() {
+                const name = document.getElementById('b-name')?.value?.trim();
+                const email = document.getElementById('b-email')?.value?.trim();
+                const website = document.getElementById('b-website')?.value?.trim();
+                const category = document.getElementById('b-cat')?.value;
+                const resultEl = document.getElementById('brand-reg-result');
+
+                if (!name || !email) { showToast('Company name and email are required!'); return; }
+
+                resultEl.innerHTML = `<div style="text-align:center;padding:16px;color:#ffd700;"><i class="fas fa-spinner fa-spin"></i> Auto-checking brand eligibility...</div>`;
+
+                try {
+                    // Step 1: Check eligibility
+                    const checkRes = await fetch('/api/brand/check-eligibility', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ email, company_name: name })
+                    });
+                    const checkData = await checkRes.json();
+
+                    if (checkData.already_verified) {
+                        resultEl.innerHTML = `<div style="background:rgba(0,204,102,0.1);border:1px solid rgba(0,204,102,0.3);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px;"><div style="color:#00cc66;font-weight:800;font-size:1.1rem;">✅ Already Verified!</div><div style="color:#aaa;font-size:0.85rem;margin-top:4px;">Brand ID: <b style="color:#ffd700;">${checkData.brand_id}</b></div></div>`;
+                        document.getElementById('brand-reg-form').innerHTML = '';
+                        // Update local storage
+                        const u = JSON.parse(localStorage.getItem('vitox_user')||'{}');
+                        u.is_verified_brand = true; u.brand_id = checkData.brand_id;
+                        localStorage.setItem('vitox_user', JSON.stringify(u));
+                        return;
+                    }
+
+                    if (!checkData.eligible) {
+                        resultEl.innerHTML = `<div style="background:rgba(255,0,85,0.1);border:1px solid rgba(255,0,85,0.3);border-radius:12px;padding:16px;margin-bottom:16px;"><div style="color:#ff0055;font-weight:800;">❌ Not Eligible</div><div style="color:#aaa;font-size:0.85rem;margin-top:4px;">${checkData.reason}</div></div>`;
+                        return;
+                    }
+
+                    // Step 2: Register brand
+                    const regRes = await fetch('/api/brand/register', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ email, company_name: name, website, category })
+                    });
+                    const regData = await regRes.json();
+
+                    if (regData.status === 'success') {
+                        resultEl.innerHTML = `
+                            <div style="background:rgba(0,204,102,0.1);border:1px solid rgba(0,204,102,0.3);border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;">
+                                <div style="font-size:2rem;margin-bottom:8px;">🎉</div>
+                                <div style="color:#00cc66;font-weight:800;font-size:1.1rem;">Brand Verified!</div>
+                                <div style="margin-top:12px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:12px;">
+                                    <div style="color:#555;font-size:0.75rem;margin-bottom:4px;">YOUR BRAND ID</div>
+                                    <div style="color:#ffd700;font-weight:800;font-size:1.1rem;letter-spacing:2px;">${regData.brand_id}</div>
+                                    <div style="color:#555;font-size:0.72rem;margin-top:4px;">Category: ${regData.category}</div>
+                                </div>
+                                <div style="color:#888;font-size:0.8rem;margin-top:12px;">Collab Chat is now unlocked! Reload the page to start collaborating.</div>
+                            </div>
+                        `;
+                        document.getElementById('brand-reg-form').innerHTML = `<button onclick="location.reload()" style="width:100%;background:linear-gradient(135deg,#ffd700,#ff5500);color:#000;border:none;padding:14px;border-radius:12px;cursor:pointer;font-weight:800;font-size:1rem;">🚀 Start Collaborating</button>`;
+                        // Update local storage
+                        const u = JSON.parse(localStorage.getItem('vitox_user')||'{}');
+                        u.is_verified_brand = true; u.brand_id = regData.brand_id;
+                        localStorage.setItem('vitox_user', JSON.stringify(u));
+                    } else {
+                        resultEl.innerHTML = `<div style="background:rgba(255,0,85,0.1);border:1px solid rgba(255,0,85,0.3);border-radius:12px;padding:16px;margin-bottom:16px;"><div style="color:#ff0055;font-weight:800;">❌ Registration Failed</div><div style="color:#aaa;font-size:0.85rem;margin-top:4px;">${regData.message}</div></div>`;
+                    }
+                } catch(e) {
+                    resultEl.innerHTML = `<div style="color:#ff0055;padding:12px;">Error: ${e.message}</div>`;
+                }
+            }
+
 
             function closeCollabChat() {
                 document.getElementById('collab-chat-drawer').style.right = '-100%';

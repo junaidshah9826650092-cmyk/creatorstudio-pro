@@ -210,6 +210,9 @@ def init_db():
             role TEXT DEFAULT 'user',
             status TEXT DEFAULT 'active',
             is_verified_brand BOOLEAN DEFAULT FALSE,
+            brand_id TEXT,
+            brand_category TEXT,
+            brand_verified_at TIMESTAMP,
             adsense_pub TEXT,
             subscription_tier TEXT DEFAULT 'free',
             premium_until TIMESTAMP,
@@ -360,6 +363,12 @@ def init_db():
         except: pass
         try: cursor.execute('ALTER TABLE users ADD COLUMN premium_until TIMESTAMP')
         except: pass
+        try: cursor.execute('ALTER TABLE users ADD COLUMN brand_id TEXT')
+        except: pass
+        try: cursor.execute('ALTER TABLE users ADD COLUMN brand_category TEXT')
+        except: pass
+        try: cursor.execute('ALTER TABLE users ADD COLUMN brand_verified_at TIMESTAMP')
+        except: pass
     else:
         # Postgres migrations
         try: 
@@ -370,6 +379,9 @@ def init_db():
             cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS adsense_pub TEXT')
             cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT \'free\'')
             cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMP')
+            cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_id TEXT')
+            cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_category TEXT')
+            cursor.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_verified_at TIMESTAMP')
             conn.commit()
         except: conn.rollback()
 
@@ -1615,6 +1627,198 @@ def serve_index():
     return response
 
 
+# ─── AUTO BRAND CHECKER ─────────────────────────────────────────────────────
+# Known brand email domains that are auto-approved
+KNOWN_BRAND_DOMAINS = {
+    'gmail.com': False,    # Public email - NOT a brand
+    'yahoo.com': False,
+    'hotmail.com': False,
+    'outlook.com': False,
+    'icloud.com': False,
+    'protonmail.com': False,
+    'rediffmail.com': False,
+    # Anything else (custom domain) is treated as potential brand
+}
+
+BRAND_CATEGORIES = {
+    'tech': ['microsoft', 'google', 'apple', 'samsung', 'oneplus', 'realme', 'boat', 'noise', 'jbl', 'sony'],
+    'fashion': ['myntra', 'ajio', 'zara', 'h&m', 'nykaa', 'bewakoof', 'manyavar'],
+    'food': ['swiggy', 'zomato', 'dominos', 'mcdonald', 'subway', 'haldiram', 'amul', 'nestl'],
+    'gaming': ['steam', 'epic', 'ea', 'ubisoft', 'krafton', 'garena', 'nodwin'],
+    'finance': ['paytm', 'phonepe', 'razorpay', 'groww', 'zerodha', 'hdfc', 'icici', 'sbi'],
+    'education': ['unacademy', 'byju', 'coursera', 'udemy', 'vedantu', 'toppr'],
+    'entertainment': ['netflix', 'amazon', 'hotstar', 'sony', 'zee', 'voot', 'mx'],
+}
+
+def auto_detect_brand(email, company_name=''):
+    """Auto-detect if an applicant is a real brand based on email domain + name signals."""
+    domain = email.split('@')[-1].lower()
+    name_lower = (company_name or '').lower()
+    
+    # Public email providers = NOT a brand
+    if domain in KNOWN_BRAND_DOMAINS:
+        return False, None, 'Public email domains (gmail, yahoo, etc.) cannot register as brands. Use your official company email.'
+    
+    # Check if the domain looks like a company (has a proper TLD pattern)
+    domain_parts = domain.split('.')
+    if len(domain_parts) < 2:
+        return False, None, 'Invalid email domain.'
+    
+    # Custom domain = potential brand - auto approve with category detection
+    detected_category = 'other'
+    for cat, keywords in BRAND_CATEGORIES.items():
+        if any(kw in domain or kw in name_lower for kw in keywords):
+            detected_category = cat
+            break
+    
+    return True, detected_category, None
+
+
+@app.route('/api/brand/check-eligibility', methods=['POST'])
+def check_brand_eligibility():
+    """Auto brand checker - runs before showing brand registration form."""
+    try:
+        data = request.json
+        email = data.get('email', '')
+        company_name = data.get('company_name', '')
+        
+        if not email:
+            return jsonify({'eligible': False, 'reason': 'Email required'}), 400
+        
+        conn = get_db_connection()
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('SELECT is_verified_brand, brand_id, role FROM users WHERE email = %s', (email,))
+            user = cursor.fetchone()
+        else:
+            user = conn.execute('SELECT is_verified_brand, brand_id, role FROM users WHERE email = ?', (email,)).fetchone()
+        conn.close()
+        
+        if not user:
+            return jsonify({'eligible': False, 'reason': 'User not found. Please login first.'})
+        
+        is_brand = user[0] if user[0] else False
+        brand_id = user[1]
+        
+        if is_brand and brand_id:
+            return jsonify({'eligible': True, 'already_verified': True, 'brand_id': brand_id})
+        
+        # Run auto-detection
+        is_eligible, category, error_msg = auto_detect_brand(email, company_name)
+        
+        return jsonify({
+            'eligible': is_eligible,
+            'detected_category': category,
+            'reason': error_msg
+        })
+    except Exception as e:
+        return jsonify({'eligible': False, 'reason': str(e)}), 500
+
+
+@app.route('/api/brand/register', methods=['POST'])
+def register_brand():
+    """Register a verified brand with a unique Brand ID."""
+    try:
+        import uuid, hashlib
+        data = request.json
+        email = data.get('email', '')
+        company_name = data.get('company_name', '')
+        company_website = data.get('website', '')
+        category = data.get('category', 'other')
+        
+        if not email or not company_name:
+            return jsonify({'status': 'error', 'message': 'Email and company name required'}), 400
+        
+        # Re-run auto brand check
+        is_eligible, detected_cat, error_msg = auto_detect_brand(email, company_name)
+        if not is_eligible:
+            return jsonify({'status': 'error', 'message': error_msg}), 403
+        
+        # Generate unique Brand ID: VITOX-BRAND-XXXX
+        hash_val = hashlib.md5(email.encode()).hexdigest()[:6].upper()
+        brand_id = f'VITOX-BRAND-{hash_val}'
+        final_category = detected_cat or category
+        
+        conn = get_db_connection()
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE users SET is_verified_brand=TRUE, brand_id=%s, brand_category=%s, 
+                brand_verified_at=CURRENT_TIMESTAMP, role='brand'
+                WHERE email=%s
+            ''', (brand_id, final_category, email))
+        else:
+            conn.execute('''
+                UPDATE users SET is_verified_brand=1, brand_id=?, brand_category=?,
+                brand_verified_at=CURRENT_TIMESTAMP, role='brand'
+                WHERE email=?
+            ''', (brand_id, final_category, email))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'status': 'success',
+            'brand_id': brand_id,
+            'category': final_category,
+            'message': f'Brand verified! Your Brand ID is {brand_id}'
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/collab/eligibility', methods=['GET'])
+def check_collab_eligibility():
+    """Check if a user is eligible to use the Collab Chat system."""
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'eligible': False, 'reason': 'not_logged_in'})
+    
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = %s', (email,))
+            user = cursor.fetchone()
+            if not user:
+                return jsonify({'eligible': False, 'reason': 'not_logged_in'})
+            role, is_brand, brand_id = user[0], user[1], user[2]
+            
+            # Count their own squad (subscribers)
+            cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (email,))
+            my_squad = cursor.fetchone()[0]
+        else:
+            user = conn.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = ?', (email,)).fetchone()
+            if not user:
+                return jsonify({'eligible': False, 'reason': 'not_logged_in'})
+            role, is_brand, brand_id = user['role'], user['is_verified_brand'], user['brand_id']
+            my_squad = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (email,)).fetchone()[0]
+        
+        conn.close()
+        
+        # RULE 1: Verified brand = always eligible
+        if is_brand and brand_id:
+            return jsonify({'eligible': True, 'type': 'brand', 'brand_id': brand_id})
+        
+        # RULE 2: Creator with 1000+ squad = eligible
+        if my_squad >= 1000:
+            return jsonify({'eligible': True, 'type': 'creator', 'squad_count': my_squad})
+        
+        # RULE 3: Admin = always eligible
+        if role == 'admin':
+            return jsonify({'eligible': True, 'type': 'admin'})
+        
+        # Else: locked
+        return jsonify({
+            'eligible': False,
+            'reason': 'not_enough_squad',
+            'squad_count': my_squad,
+            'needed': 1000
+        })
+    except Exception as e:
+        conn.close()
+        return jsonify({'eligible': False, 'reason': str(e)})
+
+
 @app.route('/api/collab/chat/send', methods=['POST'])
 def send_collab_message():
     try:
@@ -1629,31 +1833,42 @@ def send_collab_message():
         conn = get_db_connection()
         if USE_POSTGRES:
             cursor = conn.cursor()
-            # Get sender info (points and brand status)
-            cursor.execute('SELECT points, is_verified_brand FROM users WHERE email = %s', (sender_email,))
+            cursor.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = %s', (sender_email,))
             sender = cursor.fetchone()
-            sender_points = sender[0] if sender else 0
-            
-            # Get receiver subscriber count
-            cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (receiver_email,))
-            squad_count = cursor.fetchone()[0]
-            
-            # 1M Squad requirement for Elite Creators (> 100k subs)
-            if squad_count > 100000 and (sender_points or 0) < 1000000:
+            if not sender:
                 conn.close()
-                return jsonify({'status': 'error', 'message': '1M Square/Points required to chat with Elite Creators (100k+ Squad)'}), 403
+                return jsonify({'status': 'error', 'message': 'Sender not found'}), 404
+            
+            sender_role = sender[0]
+            sender_is_brand = sender[1]
+            sender_brand_id = sender[2]
+
+            # Check sender eligibility
+            if not sender_is_brand or not sender_brand_id:
+                # Not a brand - check if creator with 1000+ squad
+                cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (sender_email,))
+                my_squad = cursor.fetchone()[0]
+                if my_squad < 1000 and sender_role != 'admin':
+                    conn.close()
+                    return jsonify({'status': 'error', 'message': f'You need 1,000 Squad members to use Collab Chat. You have {my_squad}.', 'squad': my_squad}), 403
 
             cursor.execute('INSERT INTO messages (sender_email, receiver_email, content) VALUES (%s, %s, %s)',
                          (sender_email, receiver_email, content))
         else:
-            sender = conn.execute('SELECT points, is_verified_brand FROM users WHERE email = ?', (sender_email,)).fetchone()
-            sender_points = sender['points'] if sender else 0
-            
-            squad_count = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (receiver_email,)).fetchone()[0]
-            # Enforce 1M Points rule for creators with > 1k subs on SQLite (test mode)
-            if squad_count > 1000 and (sender_points or 0) < 1000000:
+            sender = conn.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = ?', (sender_email,)).fetchone()
+            if not sender:
                 conn.close()
-                return jsonify({'status': 'error', 'message': '1M Square/Points required'}), 403
+                return jsonify({'status': 'error', 'message': 'Sender not found'}), 404
+
+            sender_role = sender['role']
+            sender_is_brand = sender['is_verified_brand']
+            sender_brand_id = sender['brand_id']
+
+            if not sender_is_brand or not sender_brand_id:
+                my_squad = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (sender_email,)).fetchone()[0]
+                if my_squad < 1000 and sender_role != 'admin':
+                    conn.close()
+                    return jsonify({'status': 'error', 'message': f'You need 1,000 Squad members to use Collab Chat. You have {my_squad}.', 'squad': my_squad}), 403
 
             conn.execute('INSERT INTO messages (sender_email, receiver_email, content) VALUES (?, ?, ?)',
                          (sender_email, receiver_email, content))
@@ -1661,24 +1876,6 @@ def send_collab_message():
         conn.commit()
         conn.close()
         return jsonify({'status': 'success'})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@app.route('/api/brand/apply', methods=['POST'])
-def apply_brand_verification():
-    try:
-        data = request.json
-        email = data.get('email')
-        conn = get_db_connection()
-        # For now, we just mark them as 'pending_brand' in a new status or use role
-        if USE_POSTGRES:
-            cursor = conn.cursor()
-            cursor.execute("UPDATE users SET status = 'pending_brand' WHERE email = %s", (email,))
-        else:
-            conn.execute("UPDATE users SET status = 'pending_brand' WHERE email = ?", (email,))
-        conn.commit()
-        conn.close()
-        return jsonify({'status': 'success', 'message': 'Application submitted! Admin will verify your brand.'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
