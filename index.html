@@ -337,32 +337,73 @@
                 <p>No videos found. Be the first to upload one!</p>
             </div>
         </main>
-        <!-- Collab Chat Drawer -->
+        <!-- Collab Chat Drawer - Full Featured -->
         <div id="collab-chat-drawer"
-            style="position: fixed; top: 0; right: -100%; width: 450px; max-width: 100%; height: 100vh; background: #0a0a0a; z-index: 10001; box-shadow: -20px 0 50px rgba(0,0,0,0.9); transition: right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
-            <div
-                style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #111, #0a0a0a);">
-                <div>
-                    <h3
-                        style="margin:0; font-weight: 800; color: #ff0055; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-handshake"></i> Brand Collaboration
-                    </h3>
-                    <div id="collab-chat-target" style="font-size: 0.8rem; color: #aaa; margin-top: 4px;">Chatting with
-                        Creator</div>
+            style="position: fixed; top: 0; right: -100%; width: 420px; max-width: 100%; height: 100vh; background: #0d0d0d; z-index: 10001; box-shadow: -20px 0 60px rgba(0,0,0,0.9); transition: right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.08);">
+            
+            <!-- Header -->
+            <div style="padding: 0 20px; height: 72px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 14px; background: #111; flex-shrink:0;">
+                <button onclick="closeCollabChat()" style="background:none;border:none;color:#666;font-size:1.2rem;cursor:pointer;padding:4px;">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div id="collab-avatar" style="width:44px;height:44px;background:linear-gradient(135deg,#ff0055,#7000ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:white;flex-shrink:0;">?</div>
+                <div style="flex:1;">
+                    <div id="collab-chat-target" style="font-weight:800;font-size:1rem;">Creator</div>
+                    <div id="collab-online-status" style="font-size:0.75rem;color:#00cc66;display:flex;align-items:center;gap:5px;">
+                        <span style="width:6px;height:6px;background:#00cc66;border-radius:50%;display:inline-block;"></span> online
+                    </div>
                 </div>
-                <button onclick="closeCollabChat()"
-                    style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer;">&times;</button>
+                <!-- Collab Deal Proposal Button -->
+                <button onclick="sendCollabProposal()" style="background:rgba(255,0,85,0.1);border:1px solid rgba(255,0,85,0.3);color:#ff0055;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;">
+                    <i class="fas fa-handshake"></i> Propose Deal
+                </button>
             </div>
+
+            <!-- Quick Collab Templates -->
+            <div id="collab-templates" style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); display:flex; gap:8px; overflow-x:auto; flex-shrink:0;">
+                <button onclick="insertTemplate('Hey! I love your content. Interested in a collab?')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">👋 Say Hi</button>
+                <button onclick="insertTemplate('I want to do a collaboration video with you. Let me know your rates!')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">🎬 Collab Ask</button>
+                <button onclick="insertTemplate('I am interested in sponsoring your channel. What are your sponsorship rates per video?')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">💼 Sponsorship</button>
+                <button onclick="insertTemplate('Would you be open to a brand deal? I represent [Brand Name].')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">🏷️ Brand Deal</button>
+            </div>
+
+            <!-- Messages -->
             <div id="collab-messages-content"
-                style="flex:1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-                <!-- Messages load here -->
+                style="flex:1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; background: #0d0d0d;">
+                <!-- Empty state -->
+                <div id="collab-empty" style="text-align:center;margin:auto;">
+                    <div style="font-size:3rem;margin-bottom:12px;">🤝</div>
+                    <div style="font-weight:800;color:#333;margin-bottom:6px;">Start a Collab Conversation</div>
+                    <div style="color:#444;font-size:0.85rem;">Use the quick replies above to break the ice!</div>
+                </div>
             </div>
-            <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); background: #111;">
-                <div style="display: flex; gap: 12px;">
-                    <input type="text" id="collab-chat-input" placeholder="Discuss collaboration..."
-                        style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px; color: white; outline: none;">
+
+            <!-- Typing indicator -->
+            <div id="collab-typing" style="padding:6px 20px;color:#666;font-size:0.75rem;flex-shrink:0;display:none;">
+                <i class="fas fa-ellipsis"></i> typing...
+            </div>
+
+            <!-- Input Area -->
+            <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.07); background: #111; flex-shrink:0;">
+                <!-- Emoji Quick Bar -->
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                    <span onclick="appendEmoji('🔥')" style="cursor:pointer;font-size:1.2rem;" title="Fire">🔥</span>
+                    <span onclick="appendEmoji('💯')" style="cursor:pointer;font-size:1.2rem;">💯</span>
+                    <span onclick="appendEmoji('🚀')" style="cursor:pointer;font-size:1.2rem;">🚀</span>
+                    <span onclick="appendEmoji('🤝')" style="cursor:pointer;font-size:1.2rem;">🤝</span>
+                    <span onclick="appendEmoji('💰')" style="cursor:pointer;font-size:1.2rem;">💰</span>
+                    <span onclick="appendEmoji('🎬')" style="cursor:pointer;font-size:1.2rem;">🎬</span>
+                    <span onclick="appendEmoji('❤️')" style="cursor:pointer;font-size:1.2rem;">❤️</span>
+                    <span onclick="appendEmoji('👑')" style="cursor:pointer;font-size:1.2rem;">👑</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items:flex-end;">
+                    <textarea id="collab-chat-input" placeholder="Type your message..." rows="1"
+                        style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 12px 18px; color: white; outline: none; font-family: inherit; font-size:0.9rem; resize:none; max-height:100px; line-height:1.4;"
+                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('collab-chat-send').click();}"
+                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';"></textarea>
                     <button id="collab-chat-send"
-                        style="background: #ff0055; color: white; border: none; width: 50px; border-radius: 12px; cursor: pointer;">
+                        style="background: linear-gradient(135deg,#ff0055,#7000ff); color: white; border: none; width: 46px; height:46px; border-radius: 50%; cursor: pointer; flex-shrink:0; font-size:1rem; transition:0.2s;"
+                        onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
@@ -2767,14 +2808,25 @@
 
             // Collab Chat Logic
             let collabChatPoller = null;
+            let _collabTarget = null;
+            let _collabUser = null;
 
             function openCollabChat(creatorEmail) {
                 const user = JSON.parse(localStorage.getItem('vitox_user'));
-                if (!user) { showToast("Login required to Collab"); return; }
+                if (!user) { showToast("Login required to Collab 🤝"); return; }
+                if (user.email === creatorEmail) { showToast("You can't message yourself!"); return; }
+
+                _collabUser = user;
+                _collabTarget = creatorEmail;
 
                 const drawer = document.getElementById('collab-chat-drawer');
                 drawer.style.right = '0';
-                document.getElementById('collab-chat-target').innerText = `Chatting with: @${creatorEmail.split('@')[0]}`;
+
+                // Set avatar initial
+                const avatarEl = document.getElementById('collab-avatar');
+                if (avatarEl) avatarEl.innerText = creatorEmail.charAt(0).toUpperCase();
+
+                document.getElementById('collab-chat-target').innerText = '@' + creatorEmail.split('@')[0];
 
                 loadCollabHistory(user.email, creatorEmail);
 
@@ -2792,28 +2844,117 @@
                 if (collabChatPoller) clearInterval(collabChatPoller);
             }
 
+            function insertTemplate(text) {
+                const input = document.getElementById('collab-chat-input');
+                if (input) { input.value = text; input.focus(); input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; }
+            }
+
+            function appendEmoji(emoji) {
+                const input = document.getElementById('collab-chat-input');
+                if (input) { input.value += emoji; input.focus(); }
+            }
+
+            function sendCollabProposal() {
+                if (!_collabTarget) return;
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200002;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);';
+                modal.innerHTML = `
+                    <div style="background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px;max-width:420px;width:90%;">
+                        <h3 style="margin:0 0 4px;font-size:1.3rem;">🤝 Send Collab Proposal</h3>
+                        <p style="color:#666;font-size:0.85rem;margin-bottom:20px;">to @${_collabTarget.split('@')[0]}</p>
+                        <div style="margin-bottom:14px;">
+                            <label style="color:#aaa;font-size:0.8rem;display:block;margin-bottom:6px;">Deal Type</label>
+                            <select id="p-type" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;font-size:0.9rem;">
+                                <option>Collaboration Video</option>
+                                <option>Paid Sponsorship</option>
+                                <option>Brand Ambassador</option>
+                                <option>Revenue Share</option>
+                                <option>Shoutout Exchange</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:14px;">
+                            <label style="color:#aaa;font-size:0.8rem;display:block;margin-bottom:6px;">Proposed Budget / Offer</label>
+                            <input id="p-budget" placeholder="e.g. ₹5,000 / Revenue Share / Free Collab" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;font-size:0.9rem;">
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="color:#aaa;font-size:0.8rem;display:block;margin-bottom:6px;">Message</label>
+                            <textarea id="p-msg" placeholder="Describe your idea..." rows="3" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;font-size:0.9rem;resize:none;font-family:inherit;"></textarea>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button onclick="this.closest('div[style]').remove()" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px;border-radius:12px;cursor:pointer;">Cancel</button>
+                            <button onclick="submitProposal()" style="flex:2;background:linear-gradient(135deg,#ff0055,#7000ff);color:white;border:none;padding:12px;border-radius:12px;cursor:pointer;font-weight:800;">Send Proposal 🚀</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            function submitProposal() {
+                const type = document.getElementById('p-type')?.value;
+                const budget = document.getElementById('p-budget')?.value;
+                const msg = document.getElementById('p-msg')?.value;
+                if (!type || !budget) { showToast('Please fill deal type and budget'); return; }
+
+                const fullMsg = `📋 COLLAB PROPOSAL\n━━━━━━━━━━━━━━\nType: ${type}\nOffer: ${budget}\nDetails: ${msg || 'No details provided'}\n━━━━━━━━━━━━━━\nReply to discuss!`;
+                const input = document.getElementById('collab-chat-input');
+                if (input) input.value = fullMsg;
+
+                // Close modal and send
+                document.querySelectorAll('div[style*="inset:0"]').forEach(m => { if(m.querySelector('#p-type')) m.remove(); });
+                document.getElementById('collab-chat-send').click();
+            }
+
             async function loadCollabHistory(myEmail, targetEmail, isPolling = false) {
                 try {
                     const res = await fetch(`/api/collab/chat/history?user1=${myEmail}&user2=${targetEmail}`);
                     const msgs = await res.json();
                     const content = document.getElementById('collab-messages-content');
+                    const emptyEl = document.getElementById('collab-empty');
+
+                    if (msgs.length === 0) {
+                        if (emptyEl) emptyEl.style.display = 'block';
+                        return;
+                    }
+                    if (emptyEl) emptyEl.style.display = 'none';
 
                     const oldScroll = content.scrollTop;
                     const wasAtBottom = content.scrollHeight - content.clientHeight <= content.scrollTop + 50;
 
-                    content.innerHTML = msgs.map(m => {
+                    // Group messages by date
+                    let lastDate = null;
+                    const renderedMsgs = msgs.map(m => {
                         const isMe = m.sender_email === myEmail;
-                        return `
-                        <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 80%;">
-                            <div style="background: ${isMe ? '#ff0055' : '#222'}; color: white; padding: 12px 16px; border-radius: ${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'}; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.05);">
-                                ${m.content}
-                            </div>
-                            <div style="font-size: 0.7rem; color: #888; margin-top: 4px; text-align: ${isMe ? 'right' : 'left'};">
-                                ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                        </div>
-                    `;
-                    }).join('');
+                        const isProposal = (m.content || '').includes('COLLAB PROPOSAL');
+                        const ts = new Date(m.timestamp);
+                        const dateStr = ts.toLocaleDateString([], {day:'numeric', month:'short', year:'numeric'});
+                        const timeStr = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const formattedContent = (m.content || '').replace(/\n/g, '<br>');
+
+                        let dateSep = '';
+                        if (dateStr !== lastDate) { lastDate = dateStr; dateSep = `<div style="text-align:center;color:#333;font-size:0.72rem;margin:12px 0;">${dateStr}</div>`; }
+
+                        if (isProposal) {
+                            return dateSep + `
+                                <div style="align-self:${isMe?'flex-end':'flex-start'};max-width:90%;width:100%;">
+                                    <div style="background:linear-gradient(135deg,rgba(255,0,85,0.1),rgba(112,0,255,0.1));border:1px solid rgba(255,0,85,0.3);border-radius:16px;padding:16px;">
+                                        <div style="font-size:0.7rem;color:#ff0055;font-weight:800;margin-bottom:8px;letter-spacing:1px;">📋 COLLAB PROPOSAL</div>
+                                        <div style="font-size:0.85rem;color:#ddd;line-height:1.6;white-space:pre-line;">${formattedContent.replace('<br>📋 COLLAB PROPOSAL<br>━━━━━━━━━━━━━━<br>','')}</div>
+                                        ${!isMe ? `<div style="display:flex;gap:8px;margin-top:12px;"><button onclick="insertTemplate('I accept! Let\'s discuss more details.'" style="flex:1;background:#00cc66;border:none;color:white;padding:8px;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:700;">✅ Accept</button><button onclick="insertTemplate('Thanks but I will have to decline.')" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:8px;border-radius:8px;cursor:pointer;font-size:0.8rem;">❌ Decline</button></div>` : ''}
+                                    </div>
+                                    <div style="font-size:0.7rem;color:#444;margin-top:4px;text-align:${isMe?'right':'left'};">${timeStr} ${isMe?'✓✓':''}</div>
+                                </div>`;
+                        }
+
+                        return dateSep + `
+                            <div style="align-self:${isMe?'flex-end':'flex-start'};max-width:80%;">
+                                <div style="background:${isMe?'linear-gradient(135deg,#ff0055,#cc0044)':'#1e1e1e'};color:white;padding:11px 15px;border-radius:${isMe?'18px 18px 4px 18px':'18px 18px 18px 4px'};font-size:0.9rem;line-height:1.5;word-break:break-word;">
+                                    ${formattedContent}
+                                </div>
+                                <div style="font-size:0.7rem;color:#444;margin-top:3px;text-align:${isMe?'right':'left'};">${timeStr} ${isMe?'<span style="color:#00cc66;">✓✓</span>':''}</div>
+                            </div>`;
+                    });
+
+                    content.innerHTML = renderedMsgs.join('');
 
                     if (!isPolling || wasAtBottom) {
                         content.scrollTop = content.scrollHeight;

@@ -14,9 +14,15 @@
             background: radial-gradient(circle at center, #1b0a2a 0%, #06060c 80%);
             background-color: #06060c;
             font-family:'Outfit',sans-serif;
-            display:flex;justify-content:center;align-items:center;
-            min-height:100vh;overflow:hidden;
+            display:flex;
+            flex-direction: column;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
             perspective:2200px;
+            padding: 80px 20px 80px;
         }
 
         /* ── Progress bar ── */
@@ -30,7 +36,8 @@
             position: relative;
             display: flex;
             align-items: center;
-            /* Realistic ambient shadow below book */
+            justify-content: center;
+            margin: 0 auto;
         }
         .book-wrapper::after {
             content: '';
