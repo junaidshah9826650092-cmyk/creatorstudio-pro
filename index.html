@@ -227,6 +227,8 @@
                 <hr>
                 <a href="#" class="nav-item" onclick="openAdminChat(); return false;" style="color: #ffd700;">
                     <i class="fas fa-crown"></i> <span>Official Support</span></a>
+                <a href="#" class="nav-item" onclick="document.getElementById('bug-report-modal').style.display='flex'; return false;" style="color: #ff5500;">
+                    <i class="fas fa-bug"></i> <span>Report Bug</span></a>
                 <div id="admin-sidebar-link" style="display:none;">
                     <a href="#" class="nav-item" onclick="loadView('Admin Panel'); return false;"
                         style="color: #ff4d4d; border: 1px solid rgba(255,77,77,0.2); margin-top: 5px; background: rgba(255,77,77,0.05);">
@@ -444,6 +446,35 @@
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Bug Report Modal -->
+        <div id="bug-report-modal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200005; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+            <div style="background: #0f0f0f; border: 1px solid rgba(255,85,0,0.3); border-radius: 24px; padding: 32px; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="margin:0; font-weight: 800; display:flex; align-items:center; gap:12px;"><i class="fas fa-bug" style="color: #ff5500;"></i> Report a Bug</h2>
+                    <button onclick="document.getElementById('bug-report-modal').style.display='none'" style="background:none; border:none; color: #888; font-size: 1.5rem; cursor:pointer;">&times;</button>
+                </div>
+                <p style="color:#aaa; margin-bottom: 24px; font-size: 0.95rem;">Found a glitch? Let us know so we can squash it!</p>
+                <input type="text" id="bug-title" placeholder="Bug Title (e.g., Video won't play)" style="width: 100%; padding: 14px 18px; margin-bottom: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-family: inherit;">
+                <textarea id="bug-desc" placeholder="Describe the issue in detail. What were you doing? What happened?" rows="4" style="width: 100%; padding: 14px 18px; margin-bottom: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-family: inherit; resize: vertical;"></textarea>
+                
+                <div style="margin-bottom: 24px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+                    <label style="color: #aaa; font-size: 0.9rem; margin-bottom: 8px; display: block;">Screenshot (optional)</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="file" id="bug-img-upload" accept="image/*" style="display: none;" onchange="uploadBugScreenshot(this)">
+                        <button onclick="document.getElementById('bug-img-upload').click()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                            <i class="fas fa-upload"></i> Upload Image
+                        </button>
+                        <span id="bug-upload-status" style="font-size: 0.85rem; color: #888;"></span>
+                        <input type="hidden" id="bug-img-url" value="">
+                    </div>
+                </div>
+
+                <button onclick="submitBugReport()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #ff5500, #ff0055); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fas fa-paper-plane"></i> Submit Report
+                </button>
             </div>
         </div>
 
@@ -2053,6 +2084,10 @@
                     // Fetch Users
                     const usersRes = await fetch('/api/admin/users', { headers: { 'X-Admin-Email': user.email } });
                     const allUsers = await usersRes.json();
+                    
+                    // Fetch Bug Reports
+                    const bugsRes = await fetch('/api/admin/bugs', { headers: { 'X-Admin-Email': user.email } });
+                    const allBugs = await bugsRes.json();
 
                     grid.innerHTML = `
                     <div style="padding: 40px; color: white; width: 100%;">
@@ -2121,6 +2156,48 @@
                                 </tbody>
                             </table>
                         </div>
+                        </div>
+                        
+                        <!-- Bug Reports Management -->
+                        <h3 style="margin-top: 40px; margin-bottom: 20px; display:flex; align-items:center; gap:12px;">Platform Bug Reports <span style="background:#ff5500; color:white; font-size:0.8rem; padding: 4px 10px; border-radius: 20px;">${allBugs.filter(b=>b.status==='open').length} Open</span></h3>
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; overflow: hidden; margin-bottom: 40px;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                                <thead style="background: rgba(255,255,255,0.05);">
+                                    <tr>
+                                        <th style="padding: 16px; text-align: left; width: 20%;">Reporter</th>
+                                        <th style="padding: 16px; text-align: left; width: 40%;">Issue Details</th>
+                                        <th style="padding: 16px; text-align: left; width: 15%;">Status</th>
+                                        <th style="padding: 16px; text-align: right; width: 25%;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${allBugs.length === 0 ? '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #888;">No bugs reported yet. Platform is flawless! 🚀</td></tr>' : ''}
+                                    ${allBugs.map(b => `
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); opacity: ${b.status==='resolved' ? '0.6' : '1'};">
+                                            <td style="padding: 16px; vertical-align: top;">
+                                                <div style="font-weight: 700; color: #ccc;">${b.user_email.split('@')[0]}</div>
+                                                <div style="font-size: 0.75rem; color: #777;">${new Date(b.timestamp).toLocaleDateString()}</div>
+                                            </td>
+                                            <td style="padding: 16px;">
+                                                <div style="font-weight: 700; margin-bottom: 6px; color: ${b.status==='open' ? '#ffaa00' : '#888'};">${b.title}</div>
+                                                <div style="font-size: 0.85rem; color: #bbb; line-height: 1.5;">${b.description}</div>
+                                                ${b.screenshot_url ? `<a href="${b.screenshot_url}" target="_blank" style="display:inline-block; margin-top:8px; font-size:0.8rem; color:#0088ff; text-decoration:none;"><i class="fas fa-image"></i> View Screenshot</a>` : ''}
+                                            </td>
+                                            <td style="padding: 16px; vertical-align: top;">
+                                                <span style="background: ${b.status==='open' ? 'rgba(255,85,0,0.1)' : 'rgba(0,255,136,0.1)'}; color: ${b.status==='open' ? '#ff5500' : '#00ff88'}; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">${b.status.toUpperCase()}</span>
+                                            </td>
+                                            <td style="padding: 16px; text-align: right; vertical-align: top;">
+                                                ${b.status==='open' ? `
+                                                    <button onclick="adminBugAction(${b.id}, 'resolved')" style="background: #00ff88; color: black; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; cursor: pointer;">MARK RESOLVED</button>
+                                                ` : `
+                                                    <button onclick="adminBugAction(${b.id}, 'open')" style="background: transparent; color: #888; border: 1px solid #555; padding: 6px 12px; border-radius: 6px; font-weight: 800; cursor: pointer;">RE-OPEN</button>
+                                                `}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     </div >
                     `;
                 } catch (e) { console.error(e); grid.innerHTML = '<h2>Failed to load Admin Panel. Try again.</h2>'; }
@@ -2138,6 +2215,77 @@
                     showToast(data.message);
                     loadAdminPanel(); // Refresh UI
                 } catch (e) { console.error(e); }
+            }
+            
+            async function adminBugAction(bugId, status) {
+                const user = JSON.parse(localStorage.getItem('vitox_user'));
+                try {
+                    const res = await fetch('/api/admin/bugs/action', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Email': user.email },
+                        body: JSON.stringify({ id: bugId, status: status })
+                    });
+                    const data = await res.json();
+                    showToast(data.message);
+                    loadAdminPanel(); // Refresh UI immediately
+                } catch (e) { console.error(e); }
+            }
+
+            async function submitBugReport() {
+                const title = document.getElementById('bug-title').value.trim();
+                const desc = document.getElementById('bug-desc').value.trim();
+                const img = document.getElementById('bug-img-url').value.trim();
+                const user = JSON.parse(localStorage.getItem('vitox_user') || '{}');
+                
+                if(!title || !desc) return showToast("Title and Description are required.");
+                
+                try {
+                    const res = await fetch('/api/bugs/report', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user.email || 'anonymous', title: title, description: desc, screenshot_url: img })
+                    });
+                    const data = await res.json();
+                    if(res.ok) {
+                        showToast("Bug reported! Thank you.");
+                        document.getElementById('bug-report-modal').style.display = 'none';
+                        document.getElementById('bug-title').value = '';
+                        document.getElementById('bug-desc').value = '';
+                        document.getElementById('bug-img-url').value = '';
+                        document.getElementById('bug-upload-status').innerHTML = '';
+                    } else {
+                        showToast(data.message);
+                    }
+                } catch(e) { console.error(e); showToast("Failed to submit error report"); }
+            }
+
+            async function uploadBugScreenshot(input) {
+                if (!input.files || !input.files[0]) return;
+                const file = input.files[0];
+                const status = document.getElementById('bug-upload-status');
+                const urlInput = document.getElementById('bug-img-url');
+
+                status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const res = await fetch('/api/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                        urlInput.value = data.url;
+                        status.innerHTML = '<span style="color: #00ff88;"><i class="fas fa-check"></i> Ready</span>';
+                    } else {
+                        status.innerHTML = '<span style="color: #ff0055;">Failed</span>';
+                        showToast(data.error || "Upload failed");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    status.innerHTML = '<span style="color: #ff0055;">Error</span>';
+                }
             }
 
             // --- OFFICIAL ADMIN CHAT LOGIC ---
@@ -2729,6 +2877,12 @@
 
                     const snapTotal = document.getElementById(`snap-comm-count-${videoId}`);
                     if (snapTotal) snapTotal.innerText = parseInt(snapTotal.innerText) + 1;
+                    
+                    // Reward Creator reputation points for comments
+                    fetch('/api/record-engagement', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ video_id: videoId, user_email: user.email, action: 'positive_comment' })
+                    });
                 } catch (e) { console.error(e); }
             }
 
@@ -2819,11 +2973,11 @@
 
                 // Check eligibility from backend
                 try {
-                    const res = await fetch(`/api/collab/eligibility?email=${user.email}`);
+                    const res = await fetch(`/api/collab/eligibility?email=${user.email}&target=${creatorEmail}`);
                     const data = await res.json();
 
                     if (!data.eligible) {
-                        showCollabLocked(data.reason, data.squad_count, data.needed);
+                        showCollabLocked(data.reason, data.squad_count, data.needed, data.points);
                         return;
                     }
 
@@ -2854,11 +3008,12 @@
                     if (collabChatPoller) clearInterval(collabChatPoller);
                     collabChatPoller = setInterval(() => loadCollabHistory(user.email, creatorEmail, true), 3000);
                 } catch(e) {
+                    console.error(e);
                     showToast('Error checking eligibility. Please try again.');
                 }
             }
 
-            function showCollabLocked(reason, squadCount, needed) {
+            function showCollabLocked(reason, squadCount, needed, points) {
                 const modal = document.createElement('div');
                 modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200010;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
 
@@ -2870,18 +3025,21 @@
                         <p style="color:#666;margin-bottom:24px;">Sign in to use the Collab Chat system.</p>
                         <button onclick="this.closest('div[style]').remove()" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;margin-right:10px;">Close</button>
                     `;
-                } else if (reason === 'not_enough_squad') {
-                    const user = JSON.parse(localStorage.getItem('vitox_user') || 'null');
-                    const progress = Math.min(100, Math.round((squadCount / needed) * 100));
+                } else if (reason === 'not_enough_squad_or_points' || reason === 'not_enough_squad') {
+                    const progress = Math.min(100, Math.round(((squadCount||0) / 1000) * 100));
                     content = `
                         <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
                         <h2 style="font-size:1.4rem;margin-bottom:8px;">Collab Chat Locked</h2>
-                        <p style="color:#888;font-size:0.9rem;line-height:1.6;margin-bottom:20px;">Collab Chat is only for <b style="color:white;">Verified Brands</b> and <b style="color:white;">Creators with 1,000+ Squad</b> members.</p>
+                        <p style="color:#888;font-size:0.9rem;line-height:1.6;margin-bottom:20px;">Collab Chat is only for <b style="color:white;">Verified Brands</b>, <b style="color:white;">Creators with 1,000+ Squad</b>, or creators with <b style="color:white;">10,000+ Reputation Points</b>.</p>
                         
                         <div style="background:#0d0d0d;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin-bottom:20px;width:100%;">
                             <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
                                 <span style="color:#aaa;font-size:0.85rem;">Your Squad</span>
                                 <span style="font-weight:800;color:${(squadCount||0)>=1000?'#00cc66':'#ff0055'};">${squadCount||0} / 1,000</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                                <span style="color:#aaa;font-size:0.85rem;">Your Reputation</span>
+                                <span style="font-weight:800;color:${(points||0)>=10000?'#00cc66':'#ff0055'};">${points||0} / 10,000</span>
                             </div>
                             <div style="height:8px;background:#1a1a1a;border-radius:4px;overflow:hidden;">
                                 <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,#ff0055,#7000ff);border-radius:4px;transition:0.5s;"></div>
@@ -2893,6 +3051,23 @@
                             <button onclick="this.closest('div[style]').remove()" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px;border-radius:12px;cursor:pointer;">Maybe Later</button>
                             <button onclick="this.closest('div[style]').remove(); showBrandRegistration();" style="flex:2;background:linear-gradient(135deg,#ffd700,#ff5500);color:#000;border:none;padding:12px;border-radius:12px;cursor:pointer;font-weight:800;">🏷️ Register as Brand</button>
                         </div>
+                    `;
+                } else if (reason === 'not_enough_reputation') {
+                    // Specific logic for trying to message elite creators
+                    content = `
+                        <div style="font-size:3rem;margin-bottom:16px;">👑</div>
+                        <h2 style="font-size:1.4rem;margin-bottom:8px;">Elite Creator Locked</h2>
+                        <p style="color:#888;font-size:0.9rem;line-height:1.6;margin-bottom:20px;">You are trying to message an <b style="color:white;">Elite Creator</b> (100k+ Squad). To prevent spam, you must have a <b style="color:#00cc66;">Reputation Score of 50,000+</b>.</p>
+                        
+                        <div style="background:#0d0d0d;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin-bottom:20px;width:100%;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                                <span style="color:#aaa;font-size:0.85rem;">Your Reputation</span>
+                                <span style="font-weight:800;color:#ff0055;">${points||0} / 50,000</span>
+                            </div>
+                        </div>
+                        
+                        <p style="color:#555;font-size:0.8rem;margin-bottom:20px;">Keep posting great content! You get points when people <b>Like, Full Watch, and Share</b> your videos.</p>
+                        <button onclick="this.closest('div[style]').remove();" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;">I understand</button>
                     `;
                 } else {
                     content = `<div style="font-size:3rem;margin-bottom:16px;">🔒</div><h2>Access Restricted</h2><p style="color:#666;margin-bottom:20px;">You don't have permission to use Collab Chat.</p><button onclick="this.closest('div[style]').remove();" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:12px 24px;border-radius:12px;cursor:pointer;">Close</button>`;
@@ -3212,6 +3387,14 @@
                     const snapLikeIcon = document.getElementById(`snap-like-icon-${videoId}`);
                     if (snapLikeIcon) {
                         snapLikeIcon.style.color = data.status === 'liked' ? '#ff0055' : '#fff';
+                    }
+                    
+                    if (data.status === 'liked') {
+                        // Reward Creator reputation points for likes
+                        fetch('/api/record-engagement', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ video_id: videoId, user_email: user.email, action: 'like' })
+                        });
                     }
 
                     if (mainBtn) loadEngagementStats(videoId, channelEmail);
@@ -4030,7 +4213,13 @@
                 const shareUrl = window.location.origin + window.location.pathname + '?v=' + videoId;
                 const doPoints = () => {
                     const user = JSON.parse(localStorage.getItem('vitox_user') || 'null');
-                    if (user) { fetch('/api/add-points', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:user.email,amount:10,description:'Shared a video'})}); showToast(' +10 Points for sharing!'); }
+                    if (user) { 
+                        // Reward viewing user for sharing
+                        fetch('/api/add-points', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:user.email,amount:10,description:'Shared a video'})}); 
+                        // Reward content creator for the share
+                        fetch('/api/record-engagement', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({video_id:videoId,user_email:user.email,action:'share'})});
+                        showToast(' +10 Points for sharing!'); 
+                    }
                     else { showToast(' Link copied! Login to earn points.'); }
                 };
                 if (navigator.share) { navigator.share({title:videoTitle+' on Vitox',text:'Watch this!',url:shareUrl}).then(doPoints).catch(()=>{}); }

@@ -342,6 +342,19 @@ def init_db():
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
+    # Bug Reports Table
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS bug_reports (
+            id {id_type},
+            user_email TEXT,
+            title TEXT NOT NULL,
+            description TEXT,
+            screenshot_url TEXT,
+            status TEXT DEFAULT 'open',
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
 
     if not USE_POSTGRES:
         # SQLite migrations
@@ -1766,32 +1779,84 @@ def register_brand():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+@app.route('/api/record-engagement', methods=['POST'])
+def record_engagement():
+    """Reward reputation points to a creator based on audience feedback (likes, positive watch time)."""
+    try:
+        data = request.json
+        video_id = data.get('video_id')
+        user_email = data.get('user_email') # who is watching
+        action = data.get('action') # 'like', 'full_watch', 'positive_comment'
+        
+        if not video_id or not action:
+            return jsonify({'status': 'error', 'message': 'Missing fields'}), 400
+            
+        points_to_add = 0
+        if action == 'like': points_to_add = 10
+        elif action == 'full_watch': points_to_add = 5
+        elif action == 'positive_comment': points_to_add = 15
+        elif action == 'share': points_to_add = 20
+        
+        conn = get_db_connection()
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            # Find the uploader of the video
+            cursor.execute('SELECT email FROM videos WHERE id = %s', (video_id,))
+            uploader = cursor.fetchone()
+            if uploader:
+                uploader_email = uploader[0]
+                cursor.execute('UPDATE users SET points = points + %s WHERE email = %s', (points_to_add, uploader_email))
+        else:
+            uploader = conn.execute('SELECT email FROM videos WHERE id = ?', (video_id,)).fetchone()
+            if uploader:
+                uploader_email = uploader['email']
+                conn.execute('UPDATE users SET points = points + ? WHERE email = ?', (points_to_add, uploader_email))
+                
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'points_added': points_to_add})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 @app.route('/api/collab/eligibility', methods=['GET'])
 def check_collab_eligibility():
     """Check if a user is eligible to use the Collab Chat system."""
     email = request.args.get('email')
+    target_email = request.args.get('target') # Optional: specific creator they want to talk to
     if not email:
         return jsonify({'eligible': False, 'reason': 'not_logged_in'})
     
     conn = get_db_connection()
     try:
+        # Get user stats
         if USE_POSTGRES:
             cursor = conn.cursor()
-            cursor.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = %s', (email,))
+            cursor.execute('SELECT role, is_verified_brand, brand_id, points FROM users WHERE email = %s', (email,))
             user = cursor.fetchone()
             if not user:
                 return jsonify({'eligible': False, 'reason': 'not_logged_in'})
-            role, is_brand, brand_id = user[0], user[1], user[2]
+            role, is_brand, brand_id, my_points = user[0], user[1], user[2], user[3]
             
-            # Count their own squad (subscribers)
             cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (email,))
             my_squad = cursor.fetchone()[0]
+            
+            target_squad = 0
+            if target_email:
+                cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (target_email,))
+                target_squad = cursor.fetchone()[0]
         else:
-            user = conn.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = ?', (email,)).fetchone()
+            user = conn.execute('SELECT role, is_verified_brand, brand_id, points FROM users WHERE email = ?', (email,)).fetchone()
             if not user:
                 return jsonify({'eligible': False, 'reason': 'not_logged_in'})
-            role, is_brand, brand_id = user['role'], user['is_verified_brand'], user['brand_id']
+            role, is_brand, brand_id, my_points = user['role'], user['is_verified_brand'], user['brand_id'], user['points']
+            
             my_squad = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (email,)).fetchone()[0]
+            
+            target_squad = 0
+            if target_email:
+                tc = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (target_email,)).fetchone()
+                target_squad = tc[0] if tc else 0
         
         conn.close()
         
@@ -1799,20 +1864,38 @@ def check_collab_eligibility():
         if is_brand and brand_id:
             return jsonify({'eligible': True, 'type': 'brand', 'brand_id': brand_id})
         
-        # RULE 2: Creator with 1000+ squad = eligible
-        if my_squad >= 1000:
-            return jsonify({'eligible': True, 'type': 'creator', 'squad_count': my_squad})
-        
-        # RULE 3: Admin = always eligible
+        # RULE 2: Admin
         if role == 'admin':
             return jsonify({'eligible': True, 'type': 'admin'})
+            
+        # RULE 3: Creator Logic
+        if my_squad >= 1000:
+            # If target has massive squad, require reputation points
+            if target_email and target_squad > 100000:
+                needed_points = 50000 # 50k points needed to message elite creators
+                if my_points < needed_points:
+                    return jsonify({
+                        'eligible': False,
+                        'reason': 'not_enough_reputation',
+                        'points': my_points,
+                        'needed_points': needed_points,
+                        'message': f"To message an Elite Creator (100k+ Squad), your Reputation Score must be at least {needed_points}. Create high-quality content that audiences love!"
+                    })
+            return jsonify({'eligible': True, 'type': 'creator', 'squad_count': my_squad, 'points': my_points})
         
+        # Less than 1000 squad, BUT has high reputation?
+        # Maybe allow if points > 10000 (meaning small squad but highly loved content)
+        if my_points >= 10000:
+            return jsonify({'eligible': True, 'type': 'creator_reputation', 'squad_count': my_squad, 'points': my_points, 'message': 'Unlocked via High Reputation!'})
+            
         # Else: locked
         return jsonify({
             'eligible': False,
-            'reason': 'not_enough_squad',
+            'reason': 'not_enough_squad_or_points',
             'squad_count': my_squad,
-            'needed': 1000
+            'points': my_points,
+            'needed': 1000,
+            'needed_points': 10000
         })
     except Exception as e:
         conn.close()
@@ -1833,7 +1916,7 @@ def send_collab_message():
         conn = get_db_connection()
         if USE_POSTGRES:
             cursor = conn.cursor()
-            cursor.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = %s', (sender_email,))
+            cursor.execute('SELECT role, is_verified_brand, brand_id, points FROM users WHERE email = %s', (sender_email,))
             sender = cursor.fetchone()
             if not sender:
                 conn.close()
@@ -1842,20 +1925,29 @@ def send_collab_message():
             sender_role = sender[0]
             sender_is_brand = sender[1]
             sender_brand_id = sender[2]
+            sender_points = sender[3]
 
-            # Check sender eligibility
+            # Re-Check sender eligibility strictly on send
             if not sender_is_brand or not sender_brand_id:
-                # Not a brand - check if creator with 1000+ squad
                 cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (sender_email,))
                 my_squad = cursor.fetchone()[0]
-                if my_squad < 1000 and sender_role != 'admin':
-                    conn.close()
-                    return jsonify({'status': 'error', 'message': f'You need 1,000 Squad members to use Collab Chat. You have {my_squad}.', 'squad': my_squad}), 403
+                
+                cursor.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = %s', (receiver_email,))
+                target_squad = cursor.fetchone()[0]
+
+                if sender_role != 'admin':
+                    if my_squad < 1000 and sender_points < 10000:
+                        conn.close()
+                        return jsonify({'status': 'error', 'message': f'You need 1,000 Squad members or 10,000 Reputation Points to use Collab Chat.'}), 403
+                    
+                    if target_squad > 100000 and sender_points < 50000:
+                        conn.close()
+                        return jsonify({'status': 'error', 'message': f'You need a Reputation Score of 50,000+ to message Elite Creators.'}), 403
 
             cursor.execute('INSERT INTO messages (sender_email, receiver_email, content) VALUES (%s, %s, %s)',
                          (sender_email, receiver_email, content))
         else:
-            sender = conn.execute('SELECT role, is_verified_brand, brand_id FROM users WHERE email = ?', (sender_email,)).fetchone()
+            sender = conn.execute('SELECT role, is_verified_brand, brand_id, points FROM users WHERE email = ?', (sender_email,)).fetchone()
             if not sender:
                 conn.close()
                 return jsonify({'status': 'error', 'message': 'Sender not found'}), 404
@@ -1863,12 +1955,22 @@ def send_collab_message():
             sender_role = sender['role']
             sender_is_brand = sender['is_verified_brand']
             sender_brand_id = sender['brand_id']
+            sender_points = sender['points']
 
             if not sender_is_brand or not sender_brand_id:
                 my_squad = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (sender_email,)).fetchone()[0]
-                if my_squad < 1000 and sender_role != 'admin':
-                    conn.close()
-                    return jsonify({'status': 'error', 'message': f'You need 1,000 Squad members to use Collab Chat. You have {my_squad}.', 'squad': my_squad}), 403
+                
+                tsq = conn.execute('SELECT COUNT(*) FROM subscriptions WHERE channel_email = ?', (receiver_email,)).fetchone()
+                target_squad = tsq[0] if tsq else 0
+
+                if sender_role != 'admin':
+                    if my_squad < 1000 and sender_points < 10000:
+                        conn.close()
+                        return jsonify({'status': 'error', 'message': f'You need 1,000 Squad members or 10,000 Reputation Points to use Collab Chat.'}), 403
+                        
+                    if target_squad > 100000 and sender_points < 50000:
+                        conn.close()
+                        return jsonify({'status': 'error', 'message': f'You need a Reputation Score of 50,000+ to message Elite Creators.'}), 403
 
             conn.execute('INSERT INTO messages (sender_email, receiver_email, content) VALUES (?, ?, ?)',
                          (sender_email, receiver_email, content))
@@ -2226,6 +2328,73 @@ try:
     init_db()
 except Exception as e:
     print(f"Startup DB Init Failed (Non-Fatal): {e}")
+
+# --- BUG REPORTS ---
+@app.route('/api/bugs/report', methods=['POST'])
+def report_bug():
+    data = request.json
+    user_email = data.get('email', 'anonymous')
+    title = data.get('title')
+    description = data.get('description')
+    screenshot_url = data.get('screenshot_url', '')
+
+    if not title or not description:
+        return jsonify({'status': 'error', 'message': 'Title and description are required'}), 400
+
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO bug_reports (user_email, title, description, screenshot_url)
+                VALUES (%s, %s, %s, %s)
+            ''', (user_email, title, description, screenshot_url))
+        else:
+            conn.execute('''
+                INSERT INTO bug_reports (user_email, title, description, screenshot_url)
+                VALUES (?, ?, ?, ?)
+            ''', (user_email, title, description, screenshot_url))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'message': 'Bug report submitted successfully. Thank you!'})
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/admin/bugs')
+@admin_required
+def get_all_bugs():
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute("SELECT * FROM bug_reports ORDER BY CASE WHEN status='open' THEN 1 ELSE 2 END, timestamp DESC")
+        rows = cursor.fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM bug_reports ORDER BY CASE WHEN status='open' THEN 1 ELSE 2 END, timestamp DESC").fetchall()
+    bugs = [dict(r) for r in rows]
+    conn.close()
+    return jsonify(bugs)
+
+@app.route('/api/admin/bugs/action', methods=['POST'])
+@admin_required
+def admin_bug_action():
+    data = request.json
+    bug_id = data.get('id')
+    status = data.get('status') # 'resolved', 'open'
+    
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE bug_reports SET status = %s WHERE id = %s", (status, bug_id))
+        else:
+            conn.execute("UPDATE bug_reports SET status = ? WHERE id = ?", (status, bug_id))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'message': f'Bug marked as {status}'})
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
