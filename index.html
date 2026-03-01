@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -142,8 +142,21 @@
                 <a href="dashboard_overview.html"><i class="fas fa-user-circle"></i> View Channel</a>
                 <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
+            </div>
         </div>
     </header>
+
+    <!-- Push Notification Toast -->
+    <div id="push-notif-bar" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1a1a1a; border:1px solid rgba(255,0,85,0.4); border-radius:20px; padding:16px 24px; z-index:200001; box-shadow:0 10px 40px rgba(0,0,0,0.5); display:none; align-items:center; gap:16px; min-width:320px; max-width:480px;">
+        <div style="width:40px; height:40px; background:#ff0055; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fas fa-bell" style="color:white;"></i>
+        </div>
+        <div style="flex:1;">
+            <div id="push-notif-title" style="font-weight:800; color:white; font-size:0.9rem;">New on Vitox</div>
+            <div id="push-notif-body" style="color:#888; font-size:0.8rem; margin-top:2px;">Check out what's trending!</div>
+        </div>
+        <button onclick="document.getElementById('push-notif-bar').style.display='none'" style="background:none;border:none;color:#555;font-size:1.2rem;cursor:pointer;">&times;</button>
+    </div>
 
     <div class="main-layout">
         <!-- Sidebar -->
@@ -162,6 +175,19 @@
                 <a href="#" class="nav-item" onclick="showPricing(); return false;" style="background: linear-gradient(45deg, #121212, #252525); border: 1px solid #ffd700; margin: 12px 8px; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
                     <i class="fas fa-gem" style="color: #ffd700;"></i> <span style="color: #ffd700; font-weight: 700;">Join Premium</span></a>
                 <div style="height: 8px;"></div>
+                <hr>
+                <a href="#" class="nav-item" onclick="loadView('Trending'); return false;">
+                    <i class="fas fa-fire" style="color: #ff5500;"></i>
+                    <span>Trending</span>
+                </a>
+                <a href="#" class="nav-item" onclick="loadLeaderboardView(); return false;">
+                    <i class="fas fa-trophy" style="color: #ffd700;"></i>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="#" class="nav-item" onclick="loadForYouView(); return false;">
+                    <i class="fas fa-wand-magic-sparkles" style="color: #7000ff;"></i>
+                    <span>For You</span>
+                </a>
                 <hr>
                 <a href="rules.html" class="nav-item">
                     <i class="fas fa-book-open" style="color: #ff0055;"></i>
@@ -214,7 +240,7 @@
                     <a href="contact.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Contact Us</a>
                     <a href="disclaimer.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Disclaimer</a>
                     <a href="licenses.html" style="color: #aaa; text-decoration: none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Licenses</a>
-                    <div style="width: 100%; margin-top: 8px; color: #666; font-weight: 500;">© 2026 Vitox Media Pvt Ltd</div>
+                    <div style="width: 100%; margin-top: 8px; color: #666; font-weight: 500;">Â© 2026 Vitox Media Pvt Ltd</div>
                 </div>
             </nav>
         </aside>
@@ -277,6 +303,28 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- ðŸ”¥ Trending Section -->
+            <div id="trending-strip" style="margin-bottom: 28px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                    <h2 style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
+                        <span style="background:linear-gradient(45deg,#ff5500,#ff0055); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-fire"></i> Trending Now</span>
+                    </h2>
+                    <button onclick="loadView('Trending')" style="font-size:0.8rem; color:#ff0055; background:none; border:none; cursor:pointer; font-weight:700;">See all &rarr;</button>
+                </div>
+                <div id="trending-chips" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+            </div>
+
+            <!-- âœ¨ For You Section -->
+            <div id="for-you-row" style="margin-bottom:28px; display:none;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                    <h2 style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
+                        <span style="background:linear-gradient(45deg,#7000ff,#ff0055); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-wand-magic-sparkles"></i> Recommended For You</span>
+                    </h2>
+                    <span style="font-size:0.75rem; color:#555;">Based on your watch history</span>
+                </div>
+                <div id="for-you-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;"></div>
             </div>
 
             <div class="video-grid" id="main-video-grid">
@@ -705,7 +753,7 @@
                                     <h3 class="video-title">${(!vid.title || vid.title === 'undefined') ? 'Vitox Video' : vid.title}</h3>
                                     <p class="channel-name">${(!vid.user_email || vid.user_email === 'undefined') ? 'Official Creator' : vid.user_email.split('@')[0]} <i class="fas fa-check-circle"></i></p>
                                     <div class="meta-data">
-                                        <span>${isLive ? '<span style="color:#ff0055;">🔴 Live now</span>' : (vid.views || 0) + ' views'}</span> • <span>${vid.timestamp ? new Date(vid.timestamp).toLocaleDateString() : 'Just now'}</span>
+                                        <span>${isLive ? '<span style="color:#ff0055;">ðŸ”´ Live now</span>' : (vid.views || 0) + ' views'}</span> â€¢ <span>${vid.timestamp ? new Date(vid.timestamp).toLocaleDateString() : 'Just now'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -917,7 +965,7 @@
                                 <img src="${firstVideo.video_url}#t=5" style="width: 100%; aspect-ratio: 16/9; border-radius: 12px; object-fit: cover; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                                 <h1 style="font-size: 1.8rem; margin: 0 0 10px 0;">Liked videos</h1>
                                 <p style="margin: 0; font-weight: 500;">${user.name}</p>
-                                <p style="color: #aaa; font-size: 0.9rem; margin-top: 4px;">${likedVideos.length} videos • No views</p>
+                                <p style="color: #aaa; font-size: 0.9rem; margin-top: 4px;">${likedVideos.length} videos â€¢ No views</p>
                                 
                                 <div style="display: flex; gap: 10px; margin-top: 24px;">
                                     <button style="border-radius: 50%; width: 40px; height: 40px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer;"><i class="fas fa-download"></i></button>
@@ -945,7 +993,7 @@
                                     
                                     <div style="flex: 1;">
                                         <h4 style="margin: 0 0 4px 0; font-size: 1rem;">${vid.title || 'Untitled Video'}</h4>
-                                        <p style="margin: 0; font-size: 0.85rem; color: #aaa;">${vid.user_email} • ${vid.views || 0} views</p>
+                                        <p style="margin: 0; font-size: 0.85rem; color: #aaa;">${vid.user_email} â€¢ ${vid.views || 0} views</p>
                                     </div>
 
                                     <button style="background: none; border: none; color: white; opacity: 0; align-self: center;" class="more-btn"><i class="fas fa-ellipsis-v"></i></button>
@@ -1622,7 +1670,7 @@
 
                                 <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; margin-top: 24px; font-size: 0.95rem;">
                                     <div style="font-weight: 800; margin-bottom: 10px; color: #fff; display: flex; justify-content: space-between; align-items: center;">
-                                        <span><span id="view-count">${initialViews}</span> views • Published on ${timeAgo}</span>
+                                        <span><span id="view-count">${initialViews}</span> views â€¢ Published on ${timeAgo}</span>
                                         <div style="display: flex; gap: 8px;">
                                             <button onclick="translateDescription('${safeId}', 'Hindi')" style="font-size: 0.7rem; background: rgba(255,0,85,0.1); color: #ff0055; border: 1px solid rgba(255,0,85,0.2); padding: 4px 8px; border-radius: 4px; cursor: pointer;">Hindi</button>
                                             <button onclick="translateDescription('${safeId}', 'English')" style="font-size: 0.7rem; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; cursor: pointer;">EN</button>
@@ -2247,16 +2295,16 @@
             function simulateLiveChat() {
                 const chatContent = document.getElementById('live-chat-content');
                 const messages = [
-                    "LOVE FROM INDIA! 🇮🇳",
+                    "LOVE FROM INDIA! ðŸ‡®ðŸ‡³",
                     "Great quality stream!",
                     "Can you show your setup?",
-                    "This is lit! 🔥",
+                    "This is lit! ðŸ”¥",
                     "Helloooo!",
                     "Squad assemble!",
                     "Best creator ever!",
                     "Play some music!",
                     "Anyone from Mumbai?",
-                    "Checking in from NYC! 🗽"
+                    "Checking in from NYC! ðŸ—½"
                 ];
                 const users = ["Alex", "Deepak", "Sarah", "Raj", "Luna", "Kevin", "Zoya", "Mano", "Tyson"];
 
@@ -2401,14 +2449,14 @@
                 alertEl.style.cssText = `background:rgba(0,0,0,0.85);border:2px solid #ff0055;padding:14px 32px;border-radius:50px;color:white;font-weight:800;display:flex;align-items:center;gap:16px;box-shadow:0 0 30px rgba(255,0,85,0.4);animation:alert-slide-in 0.6s cubic-bezier(0.19,1,0.22,1) forwards;backdrop-filter:blur(10px);white-space:nowrap;`;
 
                 if (type === 'sub') {
-                    alertEl.innerHTML = `<i class="fas fa-star" style="color:#ff0055;font-size:1.4rem;"></i> <span>${user} joined the Squad! ⚡</span>`;
+                    alertEl.innerHTML = `<i class="fas fa-star" style="color:#ff0055;font-size:1.4rem;"></i> <span>${user} joined the Squad! âš¡</span>`;
                     updateSubGoal();
                 } else {
-                    const amounts = ["₹100", "₹500", "₹1000", "₹50", "₹200"];
+                    const amounts = ["â‚¹100", "â‚¹500", "â‚¹1000", "â‚¹50", "â‚¹200"];
                     const amount = amounts[Math.floor(Math.random() * amounts.length)];
                     alertEl.style.borderColor = "#ffd700";
                     alertEl.style.boxShadow = "0 0 30px rgba(255,215,0,0.4)";
-                    alertEl.innerHTML = `<i class="fas fa-gift" style="color:#ffd700;font-size:1.4rem;"></i> <span>${user} sent a gift of ${amount}! 🎁</span>`;
+                    alertEl.innerHTML = `<i class="fas fa-gift" style="color:#ffd700;font-size:1.4rem;"></i> <span>${user} sent a gift of ${amount}! ðŸŽ</span>`;
                 }
 
                 container.appendChild(alertEl);
@@ -2579,7 +2627,7 @@
                         body: JSON.stringify({
                             email: user.email,
                             title: title,
-                            description: "🔴 Live Stream via Vitox Studio",
+                            description: "ðŸ”´ Live Stream via Vitox Studio",
                             video_url: "live-placeholder", // Flag for frontend
                             thumbnail_url: thumb || "https://images.unsplash.com/photo-1628116904618-97103239a5de?auto=format&fit=crop&w=1920&q=80",
                             type: "live",
@@ -2828,7 +2876,7 @@
                         body: JSON.stringify({ video_id: videoId, email: user.email })
                     });
                     const data = await res.json();
-                    showToast(data.status === 'liked' ? "Liked! ❤️" : "Like Removed");
+                    showToast(data.status === 'liked' ? "Liked! â¤ï¸" : "Like Removed");
 
                     // Update Snap card counts if they exist
                     const snapLikeCount = document.getElementById(`snap-like-count-${videoId}`);
@@ -2861,7 +2909,7 @@
                         body: JSON.stringify({ subscriber: user.email, channel: channelEmail })
                     });
                     const data = await res.json();
-                    showToast(data.status === 'subscribed' ? "Added to Squad! 🚀" : "Left the Squad");
+                    showToast(data.status === 'subscribed' ? "Added to Squad! ðŸš€" : "Left the Squad");
 
                     // Update Snap card follow buttons
                     const snapSubBtn = document.getElementById(`snap-sub-btn-${videoId}`);
@@ -3082,7 +3130,7 @@
                 
                 modal.innerHTML = `
                     <div style="background: #111; border: 2px solid #ff0055; border-radius: 24px; padding: 40px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 0 50px rgba(255,0,85,0.3); animation: scale-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-                        <div style="font-size: 4rem; margin-bottom: 20px;">🎁</div>
+                        <div style="font-size: 4rem; margin-bottom: 20px;">ðŸŽ</div>
                         <h2 style="color: white; font-weight: 800; margin-bottom: 10px;">Daily Streak Reward!</h2>
                         <p style="color: #aaa; line-height: 1.6; margin-bottom: 25px;">You've returned to Vitox! Claim your daily 50 points and 2x Badge Progress for the next hour.</p>
                         <button id="claim-reward-btn" style="background: #ff0055; color: white; border: none; padding: 15px 40px; border-radius: 40px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(255,0,85,0.2);">
@@ -3107,7 +3155,7 @@
                         });
                     }
                     
-                    showToast("🎁 50 Points Added! 2x Progress Active.");
+                    showToast("ðŸŽ 50 Points Added! 2x Progress Active.");
                     modal.style.animation = 'scale-in 0.3s reverse forwards';
                     setTimeout(() => modal.remove(), 300);
                     
@@ -3169,7 +3217,7 @@
                             <div style="display: flex; align-items: center; gap: 12px;"><i class="fas fa-crown" style="color: #ffd700;"></i> <span><b>Priority Support</b> & Ad Revenue</span></div>
                         </div>
 
-                        <div style="font-size: 2rem; font-weight: 800; color: white; margin-bottom: 24px;">₹99<span style="font-size: 1rem; color: #666; font-weight: 400;">/month</span></div>
+                        <div style="font-size: 2rem; font-weight: 800; color: white; margin-bottom: 24px;">â‚¹99<span style="font-size: 1rem; color: #666; font-weight: 400;">/month</span></div>
 
                         <button id="rzp-button1" style="background: linear-gradient(45deg, #ffd700, #ffaa00); color: black; border: none; padding: 18px 32px; border-radius: 40px; font-weight: 800; font-size: 1.2rem; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 10px 20px rgba(255,215,0,0.2);">
                             UPGRADE TO PREMIUM
@@ -3199,7 +3247,7 @@
                     "image": "https://creatorstudio-pro.onrender.com/favicon.svg",
                     "handler": function (response){
                         // Payment Success
-                        showToast(`🚀 Success! Payment ID: ${response.razorpay_payment_id}`);
+                        showToast(`ðŸš€ Success! Payment ID: ${response.razorpay_payment_id}`);
                         upgradeUserToPremium(response.razorpay_payment_id);
                     },
                     "prefill": {
@@ -3213,7 +3261,7 @@
                 
                 const rzp1 = new Razorpay(options);
                 rzp1.on('payment.failed', function (response){
-                    showToast("❌ Payment Failed: " + response.error.description);
+                    showToast("âŒ Payment Failed: " + response.error.description);
                 });
                 rzp1.open();
             }
@@ -3228,7 +3276,7 @@
                     });
                     const data = await res.json();
                     if (data.status === 'success') {
-                        showToast("👑 Welcome to the Squad! You are now Premium.");
+                        showToast("ðŸ‘‘ Welcome to the Squad! You are now Premium.");
                         // Update UI to show gold theme/badge
                         location.reload(); 
                     }
@@ -3536,9 +3584,9 @@
                 localStorage.setItem('vitox_watch_count', count);
                 
                 // Dopamine hits
-                if (count === 1) { showToast("🎉 Badge Unlocked: First Blood!"); }
-                if (count === 5) { showToast("🏆 Badge Unlocked: Avid Watcher!"); }
-                if (count === 10) { showToast("👑 Badge Unlocked: Vitox Master!"); }
+                if (count === 1) { showToast("ðŸŽ‰ Badge Unlocked: First Blood!"); }
+                if (count === 5) { showToast("ðŸ† Badge Unlocked: Avid Watcher!"); }
+                if (count === 10) { showToast("ðŸ‘‘ Badge Unlocked: Vitox Master!"); }
                 
                 updateGamificationUI();
             }
@@ -3579,6 +3627,145 @@
                 badgeIcon.parentElement.style.boxShadow = `0 0 15px ${color}44`;
                 badgeIcon.parentElement.style.background = `${color}11`;
             }
+
+            // ===================================================
+            // FEATURE 1: TRENDING ALGORITHM
+            // ===================================================
+            function renderTrendingStrip(videos) {
+                const container = document.getElementById('trending-chips');
+                if (!container || !videos || !videos.length) return;
+                const trending = [...videos].filter(v => v.type !== 'live').sort((a, b) => (b.views||0) - (a.views||0)).slice(0, 8);
+                container.innerHTML = '';
+                trending.forEach((v, i) => {
+                    const chip = document.createElement('div');
+                    chip.style.cssText = `background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:40px;padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:0.2s;${i===0?'border-color:rgba(255,85,0,0.5);background:rgba(255,85,0,0.08);':''}`;
+                    const views = v.views >= 1000 ? (v.views/1000).toFixed(1)+'K' : (v.views||0);
+                    chip.innerHTML = `<span style="color:${i===0?'#ff5500':'#888'};font-weight:800;font-size:0.8rem;">#${i+1}</span><span style="font-size:0.85rem;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${v.title}</span><span style="color:#555;font-size:0.75rem;">${views} views</span>`;
+                    chip.onmouseenter = () => chip.style.background = 'rgba(255,255,255,0.08)';
+                    chip.onmouseleave = () => chip.style.background = i===0?'rgba(255,85,0,0.08)':'rgba(255,255,255,0.04)';
+                    chip.onclick = () => playVideo(v.video_url, v.title, v.user_email, v.views, v.timestamp, v.description, v.id, v.type);
+                    container.appendChild(chip);
+                });
+            }
+
+            // ===================================================
+            // FEATURE 2: FOR YOU (Personalized Feed)
+            // ===================================================
+            function renderForYouSection(videos) {
+                const watchHistory = JSON.parse(localStorage.getItem('vitox_watch_history') || '[]');
+                if (!watchHistory.length || !videos || !videos.length) return;
+                const keywords = watchHistory.flatMap(h => (h.title||'').toLowerCase().split(' ')).filter(w => w.length > 3);
+                const scored = videos.filter(v => !watchHistory.some(h => h.id === v.id)).map(v => {
+                    const content = (v.title+' '+(v.description||'')+' '+(v.category||'')).toLowerCase();
+                    return { ...v, score: keywords.filter(k => content.includes(k)).length };
+                }).filter(v => v.score > 0).sort((a, b) => b.score - a.score).slice(0, 6);
+                if (!scored.length) return;
+                const row = document.getElementById('for-you-row');
+                const grid = document.getElementById('for-you-grid');
+                if (!row || !grid) return;
+                row.style.display = 'block';
+                grid.innerHTML = '';
+                scored.forEach(v => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background:#111;border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:0.2s;';
+                    const thumb = v.thumbnail_url || 'https://dummyimage.com/320x180/111/ff0055.png';
+                    const views = v.views >= 1000 ? (v.views/1000).toFixed(1)+'K' : (v.views||0);
+                    card.innerHTML = `<div style="position:relative;aspect-ratio:16/9;overflow:hidden;"><img src="${thumb}" style="width:100%;height:100%;object-fit:cover;" loading="lazy"><div style="position:absolute;bottom:6px;right:6px;background:#7000ff;color:white;padding:2px 8px;border-radius:4px;font-size:0.65rem;font-weight:800;">FOR YOU</div></div><div style="padding:10px;"><div style="font-weight:700;font-size:0.85rem;line-height:1.3;margin-bottom:4px;">${v.title}</div><div style="color:#666;font-size:0.75rem;">${views} views</div></div>`;
+                    card.onmouseenter = () => card.style.borderColor = 'rgba(112,0,255,0.3)';
+                    card.onmouseleave = () => card.style.borderColor = 'rgba(255,255,255,0.06)';
+                    card.onclick = () => playVideo(v.video_url, v.title, v.user_email, v.views, v.timestamp, v.description, v.id, v.type);
+                    grid.appendChild(card);
+                });
+            }
+
+            // ===================================================
+            // FEATURE 3: CREATOR LEADERBOARD
+            // ===================================================
+            function loadLeaderboardView() {
+                const grid = document.getElementById('main-video-grid');
+                const emptyState = document.getElementById('empty-state');
+                if(emptyState) emptyState.style.display = 'none';
+                const c = {};
+                allVideos.forEach(v => {
+                    if(!c[v.user_email]) c[v.user_email] = {email:v.user_email,totalViews:0,videoCount:0};
+                    c[v.user_email].totalViews += (v.views||0);
+                    c[v.user_email].videoCount++;
+                });
+                const sorted = Object.values(c).sort((a,b) => b.totalViews - a.totalViews).slice(0,20);
+                const medals = ['','',''];
+                grid.style.display = 'block';
+                grid.innerHTML = `<div style="max-width:700px;margin:0 auto;"><h2 style="font-size:1.5rem;font-weight:800;margin-bottom:24px;"><i class="fas fa-trophy" style="color:#ffd700;"></i> Creator Leaderboard</h2>${sorted.map((cr,i)=>`<div style="background:#111;border:1px solid ${i<3?'rgba(255,215,0,0.2)':'rgba(255,255,255,0.06)'};border-radius:16px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;"><div style="font-size:${i<3?2:1}rem;font-weight:800;color:${i<3?'#ffd700':'#555'};width:40px;text-align:center;">${medals[i]||'#'+(i+1)}</div><div style="width:44px;height:44px;background:#222;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:white;border:2px solid ${i<3?'#ffd700':'rgba(255,255,255,0.1)'}">${cr.email.charAt(0).toUpperCase()}</div><div style="flex:1;"><div style="font-weight:700;">${cr.email.split('@')[0]}</div><div style="color:#666;font-size:0.8rem;">${cr.videoCount} videos</div></div><div style="text-align:right;"><div style="font-weight:800;color:${i<3?'#ffd700':'white'};font-size:1.1rem;">${cr.totalViews>=1000?(cr.totalViews/1000).toFixed(1)+'K':cr.totalViews}</div><div style="color:#555;font-size:0.75rem;">total views</div></div></div>`).join('')}</div>`;
+            }
+
+            // ===================================================
+            // FEATURE 4: SHARE & EARN
+            // ===================================================
+            function shareAndEarn(videoId, videoTitle) {
+                const shareUrl = window.location.origin + window.location.pathname + '?v=' + videoId;
+                const doPoints = () => {
+                    const user = JSON.parse(localStorage.getItem('vitox_user') || 'null');
+                    if (user) { fetch('/api/add-points', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:user.email,amount:10,description:'Shared a video'})}); showToast(' +10 Points for sharing!'); }
+                    else { showToast(' Link copied! Login to earn points.'); }
+                };
+                if (navigator.share) { navigator.share({title:videoTitle+' on Vitox',text:'Watch this!',url:shareUrl}).then(doPoints).catch(()=>{}); }
+                else { navigator.clipboard.writeText(shareUrl).then(() => { doPoints(); showToast(' Link copied!'); }); }
+            }
+
+            // ===================================================
+            // FEATURE 5: IN-APP PUSH NOTIFICATIONS
+            // ===================================================
+            function showPushNotification(title, body) {
+                const bar = document.getElementById('push-notif-bar');
+                if(!bar) return;
+                document.getElementById('push-notif-title').innerText = title;
+                document.getElementById('push-notif-body').innerText = body;
+                bar.style.display = 'flex';
+                setTimeout(() => { bar.style.display = 'none'; }, 6000);
+            }
+            function schedulePushNotifications() {
+                setTimeout(() => {
+                    if (allVideos && allVideos.length > 0) {
+                        const v = allVideos[Math.floor(Math.random() * Math.min(allVideos.length, 5))];
+                        showPushNotification(' Trending on Vitox', '"' + v.title + '" is blowing up!');
+                    }
+                }, 3.5 * 60 * 1000);
+            }
+
+            // ===================================================
+            // FEATURE 6: VIDEO CHAPTERS (from description)
+            // ===================================================
+            function parseChapters(description) {
+                if (!description) return [];
+                const chapters = [];
+                const re = /^(\d{1,2}:\d{2}(?::\d{2})?)\s+(.+)/;
+                description.split('\n').forEach(line => {
+                    const m = line.trim().match(re);
+                    if (m) { const p = m[1].split(':').map(Number); const sec = p.length===3?p[0]*3600+p[1]*60+p[2]:p[0]*60+p[1]; chapters.push({time:m[1],title:m[2].trim(),seconds:sec}); }
+                });
+                return chapters;
+            }
+
+            // ===================================================
+            // WIRE UP: After loadVideos, run all hooks
+            // ===================================================
+            function loadForYouView() {
+                loadVideos();
+                setTimeout(() => { const el = document.getElementById('for-you-row'); if(el) el.scrollIntoView({behavior:'smooth'}); }, 1500);
+            }
+
+            // Patch renderVideos to also update Trending + For You
+            (function() {
+                const _orig = renderVideos;
+                renderVideos = function(videos, flag) {
+                    _orig(videos, flag);
+                    if (allVideos && allVideos.length > 0) {
+                        renderTrendingStrip(allVideos);
+                        renderForYouSection(allVideos);
+                        schedulePushNotifications();
+                    }
+                };
+            })();
+
         </script>
 </body>
 
