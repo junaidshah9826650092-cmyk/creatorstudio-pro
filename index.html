@@ -36,13 +36,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7142476355791158" crossorigin="anonymous"></script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <!-- Google Analytics GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3TK6X8XJ2D"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
+      gtag('config', 'G-3TK6X8XJ2D');
     </script>
     <!-- Video.js and Google IMA SDK -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
@@ -57,7 +57,6 @@
 
 <body class="dark-theme">
     <!-- Global Platform AdSense (Revenue for Vitox Owner) -->
-    <amp-auto-ads type="adsense" data-ad-client="ca-pub-7142476355791158"></amp-auto-ads>
     <!-- Note: Creators use their own IDs for video-specific ads via the Link AdSense feature -->
 
     <!-- Top Bar -->
@@ -4414,6 +4413,231 @@
             })();
 
         </script>
+
+    <!-- ✨ Auto Festival Theme System -->
+    <div id="festival-banner" style="display:none; position:fixed; top:56px; left:0; right:0; z-index:99999; padding:10px 20px; text-align:center; font-weight:800; font-size:0.95rem; letter-spacing:0.5px; cursor:pointer; backdrop-filter:blur(10px);" onclick="document.getElementById('festival-banner').style.display='none'">
+        <span id="festival-banner-text"></span>
+        <span style="margin-left:12px; font-size:0.75rem; opacity:0.7;">(click to close)</span>
+    </div>
+    <canvas id="festival-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:99998;"></canvas>
+
+    <script>
+    (function() {
+        const today = new Date();
+        const month = today.getMonth() + 1; // 1-12
+        const day = today.getDate();
+
+        // Festival definitions — {name, emoji, startM, startD, endM, endD, banner color, text}
+        const festivals = [
+            {
+                name: 'Holi',
+                emoji: '🎨',
+                startM: 3, startD: 10, endM: 3, endD: 16,
+                bg: 'linear-gradient(90deg, #ff0055, #ff6600, #ffcc00, #00cc66, #0066ff, #cc00ff)',
+                color: '#fff',
+                msg: '🎨 Happy Holi from Vitox! Rang Barse! 🌈',
+                effect: 'holi'
+            },
+            {
+                name: 'Diwali',
+                emoji: '🪔',
+                startM: 10, startD: 20, endM: 11, endD: 5,
+                bg: 'linear-gradient(90deg, #1a0a00, #ff8800, #ffd700, #ff6600)',
+                color: '#ffd700',
+                msg: '🪔 Happy Diwali from Vitox! Shubh Deepawali! ✨',
+                effect: 'sparkle'
+            },
+            {
+                name: 'Independence Day',
+                emoji: '🇮🇳',
+                startM: 8, startD: 14, endM: 8, endD: 15,
+                bg: 'linear-gradient(90deg, #ff6600, #fff, #128807)',
+                color: '#000080',
+                msg: '🇮🇳 Happy Independence Day! Jai Hind! 🙏',
+                effect: 'tricolor'
+            },
+            {
+                name: 'Republic Day',
+                emoji: '🇮🇳',
+                startM: 1, startD: 25, endM: 1, endD: 26,
+                bg: 'linear-gradient(90deg, #ff6600, #fff, #128807)',
+                color: '#000080',
+                msg: '🇮🇳 Happy Republic Day! Jai Hind! 🎺',
+                effect: 'tricolor'
+            },
+            {
+                name: 'Eid',
+                emoji: '🌙',
+                startM: 3, startD: 29, endM: 3, endD: 31,
+                bg: 'linear-gradient(90deg, #006633, #00cc66, #ffd700)',
+                color: '#fff',
+                msg: '🌙 Eid Mubarak from Vitox! Khushiyan ho! ⭐',
+                effect: 'sparkle'
+            },
+            {
+                name: 'New Year',
+                emoji: '🎆',
+                startM: 1, startD: 1, endM: 1, endD: 2,
+                bg: 'linear-gradient(90deg, #0d0d0d, #7000ff, #ff0055, #ffd700)',
+                color: '#fff',
+                msg: '🎆 Happy New Year 2026 from Vitox! Naye saal ki shubhkaamnayein! 🥳',
+                effect: 'sparkle'
+            },
+            {
+                name: 'Christmas',
+                emoji: '🎄',
+                startM: 12, startD: 24, endM: 12, endD: 26,
+                bg: 'linear-gradient(90deg, #0a2a0a, #cc0000, #ffffff, #006600)',
+                color: '#fff',
+                msg: '🎄 Merry Christmas from Vitox! Ho Ho Ho! 🎅',
+                effect: 'snow'
+            }
+        ];
+
+        // Find active festival
+        let active = null;
+        for (const f of festivals) {
+            const start = new Date(today.getFullYear(), f.startM - 1, f.startD);
+            const end   = new Date(today.getFullYear(), f.endM - 1, f.endD, 23, 59);
+            if (today >= start && today <= end) { active = f; break; }
+        }
+
+        if (!active) return;
+
+        // Show banner
+        const banner = document.getElementById('festival-banner');
+        if (banner) {
+            banner.style.background = active.bg;
+            banner.style.color = active.color;
+            banner.style.display = 'block';
+            banner.style.textShadow = '0 1px 3px rgba(0,0,0,0.4)';
+            document.getElementById('festival-banner-text').textContent = active.msg;
+        }
+
+        // Canvas particles
+        const canvas = document.getElementById('festival-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+        let particles = [];
+
+        if (active.effect === 'holi') {
+            // Colorful powder puffs
+            const colors = ['#ff0055','#ff6600','#ffcc00','#00cc66','#0099ff','#cc00ff','#ff99cc','#00ffcc'];
+            for (let i = 0; i < 120; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: -Math.random() * canvas.height,
+                    r: Math.random() * 14 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 2 + 0.5,
+                    wobble: Math.random() * 3 - 1.5,
+                    alpha: Math.random() * 0.7 + 0.3,
+                    rotate: Math.random() * 360,
+                    rotateSpeed: Math.random() * 4 - 2
+                });
+            }
+        } else if (active.effect === 'sparkle') {
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 3 + 1,
+                    color: ['#ffd700','#fff','#ff6600','#ffcc00'][Math.floor(Math.random()*4)],
+                    speed: Math.random() * 1 + 0.2,
+                    wobble: Math.random() * 2 - 1,
+                    alpha: Math.random(),
+                    fade: Math.random() * 0.02 + 0.005
+                });
+            }
+        } else if (active.effect === 'tricolor') {
+            const colors = ['#ff6600','#ffffff','#128807'];
+            for (let i = 0; i < 90; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: -Math.random() * canvas.height,
+                    r: Math.random() * 8 + 3,
+                    color: colors[Math.floor(Math.random() * 3)],
+                    speed: Math.random() * 2 + 0.5,
+                    wobble: Math.random() * 2 - 1,
+                    alpha: 0.8,
+                    rotate: Math.random() * 360,
+                    rotateSpeed: Math.random() * 3 - 1.5
+                });
+            }
+        } else if (active.effect === 'snow') {
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: -Math.random() * canvas.height,
+                    r: Math.random() * 6 + 2,
+                    color: '#fff',
+                    speed: Math.random() * 1.5 + 0.3,
+                    wobble: Math.random() * 1.5 - 0.75,
+                    alpha: Math.random() * 0.7 + 0.3
+                });
+            }
+        }
+
+        // Auto stop after 8 seconds to not distract
+        let frames = 0;
+        const MAX_FRAMES = 480; // ~8 sec at 60fps
+
+        function animate() {
+            if (frames++ > MAX_FRAMES) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+
+                if (active.effect === 'holi') {
+                    // Powder blob shape
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotate || 0) * Math.PI / 180);
+                    ctx.ellipse(0, 0, p.r * 1.5, p.r, 0, 0, Math.PI * 2);
+                    p.rotate = (p.rotate || 0) + (p.rotateSpeed || 1);
+                } else {
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                }
+
+                ctx.fill();
+                ctx.restore();
+
+                // Move
+                p.y += p.speed;
+                p.x += p.wobble;
+
+                // Sparkle fade
+                if (active.effect === 'sparkle') {
+                    p.alpha -= p.fade || 0.01;
+                    if (p.alpha <= 0) {
+                        p.alpha = 1;
+                        p.x = Math.random() * canvas.width;
+                        p.y = Math.random() * canvas.height;
+                    }
+                }
+
+                // Reset falling particles
+                if (p.y > canvas.height + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    })();
+    </script>
 </body>
 
 </html>

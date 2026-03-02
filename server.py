@@ -127,9 +127,11 @@ if os.path.exists('.env'):
                 os.environ[key] = value
 
 from flask_talisman import Talisman
+from flask_socketio import SocketIO, join_room, leave_room, emit
 
 app = Flask(__name__, static_folder='.', static_url_path='/static')
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Force HTTPS (Only on Render) but EXEMPT robots.txt for Google Bot
 is_prod = os.environ.get('RENDER') == 'true'
@@ -972,6 +974,50 @@ def get_comments(video_id):
         comments = conn.execute('SELECT * FROM comments WHERE video_id = ? ORDER BY timestamp DESC', (video_id,)).fetchall()
     conn.close()
     return jsonify(to_json(comments))
+
+@socketio.on('join_video')
+def on_join(data):
+    video_id = data.get('video_id')
+    if video_id:
+        join_room(video_id)
+
+@socketio.on('new_comment')
+def on_new_comment(data):
+    video_id = data.get('video_id')
+    email = data.get('email')
+    content = data.get('content')
+    
+    if not video_id or not email or not content:
+        return
+        
+    # Automated Rule Enforcement
+    violated = enforce_automated_rules(video_id, 'comment', content, email)
+    if violated:
+        emit('comment_error', {'message': 'Content violates Vitox safety policies.'}, to=request.sid)
+        return
+
+    conn = get_db_connection()
+    timestamp = datetime.now().isoformat()
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO comments (video_id, user_email, content, timestamp) VALUES (%s, %s, %s, %s) RETURNING id', (video_id, email, content, timestamp))
+        comment_id = cursor.fetchone()[0]
+    else:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO comments (video_id, user_email, content, timestamp) VALUES (?, ?, ?, ?)', (video_id, email, content, timestamp))
+        comment_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    
+    # Broadcast to everyone in the room
+    emit('update_comments', {
+        'id': comment_id,
+        'video_id': video_id,
+        'user_email': email,
+        'content': content,
+        'timestamp': timestamp
+    }, to=video_id)
+
 
 
 @app.route('/api/report', methods=['POST'])
@@ -2398,4 +2444,4 @@ def admin_bug_action():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
