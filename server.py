@@ -432,6 +432,75 @@ def health():
     return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()}), 200
 
 
+# ✨ Auto Festival Theme API — AI Managed Indian Festival Dates
+@app.route('/api/festival', methods=['GET'])
+def get_festival():
+    """Returns today's active Indian festival (if any) for the frontend theme engine."""
+    today = datetime.now()
+    year = today.year
+
+    # Indian festival dates (update yearly or use AI to predict)
+    FESTIVALS = [
+        # Holi 2026 = March 3
+        { "name": "Holi", "start": (year, 3, 2), "end": (year, 3, 3),
+          "msg": "🎨 Happy Holi from Vitox! Rang Barse! 🌈",
+          "effect": "holi",
+          "bg": "linear-gradient(90deg,#ff0055,#ff6600,#ffcc00,#00cc66,#0066ff,#cc00ff)",
+          "color": "#fff" },
+        # Eid ul-Fitr 2026 ~ March 20
+        { "name": "Eid", "start": (year, 3, 19), "end": (year, 3, 21),
+          "msg": "🌙 Eid Mubarak from Vitox! Khushiyan ho! ⭐",
+          "effect": "sparkle",
+          "bg": "linear-gradient(90deg,#006633,#00cc66,#ffd700)",
+          "color": "#fff" },
+        # Independence Day
+        { "name": "Independence Day", "start": (year, 8, 15), "end": (year, 8, 15),
+          "msg": "🇮🇳 Happy Independence Day! Jai Hind! 🙏",
+          "effect": "tricolor",
+          "bg": "linear-gradient(90deg,#ff6600,#fff,#128807)",
+          "color": "#000080" },
+        # Republic Day
+        { "name": "Republic Day", "start": (year, 1, 26), "end": (year, 1, 26),
+          "msg": "🇮🇳 Happy Republic Day! Jai Hind! 🎺",
+          "effect": "tricolor",
+          "bg": "linear-gradient(90deg,#ff6600,#fff,#128807)",
+          "color": "#000080" },
+        # Diwali 2026 ~ Oct 20
+        { "name": "Diwali", "start": (year, 10, 19), "end": (year, 10, 21),
+          "msg": "🪔 Happy Diwali from Vitox! Shubh Deepawali! ✨",
+          "effect": "sparkle",
+          "bg": "linear-gradient(90deg,#1a0a00,#ff8800,#ffd700,#ff6600)",
+          "color": "#ffd700" },
+        # New Year
+        { "name": "New Year", "start": (year, 1, 1), "end": (year, 1, 1),
+          "msg": f"🎆 Happy New Year {year} from Vitox! 🥳",
+          "effect": "sparkle",
+          "bg": "linear-gradient(90deg,#0d0d0d,#7000ff,#ff0055,#ffd700)",
+          "color": "#fff" },
+        # Christmas
+        { "name": "Christmas", "start": (year, 12, 24), "end": (year, 12, 25),
+          "msg": "🎄 Merry Christmas from Vitox! Ho Ho Ho! 🎅",
+          "effect": "snow",
+          "bg": "linear-gradient(90deg,#0a2a0a,#cc0000,#fff,#006600)",
+          "color": "#fff" },
+    ]
+
+    for f in FESTIVALS:
+        start = datetime(f["start"][0], f["start"][1], f["start"][2])
+        end   = datetime(f["end"][0],   f["end"][1],   f["end"][2], 23, 59)
+        if start <= today <= end:
+            return jsonify({
+                "active": True,
+                "name":   f["name"],
+                "msg":    f["msg"],
+                "effect": f["effect"],
+                "bg":     f["bg"],
+                "color":  f["color"]
+            })
+
+    return jsonify({"active": False})
+
+
 @app.errorhandler(500)
 def handle_500(e):
     print(f"CRITICAL SERVER ERROR: {e}")
