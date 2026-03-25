@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from flask import Flask, request, jsonify, send_from_directory
+from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
 from ai_engine import VitoxAI
 ai_processor = VitoxAI()
@@ -512,6 +513,10 @@ def handle_500(e):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
+    # Pass through HTTP errors (like 404) so Flask handles them correctly
+    if isinstance(e, HTTPException):
+        return e
+        
     print(f"UNHANDLED EXCEPTION: {e}")
     return jsonify({
         "status": "error", 
