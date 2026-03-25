@@ -797,19 +797,10 @@
 
                 if (emptyState) emptyState.style.display = 'none';
 
-                // Reset Layout for Feed
+                // Reset Layout for Feed - Handle via CSS classes
+                document.body.classList.remove('hide-ui');
                 const sidebar = document.querySelector('.sidebar');
-                const catBar = document.querySelector('.categories-bar');
-                const content = document.querySelector('.content');
-                const topBar = document.querySelector('.top-bar');
-                if (sidebar) sidebar.style.display = 'block';
-                if (catBar) catBar.style.display = 'flex';
-                if (topBar) topBar.style.display = 'flex';
-                if (content) {
-                    content.style.marginLeft = '240px';
-                    content.style.padding = '12px 24px';
-                    content.style.paddingTop = '12px';
-                }
+                if (sidebar) sidebar.classList.remove('hidden-always');
 
                 if (grid) {
                     // Reset Grid Styles
@@ -1167,10 +1158,7 @@
                 if (sidebar) sidebar.style.display = 'block';
                 if (catBar) catBar.style.display = 'flex';
                 if (topBar) topBar.style.display = 'flex';
-                if (content) {
-                    content.style.marginLeft = '240px';
-                    content.style.padding = '12px 24px';
-                }
+                    // Layout handled via CSS classes
 
                 if (viewName === 'Squad') {
                     loadCommunityFeed();
@@ -1180,14 +1168,8 @@
                 if (viewName === 'Live Stream') {
                     if (emptyState) emptyState.style.display = 'none';
 
-                    // Full screen dashboard mode (Hide main UI)
-                    if (sidebar) sidebar.style.display = 'none';
-                    if (catBar) catBar.style.display = 'none';
-                    if (topBar) topBar.style.display = 'none';
-                    if (content) {
-                        content.style.marginLeft = '0';
-                        content.style.padding = '0';
-                    }
+                    // Full screen dashboard mode (Handle via CSS class)
+                    document.body.classList.add('hide-ui');
 
                     grid.innerHTML = `
                     <div style="display: flex; flex-direction: column; height: 100vh; background: #000; color: white; position: relative; overflow: hidden;">
