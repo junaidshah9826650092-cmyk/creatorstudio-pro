@@ -76,19 +76,20 @@ for i, theme in enumerate(themes, start=1):
     logo_size = width // 6 
     logo_pos = ((width - logo_size)//2, (height - logo_size)//2)
     
-    # Create a stylized 'V' for Vitox center logo
-    logo = Image.new("RGBA", (logo_size, logo_size), (0,0,0,0))
-    from PIL import ImageDraw
-    draw = ImageDraw.Draw(logo)
-    
-    # Draw Background circle for logo
-    draw.ellipse([0, 0, logo_size, logo_size], fill=theme["fill_color"])
-    
-    # Draw a BOLD V in the center
-    # Note: Using default font, we just make it as large as possible
-    draw.text((logo_size//3, logo_size//10), "V", fill=theme["back_color"], font=None, stroke_width=2) 
-    
-    img.paste(logo, logo_pos, logo)
+    # Use the actual Vitox App Icon
+    try:
+        app_icon = Image.open("mobile_app/web/icons/Icon-512.png").convert("RGBA")
+        app_icon = app_icon.resize((logo_size, logo_size), Image.LANCZOS)
+        img.paste(app_icon, logo_pos, app_icon)
+    except Exception as e:
+        print(f"Warning: Could not load app icon, using fallback. Error: {e}")
+        # Create a stylized 'V' for Vitox center logo fallback
+        logo = Image.new("RGBA", (logo_size, logo_size), (0,0,0,0))
+        from PIL import ImageDraw
+        draw = ImageDraw.Draw(logo)
+        draw.ellipse([0, 0, logo_size, logo_size], fill=theme["fill_color"])
+        draw.text((logo_size//3, logo_size//10), "V", fill=theme["back_color"], font=None) 
+        img.paste(logo, logo_pos, logo)
     img.save(filepath)
     
     print(f"✅ Created FIXED PRETTY: {filepath} (Link: {unique_link})")

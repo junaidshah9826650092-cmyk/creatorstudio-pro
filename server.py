@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, make_response
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
 from ai_engine import VitoxAI
@@ -129,8 +129,10 @@ if os.path.exists('.env'):
 
 from flask_talisman import Talisman
 from flask_socketio import SocketIO, join_room, leave_room, emit
+from flask_compress import Compress
 
 app = Flask(__name__, static_folder='.', static_url_path='/static')
+Compress(app) # Enable Gzip/Brotli compression
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -195,7 +197,7 @@ def to_json(data):
     return data
 
 def init_db():
-    print(f"--- INITIALIZING MILITARY-GRADE DATABASE SYSTEM ---")
+    print(f"--- vitox database  ---")
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -2664,6 +2666,18 @@ def admin_bug_action():
         conn.close()
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+# Set Cache-Control for static assets
+@app.after_request
+def add_header(response):
+    if 'Cache-Control' not in response.headers:
+        # Cache static assets for 1 year if they are in the static or assets directory
+        # For this app, most JS/CSS/Images are in the root or assets/
+        path = request.path
+        if path.endswith(('.js', '.css', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.ico', '.woff', '.woff2')):
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    return response
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
+
