@@ -37,7 +37,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7142476355791158" crossorigin="anonymous"></script>
     <!-- Google Analytics GA4 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3TK6X8XJ2D"></script>
@@ -359,9 +360,27 @@
                 <div id="for-you-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;"></div>
             </div>
 
+    <!-- Skeleton Loader Styles -->
+    <style>
+        .skeleton-card { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        .skeleton-thumb { width:100%; aspect-ratio:16/9; background:#222; border-radius:12px; animation:pulse 1.5s infinite; }
+        .skeleton-row { display:flex; gap:12px; }
+        .skeleton-avatar { width:40px; height:40px; border-radius:50%; background:#222; animation:pulse 1.5s infinite; flex-shrink:0; }
+        .skeleton-text { flex:1; display:flex; flex-direction:column; gap:8px; padding-top:4px; }
+        .skeleton-title { width:85%; height:16px; background:#222; border-radius:4px; animation:pulse 1.5s infinite; }
+        .skeleton-meta { width:60%; height:14px; background:#222; border-radius:4px; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%{opacity:1;} 50%{opacity:0.4;} 100%{opacity:1;} }
+    </style>
+
     <link rel="preload" href="/api/videos" as="fetch" crossorigin="anonymous">
             <div class="video-grid" id="main-video-grid">
-                <!-- Real videos will be injected here via JavaScript -->
+                <!-- Skeleton Loading State (Guarantees instant FCP & Perfect CLS) -->
+                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
             </div>
 
             <!-- ✨ Why Vitox? Value-Added Content (AdSense Compliance) -->
