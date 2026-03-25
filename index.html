@@ -359,7 +359,8 @@
                 <div id="for-you-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;"></div>
             </div>
 
-            <div class="video-grid" id="main-video-grid" style="min-height: 80vh;">
+    <link rel="preload" href="/api/videos" as="fetch" crossorigin="anonymous">
+            <div class="video-grid" id="main-video-grid">
                 <!-- Real videos will be injected here via JavaScript -->
             </div>
 
