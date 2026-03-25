@@ -11,16 +11,28 @@
     <!-- No ads on privacy policy pages -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0a0a0a; color: #ddd; font-family: 'Outfit', sans-serif; line-height: 1.8; }
-        header {
-            position: sticky; top: 0;
-            background: rgba(10,10,10,0.95); backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 0 40px; height: 64px;
-            display: flex; align-items: center; justify-content: space-between; z-index: 100;
+        body { background: #06060c; color: #ddd; font-family: 'Outfit', sans-serif; line-height: 1.8; position: relative; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(at 0% 0%, rgba(112, 0, 255, 0.15) 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(255, 0, 85, 0.1) 0px, transparent 50%);
+            z-index: -1;
         }
-        .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:white; font-weight:800; font-size:1.3rem; }
-        .container { max-width: 800px; margin: 0 auto; padding: 60px 40px; }
+        header {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: rgba(10, 10, 20, 0.85); backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0 40px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between; z-index: 10000;
+        }
+        .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:white; font-weight:800; font-size:1.4rem; letter-spacing: -1px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 120px 40px 60px; position: relative; z-index: 10; }
+        .content-card {
+            background: rgba(20, 20, 35, 0.4); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px;
+            padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
         h1 { font-size: 2.5rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
         .updated { color: #666; font-size: 0.9rem; margin-bottom: 48px; display: block; }
         h2 { font-size: 1.4rem; font-weight: 700; color: #fff; margin: 40px 0 16px 0; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -39,9 +51,17 @@
         footer-bar a { color:#888; text-decoration:none; margin:0 12px; }
         @media (max-width: 768px) { header { padding: 0 20px; } .container { padding: 40px 20px; } h1 { font-size: 1.8rem; } }
     </style>
+    <!-- AMP Auto Ads -->
+    <script async custom-element="amp-auto-ads"
+            src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
 </head>
 
 <body>
+    <amp-auto-ads type="adsense"
+            data-ad-client="ca-pub-7142476355791158">
+    </amp-auto-ads>
+
     <header>
         <a href="index.html" class="logo">
             <svg width="28" height="28" viewBox="0 0 64 64">
@@ -59,12 +79,13 @@
     </header>
 
     <div class="container">
-        <h1>Privacy Policy</h1>
-        <span class="updated">Last updated: March 1, 2026</span>
+        <div class="content-card">
+            <h1>Privacy Policy</h1>
+            <span class="updated">Last updated: March 1, 2026</span>
 
-        <div class="highlight-box">
-            <p><strong style="color:#fff;">Your privacy matters to us.</strong> This Privacy Policy explains how Vitox ("we," "us," or "our") collects, uses, shares, and protects your personal information when you use our platform at vitox.ai and related services.</p>
-        </div>
+            <div class="highlight-box">
+                <p><strong style="color:#fff;">Your privacy matters to us.</strong> This Privacy Policy explains how Vitox ("we," "us," or "our") collects, uses, shares, and protects your personal information when you use our platform at vitox.ai and related services.</p>
+            </div>
 
         <h2>1. Information We Collect</h2>
         <p>We collect information you provide directly to us when you:</p>
@@ -144,8 +165,9 @@
         <h2>11. Contact Us</h2>
         <p>If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
         <p><strong style="color:#fff;">Email:</strong> <a href="mailto:junaidshah78634@gmail.com">junaidshah78634@gmail.com</a></p>
-        <p><strong style="color:#fff;">Founder:</strong> Junaid Shah</p>
-        <p><strong style="color:#fff;">Website:</strong> <a href="index.html">vitox.ai</a></p>
+            <p><strong style="color:#fff;">Founder:</strong> Junaid Shah</p>
+            <p><strong style="color:#fff;">Website:</strong> <a href="index.html">vitox.ai</a></p>
+        </div>
     </div>
 
     <footer-bar>

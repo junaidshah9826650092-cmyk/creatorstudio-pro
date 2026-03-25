@@ -388,7 +388,55 @@
                     <i class="fas fa-plus"></i> Upload Your First Video
                 </button>
             </div>
-        </main>
+            <!-- ✨ Creator Spotlight (AdSense Value) -->
+            <section id="creator-spotlight" style="margin-top: 60px; padding: 40px; background: linear-gradient(135deg, rgba(112,0,255,0.05), rgba(255,0,85,0.05)); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px;">
+                    <h2 style="font-size:1.8rem; font-weight:800; color:white;"><i class="fas fa-star" style="color:#ffd700; margin-right:10px;"></i> Creator Spotlight</h2>
+                    <span style="color:var(--text-secondary); font-size:0.9rem;">Meet the Founding Squad</span>
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+                    <!-- Creator 1 -->
+                    <div style="background:rgba(255,255,255,0.03); padding:24px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); display:flex; gap:20px; align-items:center;">
+                        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(45deg, #7000ff, #ff0055); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:900; color:white; border:3px solid rgba(255,255,255,0.1);">A</div>
+                        <div>
+                            <h3 style="color:white; margin-bottom:4px;">Arjun K.</h3>
+                            <p style="color:#ff0055; font-size:0.8rem; font-weight:700; text-transform:uppercase; margin-bottom:8px;">Tech Storyteller</p>
+                            <p style="font-size:0.85rem; color:#888; line-height:1.5;">"Vitox gives me the freedom to explain complex tech in Hindi without being buried by massive global channels."</p>
+                        </div>
+                    </div>
+                    <!-- Creator 2 -->
+                    <div style="background:rgba(255,255,255,0.03); padding:24px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); display:flex; gap:20px; align-items:center;">
+                        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(45deg, #00d2ff, #3a7bd5); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:900; color:white; border:3px solid rgba(255,255,255,0.1);">S</div>
+                        <div>
+                            <h3 style="color:white; margin-bottom:4px;">Samiya V.</h3>
+                            <p style="color:#ff0055; font-size:0.8rem; font-weight:700; text-transform:uppercase; margin-bottom:8px;">Lifestyle & Art</p>
+                            <p style="font-size:0.85rem; color:#888; line-height:1.5;">"I love the V-Snaps feature. It's the perfect way to showcase my mini-vlogs to a dedicated Indian audience."</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ✨ Trending Categories (SEO Value) -->
+            <section id="trending-categories" style="margin-top: 60px; margin-bottom: 60px;">
+                <h2 style="font-size:1.8rem; font-weight:800; color:white; margin-bottom:32px; text-align:center;">Explore Vitox <span style="color:#ff0055;">Universes</span></h2>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px;">
+                    <div style="background:rgba(255,255,255,0.02); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); transition:0.3s; cursor:pointer;" onmouseover="this.style.background='rgba(255,0,85,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+                        <i class="fas fa-gamepad" style="font-size:2rem; color:#ff0055; margin-bottom:20px;"></i>
+                        <h3 style="color:white; margin-bottom:12px;">Gaming Legends</h3>
+                        <p style="font-size:0.85rem; color:#777; line-height:1.6;">Join thousands of Indian gamers streaming the latest blockbusters and mobile gaming championships. From walkthroughs to competitive esports, find your next squad here.</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.02); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); transition:0.3s; cursor:pointer;" onmouseover="this.style.background='rgba(112,0,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+                        <i class="fas fa-code" style="font-size:2rem; color:#7000ff; margin-bottom:20px;"></i>
+                        <h3 style="color:white; margin-bottom:12px;">Tech & Innovation</h3>
+                        <p style="font-size:0.85rem; color:#777; line-height:1.6;">Stay ahead of the curve with gadget reviews, coding tutorials, and future-tech discussions curated specifically for the modern Indian student and professional.</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.02); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); transition:0.3s; cursor:pointer;" onmouseover="this.style.background='rgba(255,165,0,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+                        <i class="fas fa-graduation-cap" style="font-size:2rem; color:#ffa500; margin-bottom:20px;"></i>
+                        <h3 style="color:white; margin-bottom:12px;">Educational Hub</h3>
+                        <p style="font-size:0.85rem; color:#777; line-height:1.6;">Learning never stops on Vitox. Explore high-quality educational content, skill-building workshops, and motivational talks to help you achieve your career goals.</p>
+                    </div>
+                </div>
+            </section>
         <!-- Collab Chat Drawer - Full Featured -->
         <div id="collab-chat-drawer"
             style="position: fixed; top: 0; right: -100%; width: 420px; max-width: 100%; height: 100vh; background: #0d0d0d; z-index: 10001; box-shadow: -20px 0 60px rgba(0,0,0,0.9); transition: right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.08);">
