@@ -29,10 +29,13 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path fill='%23ff0055' d='M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z'/></svg>">
     
     <!-- External Libraries -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link rel="preload" href="https://unpkg.com/aos@2.3.1/dist/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"></noscript>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
     <link rel="stylesheet" href="style.css?v=20.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7142476355791158" crossorigin="anonymous"></script>
@@ -45,17 +48,19 @@
       gtag('config', 'G-3TK6X8XJ2D');
     </script>
     <!-- Video.js and Google IMA SDK -->
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.css" rel="stylesheet" />
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.0.0/videojs-contrib-ads.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.min.js"></script>
+    <link rel="preload" href="https://vjs.zencdn.net/8.10.0/video-js.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://vjs.zencdn.net/8.10.0/video-js.css"></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.css"></noscript>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js" defer></script>
+    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.0.0/videojs-contrib-ads.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.min.js" defer></script>
     <!-- Razorpay Checkout -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 
     <style id="admin-custom-css"></style>
-    <script src="sounds_manager.js"></script>
+    <script src="sounds_manager.js" defer></script>
 </head>
 
 <body class="dark-theme">
@@ -354,7 +359,7 @@
                 <div id="for-you-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;"></div>
             </div>
 
-            <div class="video-grid" id="main-video-grid">
+            <div class="video-grid" id="main-video-grid" style="min-height: 80vh;">
                 <!-- Real videos will be injected here via JavaScript -->
             </div>
 
