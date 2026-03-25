@@ -76,20 +76,30 @@ for i, theme in enumerate(themes, start=1):
     logo_size = width // 6 
     logo_pos = ((width - logo_size)//2, (height - logo_size)//2)
     
-    # Use the actual Vitox App Icon
-    try:
-        app_icon = Image.open("mobile_app/web/icons/Icon-512.png").convert("RGBA")
-        app_icon = app_icon.resize((logo_size, logo_size), Image.LANCZOS)
-        img.paste(app_icon, logo_pos, app_icon)
-    except Exception as e:
-        print(f"Warning: Could not load app icon, using fallback. Error: {e}")
-        # Create a stylized 'V' for Vitox center logo fallback
-        logo = Image.new("RGBA", (logo_size, logo_size), (0,0,0,0))
-        from PIL import ImageDraw
-        draw = ImageDraw.Draw(logo)
-        draw.ellipse([0, 0, logo_size, logo_size], fill=theme["fill_color"])
-        draw.text((logo_size//3, logo_size//10), "V", fill=theme["back_color"], font=None) 
-        img.paste(logo, logo_pos, logo)
+    # Create a stylized logo background using the exact Vitox proportions
+    logo = Image.new("RGBA", (logo_size, logo_size), (0,0,0,0))
+    from PIL import ImageDraw
+    draw = ImageDraw.Draw(logo)
+    
+    # Draw Background circle for logo
+    draw.ellipse([0, 0, logo_size, logo_size], fill=theme["fill_color"])
+    
+    # Exact polygon coordinates from favicon.svg (based on 64x64)
+    # M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z
+    scale = logo_size / 64.0
+    poly_pts = [
+        (32 * scale, 62 * scale),
+        (4 * scale, 12 * scale),
+        (18 * scale, 12 * scale),
+        (32 * scale, 40 * scale),
+        (46 * scale, 12 * scale),
+        (60 * scale, 12 * scale)
+    ]
+    
+    # Draw the exact Vitox logo shape!
+    draw.polygon(poly_pts, fill=theme["back_color"])
+    
+    img.paste(logo, logo_pos, logo)
     img.save(filepath)
     
     print(f"✅ Created FIXED PRETTY: {filepath} (Link: {unique_link})")

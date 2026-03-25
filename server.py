@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from flask import Flask, request, jsonify, send_from_directory, make_response
+from flask import Flask, request, jsonify, send_from_directory, make_response, redirect
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
 from ai_engine import VitoxAI
@@ -365,6 +365,16 @@ def init_db():
             description TEXT,
             screenshot_url TEXT,
             status TEXT DEFAULT 'open',
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # QR Code A/B Testing Tracking Table
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS qr_scans (
+            id {id_type},
+            variant TEXT,
+            ip_address TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -2665,6 +2675,29 @@ def admin_bug_action():
     except Exception as e:
         conn.close()
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/qr/scan')
+def qr_scan_track():
+    variant = request.args.get('variant', 'unknown')
+    gift = request.args.get('gift', '5')
+    ip_addr = request.remote_addr
+    
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            id_val = str(uuid.uuid4())
+            cursor.execute("INSERT INTO qr_scans (id, variant, ip_address) VALUES (%s, %s, %s)", (id_val, variant, ip_addr))
+        else:
+            id_val = str(uuid.uuid4())
+            conn.execute("INSERT INTO qr_scans (id, variant, ip_address) VALUES (?, ?, ?)", (id_val, variant, ip_addr))
+        conn.commit()
+    except Exception as e:
+        print(f"QR Tracking Error: {e}")
+    finally:
+        conn.close()
+        
+    return redirect(f'/reward.html?gift={gift}')
 
 # Set Cache-Control for static assets
 @app.after_request
