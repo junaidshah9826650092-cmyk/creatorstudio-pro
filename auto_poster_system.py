@@ -124,9 +124,9 @@ def create_poster(variant, heading, subtext, style, cta):
     print(f"✅ Saved: {path}")
 
 variants = [
-    ("A", "🚀 FREE YouTube Tools", "Thumbnail + Logo in 1 Click", "clean", "📱 Scan & Try Now"),
-    ("B", "😳 You're Missing This", "Create Thumbnails FREE", "modern", "👇 Scan Before Others Do"),
-    ("C", "🔥 Try Before Others", "No Login Needed", "bold", "⚡ INSTANT ACCESS")
+    ("A", "🚀 The Next Video Platform", "Upload, Share & Earn Today", "clean", "📱 Join Vitox Now"),
+    ("B", "😳 Better Than YouTube?", "Monetize From Day 1", "modern", "👇 Claim Your Channel"),
+    ("C", "🔥 Upload & Get Famous", "No Algorithms. Just Views.", "bold", "⚡ START CREATING")
 ]
 
 for v in variants:
