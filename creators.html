@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Hub - Vitox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #06060c; color: #ddd; font-family: 'Outfit', sans-serif; line-height: 1.8; position: relative; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(at 0% 0%, rgba(112, 0, 255, 0.15) 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(255, 0, 85, 0.1) 0px, transparent 50%);
+            z-index: -1;
+        }
+        header {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: rgba(10, 10, 20, 0.85); backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0 40px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between; z-index: 10000;
+        }
+        .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:white; font-weight:800; font-size:1.4rem; letter-spacing: -1px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 120px 40px 60px; position: relative; z-index: 10; }
+        .content-card {
+            background: rgba(20, 20, 35, 0.4); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px;
+            padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        h1 { font-size: 2.5rem; font-weight: 800; color: #fff; margin-bottom: 24px; letter-spacing: -1px; }
+        h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin: 32px 0 16px 0; }
+        p { color: #bbb; margin-bottom: 16px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 24px; }
+        .feature-item { background: rgba(255,255,255,0.03); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .feature-item i { font-size: 1.5rem; color: #ff0055; margin-bottom: 16px; display: block; }
+        footer-bar { display:block; background:#050505; border-top:1px solid rgba(255,255,255,0.06); padding:30px 40px; text-align:center; color:#555; font-size:0.85rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Vitox</a>
+    </header>
+    <div class="container">
+        <div class="content-card">
+            <h1>Launch Your Creator Journey</h1>
+            <p>Vitox is designed from the ground up to empower a new generation of digital storytellers. Whether you're a gamer, a vlogger, or a tech visionary, we have the tools you need to succeed.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fas fa-money-bill-trend-up"></i>
+                    <h3>Smart Monetization</h3>
+                    <p>Keep 80% of your ad revenue from day one. No complex thresholds, just pure growth.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <h3>AI Creation Kit</h3>
+                    <p>Access our built-in AI tools for thumbnails, descriptions, and video generation.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-users-viewfinder"></i>
+                    <h3>Hyper-Local Reach</h3>
+                    <p>Our algorithm prioritizes local relevance, helping you build a dedicated community fast.</p>
+                </div>
+            </div>
+
+            <h2>Monetization Tiers</h2>
+            <p>We offer diverse ways to earn, including direct ad-rev share, fan subscriptions, and brand collaborations in our exclusive Creator Marketplace.</p>
+            
+            <h2>Apply for Verification</h2>
+            <p>Ready to take your channel to the next level? Apply for the Vitox Creator Badge today (Coming Soon).</p>
+            <button style="background: linear-gradient(90deg, #ff0055, #7000ff); color: white; border: none; padding: 14px 30px; border-radius: 12px; font-weight: 700; cursor: pointer;">Join the Squad</button>
+        </div>
+    </div>
+    <footer-bar>
+        <div>© 2026 Vitox. All rights reserved.</div>
+    </footer-bar>
+</body>
+</html>

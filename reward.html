@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitox | Secret Gift Unlocked!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --red: #ff0055;
+            --orange: #ff5500;
+            --gold: #ffd700;
+            --bg: #06060c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .portal-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(255, 0, 85, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .gift-box {
+            font-size: 5rem;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 20px var(--gold));
+            cursor: pointer;
+            transition: 0.5s;
+        }
+
+        .gift-box:hover {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, #fff, var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: #888;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .reward-value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 8px;
+            display: none;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .reward-value.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--red), var(--orange));
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(255, 0, 85, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 0, 85, 0.4);
+        }
+
+        .status-msg { margin-top: 20px; font-size: 0.9rem; font-weight: 600; }
+
+        /* ✨ Animated Sparkles ✨ */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: rise 2s infinite ease-in;
+            opacity: 0;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-bg"></div>
+    <script src="sounds_manager.js"></script>
+    <script>
+        function createSparkle() {
+            const s = document.createElement('div');
+            s.className = 'sparkle';
+            s.style.left = Math.random() * 100 + '%';
+            s.style.top = Math.random() * 100 + '%';
+            s.style.background = ['#ff0055', '#ffd700', 'white'][Math.floor(Math.random()*3)];
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 2000);
+        }
+        setInterval(createSparkle, 200);
+    </script>
+    <div class="container">
+        <div id="gift-stage">
+            <div class="gift-box" onclick="claimReward()">🎁</div>
+            <h1>Secret Gift Found!</h1>
+            <p>You've discovered a hidden Vitox mystery box. Tap the gift to reveal your prize!</p>
+            <button class="btn" onclick="claimReward()" id="claim-btn">Open Secret Box</button>
+            <div id="status" class="status-msg"></div>
+        </div>
+
+        <div id="reward-stage" style="display:none;">
+            <div style="font-size: 5rem;">✨</div>
+            <div class="reward-value show" id="pts-value">1,000</div>
+            <div style="font-weight: 800; color: white; margin-bottom: 32px;">Points Added to Wallet!</div>
+            <p>Congratulations! You spotted a hidden QR code and unlocked a major bonus.</p>
+            <a href="index.html" class="btn">Return to Feed</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const giftCode = urlParams.get('gift');
+
+        async function claimReward() {
+            const user = JSON.parse(localStorage.getItem('vitox_user') || '{}');
+            const status = document.getElementById('status');
+            const btn = document.getElementById('claim-btn');
+
+            if (!user.email) {
+                status.innerHTML = '<span style="color:var(--red)">Please <a href="login.html" style="color:white">Login</a> to claim your gift!</span>';
+                return;
+            }
+
+            if (!giftCode) {
+                status.innerHTML = '<span style="color:var(--red)">Invalid Gift Link!</span>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking...';
+
+            try {
+                const res = await fetch('/api/qr/claim', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email, gift_code: giftCode })
+                });
+
+                const data = await res.json();
+                if (data.status === 'success') {
+                    if (window.VitoxSounds) VitoxSounds.play('success');
+                    document.getElementById('gift-stage').style.display = 'none';
+                    document.getElementById('reward-stage').style.display = 'block';
+                    document.getElementById('pts-value').innerText = data.points.toLocaleString();
+                } else {
+                    status.innerHTML = `<span style="color:var(--red)">${data.message}</span>`;
+                    btn.disabled = false;
+                    btn.innerText = 'Try Again';
+                }
+            } catch (e) {
+                status.innerHTML = '<span style="color:var(--red)">Connection Error!</span>';
+                btn.disabled = false;
+                btn.innerText = 'Try Again';
+            }
+        }
+    </script>
+</body>
+</html>

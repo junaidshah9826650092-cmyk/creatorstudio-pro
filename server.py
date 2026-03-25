@@ -345,6 +345,14 @@ def init_db():
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Site Settings Table (For No-Code Admin Power)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS site_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+    ''')
     
     # Bug Reports Table
     cursor.execute(f'''
@@ -358,6 +366,22 @@ def init_db():
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Default Settings
+    defaults = {
+        'site_name': 'Vitox',
+        'site_tagline': 'The Ultimate Video Platform',
+        'spotlight_title': 'Creator Spotlight',
+        'spotlight_desc': 'Discover the visionary storytellers and technical minds shaping the future of video on Vitox.',
+        'maintenance_mode': 'false',
+        'announcement_banner': '',
+        'custom_css': ''
+    }
+    for k, v in defaults.items():
+        if USE_POSTGRES:
+            cursor.execute('INSERT INTO site_settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO NOTHING', (k, v))
+        else:
+            cursor.execute('INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?)', (k, v))
 
     if not USE_POSTGRES:
         # SQLite migrations
@@ -648,6 +672,130 @@ def withdraw():
         
     conn.close()
     return jsonify({'status': status, 'message': message})
+
+# --- Admin Power APIs (No-Code Support) ---
+
+@app.route('/api/admin/settings', methods=['GET', 'POST'])
+def admin_settings():
+    if request.method == 'POST':
+        data = request.json
+        if not data or data.get('admin_email') != ADMIN_EMAIL:
+            return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+        
+        updates = data.get('settings', {})
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        for k, v in updates.items():
+            if USE_POSTGRES:
+                cursor.execute('INSERT INTO site_settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value', (k, v))
+            else:
+                cursor.execute('INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)', (k, v))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success'})
+    
+    # GET
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM site_settings')
+        rows = cursor.fetchall()
+    else:
+        rows = conn.execute('SELECT * FROM site_settings').fetchall()
+    
+    settings = {row['key']: row['value'] for row in rows}
+    conn.close()
+    return jsonify(settings)
+
+@app.route('/api/rules/claim_reward', methods=['POST'])
+def claim_rules_reward():
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    conn = get_db_connection()
+    # Check if already claimed
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT id FROM transactions WHERE user_email = %s AND type = 'rule_reward'", (email,))
+        existing = cursor.fetchone()
+    else:
+        existing = conn.execute("SELECT id FROM transactions WHERE user_email = ? AND type = 'rule_reward'", (email,)).fetchone()
+    
+    if existing:
+        conn.close()
+        return jsonify({'status': 'error', 'message': 'Reward already claimed'}), 400
+    
+    # Award 500 points
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET points = points + 500 WHERE email = %s", (email,))
+        cursor.execute("INSERT INTO transactions (user_email, amount, type, description) VALUES (%s, %s, %s, %s)", 
+                     (email, 500, 'rule_reward', 'Constitution Master Reward'))
+    else:
+        conn.execute("UPDATE users SET points = points + 500 WHERE email = ?", (email,))
+        conn.execute("INSERT INTO transactions (user_email, amount, type, description) VALUES (?, ?, ?, ?)", 
+                     (email, 500, 'rule_reward', 'Constitution Master Reward'))
+    
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'message': '500 Points awarded!'})
+
+@app.route('/api/qr/claim', methods=['POST'])
+def claim_qr_reward():
+    data = request.json
+    email = data.get('email')
+    gift_code = data.get('gift_code')
+    if not email or not gift_code:
+        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+    
+    conn = get_db_connection()
+    # Check if this specific gift already claimed by this user
+    reward_key = f"qr_gift_{gift_code}"
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT id FROM transactions WHERE user_email = %s AND type = %s", (email, reward_key))
+        existing = cursor.fetchone()
+    else:
+        existing = conn.execute("SELECT id FROM transactions WHERE user_email = ? AND type = ?", (email, reward_key)).fetchone()
+    
+    if existing:
+        conn.close()
+        return jsonify({'status': 'error', 'message': 'This gift already claimed!'}), 400
+    
+    # Award 1000 points for QR findings
+    if USE_POSTGRES:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET points = points + 1000 WHERE email = %s", (email,))
+        cursor.execute("INSERT INTO transactions (user_email, amount, type, description) VALUES (%s, %s, %s, %s)", 
+                     (email, 1000, reward_key, f"Secret QR Gift: {gift_code}"))
+    else:
+        conn.execute("UPDATE users SET points = points + 1000 WHERE email = ?", (email,))
+        conn.execute("INSERT INTO transactions (user_email, amount, type, description) VALUES (?, ?, ?, ?)", 
+                     (email, 1000, reward_key, f"Secret QR Gift: {gift_code}"))
+    
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'points': 1000})
+
+@app.route('/api/admin/reports', methods=['POST'])
+def get_admin_reports():
+    data = request.json
+    if not data or data.get('admin_email') != ADMIN_EMAIL:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM reports ORDER BY timestamp DESC')
+        reports = cursor.fetchall()
+    else:
+        reports = conn.execute('SELECT * FROM reports ORDER BY timestamp DESC').fetchall()
+    
+    res = to_json(reports)
+    conn.close()
+    return jsonify(res)
 
 # Local file storage has been decommissioned in favor of Cloud Storage (Firebase/Cloudinary).
 

@@ -57,6 +57,8 @@
     <script async custom-element="amp-auto-ads"
             src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
     </script>
+    <style id="admin-custom-css"></style>
+    <script src="sounds_manager.js"></script>
 </head>
 
 <body class="dark-theme">
@@ -66,6 +68,12 @@
 
     <!-- Global Platform AdSense (Revenue for Vitox Owner) -->
     <!-- Note: Creators use their own IDs for video-specific ads via the Link AdSense feature -->
+
+    <!-- Announcement Banner -->
+    <div id="admin-announcement-banner" style="display:none; background: linear-gradient(90deg, #ff0055, #ff5500); color: white; text-align: center; padding: 10px; font-weight: 700; font-size: 0.9rem; z-index: 10001; position: relative; border-bottom: 1px solid rgba(255,255,255,0.2);">
+        <span id="announcement-text"></span>
+        <button onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:white; margin-left:15px; cursor:pointer; font-size:1.2rem; vertical-align:middle;">&times;</button>
+    </div>
 
     <!-- Top Bar -->
     <header class="top-bar">
@@ -165,6 +173,13 @@
         <button onclick="document.getElementById('push-notif-bar').style.display='none'" style="background:none;border:none;color:#555;font-size:1.2rem;cursor:pointer;">&times;</button>
     </div>
 
+    <div id="maintenance-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0f0f0f; z-index:999999; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; padding:40px;">
+        <i class="fas fa-hammer fa-4x" style="color:#ff0055; margin-bottom:24px;"></i>
+        <h1 style="font-size:3rem; font-weight:900;">System Upgrading</h1>
+        <p style="color:#888; font-size:1.2rem; max-width:500px; margin-top:16px;">Vitox is currently undergoing scheduled maintenance to bring you new AI features. We'll be back shortly!</p>
+        <div style="margin-top:40px; padding:12px 24px; border:1px solid #333; border-radius:12px; color:#555;">Admin? <a href="admin.html" style="color:#ff0055;">Login here</a></div>
+    </div>
+
     <div class="main-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
@@ -245,19 +260,19 @@
                 <div style="padding: 16px 24px; font-size: 0.8rem; line-height: 1.4; color: #aaa; display: flex; flex-direction: column; gap: 12px;">
                     <div style="display: flex; flex-wrap: wrap; gap: 6px 12px;">
                         <a href="about.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">About</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Press</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Copyright</a>
+                        <a href="press.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Press</a>
+                        <a href="copyright_policy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Copyright</a>
                         <a href="contact.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Contact us</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Creators</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Advertise</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Developers</a>
+                        <a href="creators.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Creators</a>
+                        <a href="advertise.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Advertise</a>
+                        <a href="developers.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Developers</a>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 6px 12px;">
                         <a href="terms.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms</a>
                         <a href="privacy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Privacy</a>
-                        <a href="policy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Policy & Safety</a>
+                        <a href="safety.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Policy & Safety</a>
                         <a href="how_it_works.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">How Vitox works</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Test new features</a>
+                        <a href="test_features.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Test new features</a>
                     </div>
                     <div style="color: #717171; font-weight: 400; font-size: 0.75rem; margin-top: 4px;">© 2026 Vitox LLC</div>
                 </div>
@@ -382,8 +397,8 @@
                 <div style="background: rgba(255,0,85,0.05); width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; border: 1px solid rgba(255,0,85,0.1);">
                     <i class="fas fa-sparkles" style="font-size: 3rem; color: #ff0055;"></i>
                 </div>
-                <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 12px;">Welcome to the Launch Phase</h2>
-                <p style="color: #888; max-width: 500px; margin: 0 auto 32px; font-size: 1.1rem; line-height: 1.6;">Our community is just getting started! Be one of the founding creators of Vitox. Upload your first video now and claim your spot on the leaderboard.</p>
+                <h2 id="spotlight-title" style="font-size: 2rem; font-weight: 800; margin-bottom: 12px;">Welcome to the Launch Phase</h2>
+                <p id="spotlight-desc" style="color: #888; max-width: 500px; margin: 0 auto 32px; font-size: 1.1rem; line-height: 1.6;">Our community is just getting started! Be one of the founding creators of Vitox. Upload your first video now and claim your spot on the leaderboard.</p>
                 <button onclick="location.href='upload.html'" style="padding: 16px 40px; background: #ff0055; color: white; border: none; border-radius: 16px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 30px rgba(255,0,85,0.3); transition: 0.3s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
                     <i class="fas fa-plus"></i> Upload Your First Video
                 </button>
@@ -1764,6 +1779,53 @@
                 toast.style.cssText = "background: #333; color: white; padding: 12px 24px; border-radius: 4px; margin-top: 10px;";
                 container.appendChild(toast);
                 setTimeout(() => toast.remove(), 3000);
+            }
+
+            // --- Dynamic Site Configuration (Admin Power) ---
+            async function loadAdminConfig() {
+                try {
+                    const res = await fetch('/api/admin/settings');
+                    const config = await res.json();
+                    
+                    // Apply Site Name & Tagline
+                    if (config.site_name) {
+                        document.title = `${config.site_name} | The Next-Gen Video Platform`;
+                        document.querySelectorAll('.logo-text').forEach(el => el.innerText = config.site_name);
+                    }
+                    
+                    // Apply Custom CSS
+                    if (config.custom_css) {
+                        document.getElementById('admin-custom-css').innerHTML = config.custom_css;
+                    }
+                    
+                    // Apply Announcement Banner
+                    if (config.announcement_banner && config.announcement_banner.trim() !== '') {
+                        const banner = document.getElementById('admin-announcement-banner');
+                        document.getElementById('announcement-text').innerHTML = config.announcement_banner;
+                        banner.style.display = 'block';
+                    }
+                    
+                    // Apply Spotlight Title & Desc
+                    if (config.spotlight_title) {
+                        const sTitle = document.getElementById('spotlight-title');
+                        if (sTitle) sTitle.innerText = config.spotlight_title;
+                    }
+                    if (config.spotlight_desc) {
+                        const sDesc = document.getElementById('spotlight-desc');
+                        if (sDesc) sDesc.innerText = config.spotlight_desc;
+                    }
+
+                    // Handle Maintenance Mode
+                    if (config.maintenance_mode === 'true') {
+                        const user = JSON.parse(localStorage.getItem('vitox_user'));
+                        if (!user || user.email !== 'junaidshah78634@gmail.com') {
+                            document.getElementById('maintenance-overlay').style.display = 'flex';
+                            document.body.style.overflow = 'hidden';
+                        }
+                    }
+                } catch (e) {
+                    console.error("Config load failed:", e);
+                }
             }
 
             async function playVideo(url, title, user_email, views, timestamp, description, videoId, type = 'video') {
@@ -4592,6 +4654,12 @@
             animate();
         }
     })();
+    </script>
+    <script>
+        // --- Admin Global Initialization ---
+        window.addEventListener('load', () => {
+            if (typeof loadAdminConfig === 'function') loadAdminConfig();
+        });
     </script>
 </body>
 
