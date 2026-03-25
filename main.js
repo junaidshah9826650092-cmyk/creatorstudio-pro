@@ -4347,3 +4347,16 @@ window.onload = () => {
             if (typeof loadAdminConfig === 'function') loadAdminConfig();
         });
     
+// ============================================================
+// BOOT: Initialize the app when DOM is ready
+// (This call was in an inline script in index.html — restored here)
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Load the main video feed
+    if (typeof loadVideos === 'function') loadVideos();
+
+    // Restore AOS after defer
+    if (typeof AOS !== 'undefined') {
+        AOS.init({ duration: 800, once: true, easing: 'ease-out-cubic' });
+    }
+});
