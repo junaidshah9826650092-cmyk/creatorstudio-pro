@@ -53,9 +53,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.min.js"></script>
     <!-- Razorpay Checkout -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- AMP Auto Ads -->
+    <script async custom-element="amp-auto-ads"
+            src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
 </head>
 
 <body class="dark-theme">
+    <amp-auto-ads type="adsense"
+            data-ad-client="ca-pub-7142476355791158">
+    </amp-auto-ads>
+
     <!-- Global Platform AdSense (Revenue for Vitox Owner) -->
     <!-- Note: Creators use their own IDs for video-specific ads via the Link AdSense feature -->
 
@@ -247,8 +255,8 @@
                     <div style="display: flex; flex-wrap: wrap; gap: 6px 12px;">
                         <a href="terms.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms</a>
                         <a href="privacy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Privacy</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Policy & Safety</a>
-                        <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">How Vitox works</a>
+                        <a href="policy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Policy & Safety</a>
+                        <a href="how_it_works.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">How Vitox works</a>
                         <a href="#" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Test new features</a>
                     </div>
                     <div style="color: #717171; font-weight: 400; font-size: 0.75rem; margin-top: 4px;">© 2026 Vitox LLC</div>
@@ -320,7 +328,7 @@
             <div id="trending-strip" style="margin-bottom: 28px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
                     <h2 style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
-                        <span style="background:linear-gradient(45deg,#ff5500,#ff0055); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-fire"></i> Trending Now</span>
+                        <span style="background:linear-gradient(45deg,#ff5500,#ff0055); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-fire"></i> Trending Now</span>
                     </h2>
                     <button onclick="loadView('Trending')" style="font-size:0.8rem; color:#ff0055; background:none; border:none; cursor:pointer; font-weight:700;">See all &rarr;</button>
                 </div>
@@ -331,7 +339,7 @@
             <div id="for-you-row" style="margin-bottom:28px; display:none;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
                     <h2 style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
-                        <span style="background:linear-gradient(45deg,#7000ff,#ff0055); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-wand-magic-sparkles"></i> Recommended For You</span>
+                        <span style="background:linear-gradient(45deg,#7000ff,#ff0055); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-wand-magic-sparkles"></i> Recommended For You</span>
                     </h2>
                     <span style="font-size:0.75rem; color:#555;">Based on your watch history</span>
                 </div>
@@ -342,10 +350,43 @@
                 <!-- Real videos will be injected here via JavaScript -->
             </div>
 
+            <!-- ✨ Why Vitox? Value-Added Content (AdSense Compliance) -->
+            <section id="why-vitox" style="margin-top: 60px; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 24px; background: linear-gradient(135deg, #fff 0%, #ff0055 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">The Future of Content is <span style="color: #ff0055;">You</span></h2>
+                <div style="max-width: 800px; margin: 0 auto; line-height: 1.8; color: #aaa; font-size: 1.1rem; text-align: justify;">
+                    <p style="margin-bottom: 20px;">Vitox isn't just another video platform; it's a movement built specifically for the next generation of <strong>Indian Creators</strong>. We noticed a recurring problem: small, talented creators often get lost in the noise of massive algorithms. Our mission is to change that by providing a high-visibility stage where quality and uniqueness always come first.</p>
+                    <p style="margin-bottom: 20px;">Whether you're a storyteller, a gamer, a musician, or an educator, Vitox offers the tools you need to build a real <strong>Squad</strong>. From our high-speed HD streaming and AI-powered creator tools to our unique <em>V-Snaps</em> shorts ecosystem, every feature is designed to maximize your creative potential and help you monetize your passion fairly.</p>
+                    <p>We believe in transparency, creator freedom, and the power of local communities. Join Vitox today and be part of a platform that respects your time, your talent, and your audience. Small creators, big visibility — that's the Vitox promise.</p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 48px;">
+                    <div>
+                        <i class="fas fa-rocket" style="font-size: 2.5rem; color: #ff0055; margin-bottom: 16px;"></i>
+                        <h3 style="color: white; margin-bottom: 8px;">Instant Reach</h3>
+                        <p style="font-size: 0.9rem; color: #777;">Our algorithm prioritizes new talent, giving everyone a fair shot at trending.</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-shield-halved" style="font-size: 2.5rem; color: #ff0055; margin-bottom: 16px;"></i>
+                        <h3 style="color: white; margin-bottom: 8px;">Creator Rights</h3>
+                        <p style="font-size: 0.9rem; color: #777;">You own your content. We provide the stage and the tools to protect it.</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-coins" style="font-size: 2.5rem; color: #ff0055; margin-bottom: 16px;"></i>
+                        <h3 style="color: white; margin-bottom: 8px;">Fair Earnings</h3>
+                        <p style="font-size: 0.9rem; color: #777;">Multiple ways to earn, from points and brand deals to direct fan support.</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Empty State if no videos -->
-            <div id="empty-state" class="empty-state" style="display: none;">
-                <i class="fas fa-video-slash"></i>
-                <p>No videos found. Be the first to upload one!</p>
+            <div id="empty-state" class="empty-state" style="display: none; padding: 60px 20px; text-align: center;">
+                <div style="background: rgba(255,0,85,0.05); width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; border: 1px solid rgba(255,0,85,0.1);">
+                    <i class="fas fa-sparkles" style="font-size: 3rem; color: #ff0055;"></i>
+                </div>
+                <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 12px;">Welcome to the Launch Phase</h2>
+                <p style="color: #888; max-width: 500px; margin: 0 auto 32px; font-size: 1.1rem; line-height: 1.6;">Our community is just getting started! Be one of the founding creators of Vitox. Upload your first video now and claim your spot on the leaderboard.</p>
+                <button onclick="location.href='upload.html'" style="padding: 16px 40px; background: #ff0055; color: white; border: none; border-radius: 16px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 30px rgba(255,0,85,0.3); transition: 0.3s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-plus"></i> Upload Your First Video
+                </button>
             </div>
         </main>
         <!-- Collab Chat Drawer - Full Featured -->
@@ -4414,7 +4455,7 @@
 
         </script>
 
-    <!-- ? Auto Festival Theme System � Server Driven -->
+    <!-- ? Auto Festival Theme System � Server Driven -->
     <div id="festival-banner" style="display:none; position:fixed; top:56px; left:0; right:0; z-index:99999; padding:10px 20px; text-align:center; font-weight:800; font-size:0.95rem; letter-spacing:0.5px; cursor:pointer; backdrop-filter:blur(10px);" onclick="document.getElementById('festival-banner').style.display='none'">
         <span id="festival-banner-text"></span>
         <span style="margin-left:12px; font-size:0.75rem; opacity:0.7;">(click to dismiss)</span>
