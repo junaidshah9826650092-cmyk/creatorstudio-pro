@@ -134,7 +134,7 @@ from flask_compress import Compress
 app = Flask(__name__, static_folder='.', static_url_path='/static')
 Compress(app) # Enable Gzip/Brotli compression
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # Force HTTPS (Only on Render) but EXEMPT robots.txt for Google Bot
 is_prod = os.environ.get('RENDER') == 'true'

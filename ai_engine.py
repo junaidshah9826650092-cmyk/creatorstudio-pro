@@ -29,7 +29,8 @@ class VitoxAI:
             'gemini-pro': 'gemini-1.5-pro',
             'llama-3-free': 'meta-llama/llama-3-8b-instruct:free',
             'mistral-free': 'mistralai/mistral-7b-instruct:free',
-            'google-gemma-free': 'google/gemma-7b-it:free'
+            'google-gemma-free': 'google/gemma-7b-it:free',
+            'ollama-llama3': 'ollama:llama3:8b'  # free local Ollama model
         }
         
         # If in budget mode, force free models for generic aliases
@@ -48,6 +49,8 @@ class VitoxAI:
 
         if 'gemini' in selected_model:
             return self._call_gemini(prompt, selected_model)
+        elif selected_model.startswith('ollama'):
+            return self._call_ollama(prompt, selected_model)
         else:
             return self._call_openrouter(prompt, selected_model)
 
@@ -69,7 +72,7 @@ class VitoxAI:
         key = self._get_openrouter_key()
         if not key:
             return "OpenRouter API key not configured."
-            
+
         try:
             response = requests.post(
                 url=self.openrouter_url,
@@ -90,7 +93,26 @@ class VitoxAI:
         except Exception as e:
             return f"OpenRouter Error: {str(e)}"
 
-    def suggest_content(self, topic):
+    def _call_ollama(self, prompt, model):
+        """Call a locally running Ollama model via its REST API.
+        Expected model format: 'ollama:llama3:8b' or similar.
+        """
+        # Extract the actual model name after the prefix
+        parts = model.split(':', 1)
+        ollama_model = parts[1] if len(parts) > 1 else model
+        url = os.getenv('OLLAMA_URL', 'http://localhost:11434') + '/api/generate'
+        try:
+            resp = requests.post(url, json={
+                'model': ollama_model,
+                'prompt': prompt,
+                'stream': False
+            })
+            resp.raise_for_status()
+            data = resp.json()
+            return data.get('response', '')
+        except Exception as e:
+            return f"Ollama Error: {str(e)}"
+def suggest_content(self, topic):
         """Specialized for content creation helpers"""
         prompt = f"Suggest a catchy video title and a 2-sentence description for a video about: {topic}. Return ONLY raw JSON format with 'title' and 'description' keys."
         raw_res = self.ask(prompt, model_alias='gemini-flash')
