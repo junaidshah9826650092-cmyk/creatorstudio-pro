@@ -781,6 +781,18 @@
   <p style="font-size:.72rem;color:#888;">You are now a Certified Vitox Law Expert.</p>
   <button class="ctrl" style="margin-top:10px;" onclick="location.href='index.html'">Go Home</button>
 </div>
+    <!-- Side navigation buttons -->
+    <div class="side-buttons">
+      <button class="side-btn prev" onclick="prevPage()" aria-label="Previous Page">&#9664;</button>
+      <button class="side-btn next" onclick="nextPage()" aria-label="Next Page">&#9654;</button>
+    </div>
+    <!-- AI Help Box -->
+    <div class="ai-help-box">
+      <textarea class="ai-query" placeholder="Ask the AI..."></textarea>
+      <button class="ai-submit" onclick="handleAI()">Ask</button>
+      <div class="ai-response"></div>
+    </div>
+    <script src="rulebook.js"></script>
 
 <div class="controls">
   <button class="ctrl" onclick="openAll()"><i class="fas fa-book-open"></i> Read All</button>

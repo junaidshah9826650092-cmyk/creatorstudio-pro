@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qunic – AI‑Powered 3D Experience</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Three.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.min.js"></script>
+  <!-- TensorFlow.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.9.0/dist/tf.min.js"></script>
+  <!-- Pre‑trained MobileNet model -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+</head>
+<body>
+  <header class="hero">
+    <h1>Qunic – AI‑Powered 3D Experience</h1>
+    <p class="subtitle">Watch a 3D object react to what the AI sees.</p>
+  </header>
+  <section class="canvas-container">
+    <canvas id="glCanvas"></canvas>
+    <input type="file" id="imageInput" accept="image/*" />
+    <p id="prediction" class="prediction"></p>
+  </section>
+  <script src="qunic.js"></script>
+</body>
+</html>
