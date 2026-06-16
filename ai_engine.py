@@ -21,7 +21,7 @@ class VitoxAI:
         return os.environ.get('OPENROUTER_API_KEY', '').strip()
 
     def ask(self, prompt, model_alias='gemini-flash'):
-        """Unified method for LLM queries (including ML/DL/Generative tasks)"""
+        """Unified method for LLM queries with automatic free model fallbacks"""
         
         # Define models with their types
         models = {
@@ -40,19 +40,49 @@ class VitoxAI:
             elif model_alias not in models:
                 model_alias = 'llama-3-free'
         
-        selected_model = models.get(model_alias, 'gemini-2.5-flash')
-        
-        # Security: Prevent usage of unauthorized expensive models via string injection
-        if self.budget_mode and not any(m in selected_model for m in [':free', 'flash', 'gemma']):
-             # If someone tries to pass a paid model name directly and we are in budget mode, fallback
-             selected_model = 'meta-llama/llama-3-8b-instruct:free'
-
-        if 'gemini' in selected_model:
-            return self._call_gemini(prompt, selected_model)
-        elif selected_model.startswith('ollama'):
-            return self._call_ollama(prompt, selected_model)
+        # Determine sequence of attempts
+        attempts = []
+        if model_alias == 'gemini-flash':
+            attempts = ['gemini-flash', 'llama-3-free', 'mistral-free', 'google-gemma-free', 'ollama-llama3']
+        elif model_alias == 'llama-3-free':
+            attempts = ['llama-3-free', 'mistral-free', 'gemini-flash', 'google-gemma-free']
         else:
-            return self._call_openrouter(prompt, selected_model)
+            attempts = [model_alias]
+            
+        for alias in attempts:
+            selected_model = models.get(alias, 'gemini-2.5-flash')
+            
+            # Security: Prevent usage of unauthorized expensive models via string injection
+            if self.budget_mode and not any(m in selected_model for m in [':free', 'flash', 'gemma']):
+                 selected_model = 'meta-llama/llama-3-8b-instruct:free'
+                 
+            try:
+                if 'gemini' in selected_model:
+                    key = self._get_gemini_key()
+                    if not key:
+                        raise ValueError("Gemini key not configured")
+                    res = self._call_gemini(prompt, selected_model)
+                    if "Error" in res or "not configured" in res:
+                        raise ValueError(res)
+                    return res
+                elif selected_model.startswith('ollama'):
+                    res = self._call_ollama(prompt, selected_model)
+                    if "Error" in res or "Connection" in res:
+                        raise ValueError(res)
+                    return res
+                else:
+                    key = self._get_openrouter_key()
+                    if not key:
+                        raise ValueError("OpenRouter key not configured")
+                    res = self._call_openrouter(prompt, selected_model)
+                    if "Error" in res or "not configured" in res:
+                        raise ValueError(res)
+                    return res
+            except Exception as e:
+                print(f"Model {alias} ({selected_model}) failed: {e}. Trying next fallback...")
+                
+        # Ultimate fallback response if absolutely everything fails
+        return "Vitox Girl: Mujhe lagta hai server abhi busy hai ya configurations mein thoda glitch hai. Lekin main aapse jald hi baat karungi! 🙂 Aapka din shubh ho!"
 
     def _call_gemini(self, prompt, model):
         key = self._get_gemini_key()
