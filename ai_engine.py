@@ -12,6 +12,7 @@ class VitoxAI:
     def __init__(self, budget_mode=True):
         self.gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/"
         self.openrouter_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.hf_url = "https://api-inference.huggingface.co/models/"
         self.budget_mode = budget_mode
 
     def _get_gemini_key(self):
@@ -20,44 +21,62 @@ class VitoxAI:
     def _get_openrouter_key(self):
         return os.environ.get('OPENROUTER_API_KEY', '').strip()
 
-    def ask(self, prompt, model_alias='gemini-flash'):
-        """Unified method for LLM queries with automatic free model fallbacks"""
+    def _get_hf_key(self):
+        return os.environ.get('HUGGINGFACE_API_KEY', '').strip()
+
+    def ask(self, prompt, model_alias='gemini-flash', premium=False):
+        """Unified method for LLM queries with automatic free model fallbacks.
+        Set premium=True to unlock GPT-4-class models for premium/admin users."""
         
-        # Define models with their types
+        # Define all models - free and premium
         models = {
+            # --- Free Models ---
             'gemini-flash': 'gemini-2.5-flash',
-            'gemini-pro': 'gemini-2.5-pro',
             'llama-3-free': 'meta-llama/llama-3-8b-instruct:free',
             'mistral-free': 'mistralai/mistral-7b-instruct:free',
             'google-gemma-free': 'google/gemma-7b-it:free',
-            'ollama-llama3': 'ollama:llama3:8b'  # free local Ollama model
+            'ollama-llama3': 'ollama:llama3:8b',
+            # --- Hugging Face Models (Free Inference API) ---
+            'hf-falcon': 'hf:tiiuae/falcon-7b-instruct',
+            'hf-mistral': 'hf:mistralai/Mistral-7B-Instruct-v0.2',
+            'hf-zephyr': 'hf:HuggingFaceH4/zephyr-7b-beta',
+            # --- Premium Models (unlocked for subscribers & admin) ---
+            'gemini-pro': 'gemini-2.5-pro',
+            'llama-3-70b': 'meta-llama/llama-3-70b-instruct',
+            'claude-haiku': 'anthropic/claude-haiku',
+            'gpt-4o-mini': 'openai/gpt-4o-mini',
         }
         
-        # If in budget mode, force free models for generic aliases
-        if self.budget_mode:
-            if model_alias == 'gemini-pro':
-                model_alias = 'gemini-flash' # Downgrade to free-ish tier
+        # Budget / premium guard
+        if not premium:
+            # Budget mode: force free models only
+            if model_alias in ('gemini-pro', 'llama-3-70b', 'claude-haiku', 'gpt-4o-mini'):
+                model_alias = 'gemini-flash'
             elif model_alias not in models:
                 model_alias = 'llama-3-free'
         
-        # Determine sequence of attempts
-        attempts = []
+        # Build attempt chain
         if model_alias == 'gemini-flash':
-            attempts = ['gemini-flash', 'llama-3-free', 'mistral-free', 'google-gemma-free', 'ollama-llama3']
+            attempts = ['gemini-flash', 'hf-zephyr', 'llama-3-free', 'mistral-free', 'google-gemma-free']
         elif model_alias == 'llama-3-free':
-            attempts = ['llama-3-free', 'mistral-free', 'gemini-flash', 'google-gemma-free']
+            attempts = ['llama-3-free', 'mistral-free', 'gemini-flash', 'hf-mistral']
+        elif model_alias.startswith('hf-'):
+            attempts = [model_alias, 'gemini-flash', 'llama-3-free']
+        elif premium:
+            attempts = [model_alias, 'gemini-pro', 'gemini-flash', 'llama-3-free']
         else:
             attempts = [model_alias]
             
         for alias in attempts:
             selected_model = models.get(alias, 'gemini-2.5-flash')
-            
-            # Security: Prevent usage of unauthorized expensive models via string injection
-            if self.budget_mode and not any(m in selected_model for m in [':free', 'flash', 'gemma']):
-                 selected_model = 'meta-llama/llama-3-8b-instruct:free'
-                 
             try:
-                if 'gemini' in selected_model:
+                if selected_model.startswith('hf:'):
+                    # Hugging Face Inference API
+                    res = self._call_huggingface(prompt, selected_model[3:])
+                    if res and 'Error' not in res:
+                        return res
+                    raise ValueError(res)
+                elif 'gemini' in selected_model:
                     key = self._get_gemini_key()
                     if not key:
                         raise ValueError("Gemini key not configured")
@@ -92,7 +111,7 @@ class VitoxAI:
         try:
             url = f"{self.gemini_url}{model}:generateContent?key={key}"
             payload = {"contents": [{"parts": [{"text": prompt}]}]}
-            res = requests.post(url, json=payload, headers={'Content-Type': 'application/json'})
+            res = requests.post(url, json=payload, headers={'Content-Type': 'application/json'}, timeout=30)
             result = res.json()
             return result['candidates'][0]['content']['parts'][0]['text']
         except Exception as e:
@@ -109,6 +128,8 @@ class VitoxAI:
                 headers={
                     "Authorization": f"Bearer {key}",
                     "Content-Type": "application/json",
+                    "HTTP-Referer": "https://creatorstudio-pro.onrender.com",
+                    "X-Title": "Vitox AI"
                 },
                 data=json.dumps({
                     "model": model,
@@ -116,12 +137,39 @@ class VitoxAI:
                         {"role": "system", "content": "You are Vitox AI. An expert in ML, DL, LLMs and Generative AI."},
                         {"role": "user", "content": prompt}
                     ]
-                })
+                }),
+                timeout=30
             )
             result = response.json()
             return result['choices'][0]['message']['content']
         except Exception as e:
             return f"OpenRouter Error: {str(e)}"
+
+    def _call_huggingface(self, prompt, model):
+        """Call Hugging Face Inference API"""
+        key = self._get_hf_key()
+        headers = {"Content-Type": "application/json"}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+        try:
+            response = requests.post(
+                f"{self.hf_url}{model}",
+                headers=headers,
+                json={"inputs": prompt, "parameters": {"max_new_tokens": 512, "temperature": 0.7}},
+                timeout=30
+            )
+            result = response.json()
+            if isinstance(result, list) and result:
+                text = result[0].get('generated_text', '')
+                # Remove the input prompt from output if model echoes it
+                if text.startswith(prompt):
+                    text = text[len(prompt):].strip()
+                return text or "No response from HuggingFace model."
+            elif isinstance(result, dict) and 'error' in result:
+                return f"HuggingFace Error: {result['error']}"
+            return str(result)
+        except Exception as e:
+            return f"HuggingFace Error: {str(e)}"
 
     def _call_ollama(self, prompt, model):
         """Call a locally running Ollama model via its REST API.
@@ -136,7 +184,7 @@ class VitoxAI:
                 'model': ollama_model,
                 'prompt': prompt,
                 'stream': False
-            })
+            }, timeout=30)
             resp.raise_for_status()
             data = resp.json()
             return data.get('response', '')

@@ -63,18 +63,51 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def is_premium_user(email):
+    """Check if user has active premium subscription. Admin always premium."""
+    if not email:
+        return False
+    if email == ADMIN_EMAIL:
+        return True  # Admin always premium — sab free!
+    try:
+        conn = get_db_connection()
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT subscription_tier, premium_until FROM users WHERE email = %s', (email,))
+            user = cursor.fetchone()
+        else:
+            user = conn.execute('SELECT subscription_tier, premium_until FROM users WHERE email = ?', (email,)).fetchone()
+        conn.close()
+        if not user:
+            return False
+        tier = user['subscription_tier'] or 'free'
+        premium_until = user['premium_until']
+        if tier in ('premium', 'pro') and premium_until:
+            from datetime import datetime as dt
+            exp = dt.fromisoformat(str(premium_until).replace('Z', '+00:00').split('+')[0])
+            return exp > dt.now()
+        return False
+    except Exception as e:
+        print(f"Premium check error: {e}")
+        return False
+
 def check_ai_budget(email=None):
     """
     Budget Controller: Prevents 90k bills by limiting daily requests.
-    Guest Limit: 3 requests/day
-    User Limit: 15 requests/day
-    Admin: Unlimited
+    Guest Limit:   5 requests/day
+    Free User:    20 requests/day
+    Premium User: 200 requests/day
+    Admin:        Unlimited (free!)
     """
     if not email:
         email = 'guest_' + request.remote_addr
     
+    # Admin = unlimited, all free
     if email == ADMIN_EMAIL:
         return True, 0
+
+    # Premium users get much higher limit
+    premium = is_premium_user(email)
     
     conn = get_db_connection()
     today = date.today().isoformat()
@@ -88,7 +121,12 @@ def check_ai_budget(email=None):
             row = conn.execute('SELECT request_count FROM ai_usage WHERE user_email = ? AND usage_date = ?', (email, today)).fetchone()
         
         count = row['request_count'] if row else 0
-        limit = 15 if not email.startswith('guest_') else 3
+        if email.startswith('guest_'):
+            limit = 5
+        elif premium:
+            limit = 200
+        else:
+            limit = 20
         
         if count >= limit:
             conn.close()
@@ -114,8 +152,10 @@ def check_ai_budget(email=None):
         return True, limit
     except Exception as e:
         print(f"Budget Check Error: {e}")
-        conn.close()
-        return True, 100 # Fail safe to allow usage if DB fails
+        if 'conn' in locals():
+            try: conn.close()
+            except: pass
+        return True, 100  # Fail safe
 
 # Local disk storage disabled (Cloud Only)
 
@@ -174,11 +214,12 @@ def get_db_connection():
         # conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
         return conn
     else:
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(DB_FILE, timeout=10)
         conn.row_factory = sqlite3.Row
         # Military-grade optimization for SQLite
         conn.execute('PRAGMA journal_mode = WAL')
         conn.execute('PRAGMA synchronous = NORMAL')
+        conn.execute('PRAGMA busy_timeout = 10000')
         return conn
 
 def to_json(data):
@@ -1759,6 +1800,171 @@ def moderate_video():
     status = ai_processor.moderate(title, desc)
     return jsonify({'status': status, 'reason': 'Flagged by Vitox AI System' if status == 'unsafe' else ''})
 
+@app.route('/api/subscription/plans', methods=['GET'])
+def get_subscription_plans():
+    """Return available subscription plans"""
+    return jsonify({
+        'plans': [
+            {
+                'id': 'free',
+                'name': 'Free',
+                'price': 0,
+                'currency': 'INR',
+                'period': 'forever',
+                'features': ['5 guest / 20 user AI requests/day', 'Gemini Flash & LLaMA 3 8B', 'Standard chat support', 'Community access'],
+                'badge': None
+            },
+            {
+                'id': 'premium',
+                'name': 'Premium',
+                'price': 199,
+                'currency': 'INR',
+                'period': 'month',
+                'features': ['200 AI requests/day', '✨ Gemini Pro 2.5 + GPT-4o Mini', '🤗 Hugging Face models (Falcon, Zephyr)', '⚡ LLaMA 3 70B', '🌟 Priority support', '🏅 Premium badge'],
+                'badge': '🔥 Popular'
+            },
+            {
+                'id': 'pro',
+                'name': 'Pro Creator',
+                'price': 499,
+                'currency': 'INR',
+                'period': 'month',
+                'features': ['Unlimited AI requests', '🧠 All premium models + Claude Haiku', '🎨 AI image generation', '🚀 Creator monetization tools', '💼 Business analytics', '🎯 Brand verification'],
+                'badge': '👑 Best Value'
+            }
+        ]
+    })
+
+@app.route('/api/subscription/status', methods=['GET'])
+def get_subscription_status():
+    """Get current user subscription status"""
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'tier': 'guest', 'premium': False})
+    
+    if email == ADMIN_EMAIL:
+        return jsonify({
+            'tier': 'admin',
+            'premium': True,
+            'unlimited': True,
+            'models': ['gemini-flash', 'gemini-pro', 'llama-3-free', 'llama-3-70b', 'hf-falcon', 'hf-mistral', 'hf-zephyr', 'claude-haiku', 'gpt-4o-mini'],
+            'daily_limit': 'Unlimited',
+            'premium_until': None,
+            'badge': '👑 Admin'
+        })
+    
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT subscription_tier, premium_until FROM users WHERE email = %s', (email,))
+            user = cursor.fetchone()
+        else:
+            user = conn.execute('SELECT subscription_tier, premium_until FROM users WHERE email = ?', (email,)).fetchone()
+        conn.close()
+    except Exception as e:
+        conn.close()
+        return jsonify({'tier': 'free', 'premium': False, 'error': str(e)})
+    
+    if not user:
+        return jsonify({'tier': 'free', 'premium': False})
+    
+    tier = user['subscription_tier'] or 'free'
+    premium = is_premium_user(email)
+    
+    models_available = ['gemini-flash', 'llama-3-free', 'hf-zephyr']
+    daily_limit = 20
+    if premium:
+        daily_limit = 200 if tier == 'premium' else 9999
+        models_available = ['gemini-flash', 'gemini-pro', 'llama-3-free', 'llama-3-70b', 'hf-falcon', 'hf-mistral', 'hf-zephyr', 'gpt-4o-mini']
+        if tier == 'pro':
+            models_available.append('claude-haiku')
+    
+    return jsonify({
+        'tier': tier,
+        'premium': premium,
+        'daily_limit': daily_limit,
+        'models': models_available,
+        'premium_until': str(user['premium_until']) if user['premium_until'] else None,
+        'badge': '⭐ Premium' if tier == 'premium' else ('👑 Pro Creator' if tier == 'pro' else None)
+    })
+
+@app.route('/api/subscription/activate', methods=['POST'])
+def activate_subscription():
+    """Activate premium subscription (demo/manual activation, replace with Razorpay webhook in production)"""
+    data = request.json
+    email = data.get('email')
+    plan = data.get('plan', 'premium')  # 'premium' or 'pro'
+    payment_id = data.get('payment_id', 'demo_' + str(datetime.now().timestamp()))
+    
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    if plan not in ('premium', 'pro'):
+        return jsonify({'status': 'error', 'message': 'Invalid plan'}), 400
+    
+    # Set premium for 30 days
+    from datetime import timedelta
+    premium_until = (datetime.now() + timedelta(days=30)).isoformat()
+    
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('UPDATE users SET subscription_tier = %s, premium_until = %s WHERE email = %s',
+                           (plan, premium_until, email))
+            cursor.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (%s, %s, %s, %s, %s)',
+                           (email, 199 if plan == 'premium' else 499, 'subscription', f'{plan.title()} Plan - {payment_id}', 'completed'))
+        else:
+            conn.execute('UPDATE users SET subscription_tier = ?, premium_until = ? WHERE email = ?',
+                         (plan, premium_until, email))
+            conn.execute('INSERT INTO transactions (user_email, amount, type, description, status) VALUES (?, ?, ?, ?, ?)',
+                         (email, 199 if plan == 'premium' else 499, 'subscription', f'{plan.title()} Plan - {payment_id}', 'completed'))
+        conn.commit()
+        conn.close()
+        return jsonify({
+            'status': 'success',
+            'message': f'🎉 {plan.title()} plan activated! Enjoy premium AI access for 30 days.',
+            'tier': plan,
+            'premium_until': premium_until
+        })
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/subscription/admin-grant', methods=['POST'])
+def admin_grant_premium():
+    """Admin-only: grant free premium to any user"""
+    data = request.json
+    admin_email = data.get('admin_email')
+    if admin_email != ADMIN_EMAIL:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    target_email = data.get('target_email')
+    plan = data.get('plan', 'premium')
+    days = data.get('days', 30)
+    
+    if not target_email:
+        return jsonify({'status': 'error', 'message': 'target_email required'}), 400
+    
+    from datetime import timedelta
+    premium_until = (datetime.now() + timedelta(days=days)).isoformat()
+    
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('UPDATE users SET subscription_tier = %s, premium_until = %s WHERE email = %s',
+                           (plan, premium_until, target_email))
+        else:
+            conn.execute('UPDATE users SET subscription_tier = ?, premium_until = ? WHERE email = ?',
+                         (plan, premium_until, target_email))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'message': f'✅ Granted {plan} to {target_email} for {days} days (Admin free grant)'})
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/api/ai/ask', methods=['POST'])
 def ai_ask():
     data = request.json
@@ -1768,13 +1974,14 @@ def ai_ask():
     
     can_ai, limit = check_ai_budget(email)
     if not can_ai:
-        return jsonify({'answer': f'⚠️ AI Budget Exceeded for today ({limit} requests). Please try again later or join our premium squad!'}), 429
+        return jsonify({'answer': f'⚠️ AI Budget Exceeded for today ({limit} requests). Upgrade to Premium for 200 requests/day!'}), 429
 
     if not prompt:
         return jsonify({'error': 'No prompt provided'}), 400
 
-    answer = ai_processor.ask(prompt, model)
-    return jsonify({'answer': answer})
+    premium = is_premium_user(email)
+    answer = ai_processor.ask(prompt, model, premium=premium)
+    return jsonify({'answer': answer, 'premium_used': premium})
 
 @app.route('/api/ai/predict', methods=['POST'])
 def ai_predict():
@@ -1829,12 +2036,14 @@ def ai_chat():
     
     can_ai, limit = check_ai_budget(email)
     if not can_ai:
-        return jsonify({'answer': f'Daily chat limit of {limit} reached. Continue tomorrow!'}), 429
+        return jsonify({'answer': f'Daily chat limit of {limit} reached. Upgrade to Premium for more! 🚀'}), 429
         
     if not prompt: return jsonify({'error': 'No prompt provided'}), 400
     
-    answer = ai_processor.ask(prompt, model_alias='llama-3-free')
-    return jsonify({'answer': answer})
+    premium = is_premium_user(email)
+    model_to_use = 'llama-3-70b' if premium else 'llama-3-free'
+    answer = ai_processor.ask(prompt, model_alias=model_to_use, premium=premium)
+    return jsonify({'answer': answer, 'premium_used': premium})
 
 @app.route('/api/gemini_chat', methods=['POST'])
 def gemini_chat():
@@ -1850,11 +2059,13 @@ def gemini_chat():
     # AI Budget check
     can_ai, limit = check_ai_budget(email)
     if not can_ai:
-        return jsonify({'answer': f'⚠️ AI Budget Exceeded for today ({limit} requests). Please try again later or join our premium squad!'}), 429
+        return jsonify({'answer': f'⚠️ AI Budget Exceeded for today ({limit} requests). Upgrade to Premium for 200 req/day! 🚀'}), 429
     
     # Copyright scan
     if not ai_processor.copyright_scan(prompt):
         return jsonify({'answer': 'Sorry, copyright check failed. Please rephrase.'})
+    
+    premium = is_premium_user(email)
     
     system_instruction = (
         "System: You are Vitox Girl, a friendly, knowledgeable, and slightly playful AI assistant who lives inside a 3-D avatar on the Vitox video platform. "
@@ -1865,7 +2076,9 @@ def gemini_chat():
     )
     full_prompt = f"{system_instruction}\n\nUser: {prompt}"
     
-    answer = ai_processor.ask(full_prompt, model_alias='gemini-flash')
+    # Premium users get Gemini Pro, free users get Gemini Flash
+    model_to_use = 'gemini-pro' if premium else 'gemini-flash'
+    answer = ai_processor.ask(full_prompt, model_alias=model_to_use, premium=premium)
     
     # Moderate response / scan response
     if not ai_processor.copyright_scan(answer):
@@ -1919,6 +2132,88 @@ def get_gemini_chat_history():
     messages = [dict(r) for r in rows]
     conn.close()
     return jsonify(messages)
+
+
+def send_email(to_address, subject, body):
+    import smtplib
+    from email.message import EmailMessage
+    
+    email_host = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    try:
+        email_port = int(os.environ.get('EMAIL_PORT', '587'))
+    except:
+        email_port = 587
+    email_user = os.environ.get('EMAIL_USER', '')
+    email_pass = os.environ.get('EMAIL_PASS', '')
+    email_from = os.environ.get('EMAIL_FROM', email_user)
+
+    if not email_user or not email_pass:
+        print("SMTP Credentials not configured in environment.")
+        return False
+
+    msg = EmailMessage()
+    msg.set_content(body)
+    msg['Subject'] = subject
+    msg['From'] = email_from
+    msg['To'] = to_address
+
+    try:
+        if email_port == 465:
+            server = smtplib.SMTP_SSL(email_host, email_port)
+            server.login(email_user, email_pass)
+        else:
+            server = smtplib.SMTP(email_host, email_port)
+            server.starttls()
+            server.login(email_user, email_pass)
+        server.send_message(msg)
+        server.quit()
+        return True
+    except Exception as e:
+        print(f"SMTP Error: {e}")
+        return False
+
+
+@app.route('/api/ai/email-transcript', methods=['POST'])
+def email_transcript():
+    data = request.json or {}
+    email = data.get('email')
+    transcript = data.get('transcript')
+    
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email address is required'}), 400
+    if not transcript:
+        return jsonify({'status': 'error', 'message': 'Transcript is required'}), 400
+        
+    # Generate summary using VitoxAI
+    summary_prompt = (
+        "System: You are Vitox Girl AI. Summarize the following conversation in one short, warm, and friendly Hinglish sentence (maximum 20 words). "
+        "Make it sound like a personal goodbye or a cute summary of what you talked about.\n\n"
+        f"Conversation:\n{transcript}\n\nSummary:"
+    )
+    try:
+        summary = ai_processor.ask(summary_prompt, model_alias='gemini-flash')
+    except Exception as e:
+        print(f"Failed to generate summary: {e}")
+        summary = "Aapka chat complete ho gaya hai! Thanks for talking to me. 😊"
+
+    # Send email
+    subject = "Your Vitox Chat Transcript"
+    email_body = (
+        f"Hello!\n\nHere is the transcript of your chat with Vitox Girl AI:\n\n"
+        f"--------------------------------------------------\n"
+        f"{transcript}\n"
+        f"--------------------------------------------------\n\n"
+        f"Thank you for using Vitox!\n"
+        f"Best regards,\nThe Vitox Team"
+    )
+    
+    email_sent = send_email(email, subject, email_body)
+    
+    return jsonify({
+        'status': 'success',
+        'email_sent': email_sent,
+        'summary': summary
+    })
 
 
 @app.route('/api/admin/backup', methods=['POST'])
