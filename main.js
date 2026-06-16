@@ -485,6 +485,14 @@ async function performSearch() {
     renderVideos(filtered);
 }
 
+// AI Search: opens YouTube search results in a new tab
+function performAISearch() {
+    const query = document.getElementById('search-input').value.trim();
+    if (!query) return;
+    const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    window.open(youtubeUrl, '_blank');
+}
+
 // ... Additional helper functions (performAISearch, playVideo, toggleLike, etc.) would be here ...
 // For brevity, I am merging most into this structure.
 

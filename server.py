@@ -1836,6 +1836,91 @@ def ai_chat():
     answer = ai_processor.ask(prompt, model_alias='llama-3-free')
     return jsonify({'answer': answer})
 
+@app.route('/api/gemini_chat', methods=['POST'])
+def gemini_chat():
+    email = request.headers.get('X-User-Email')
+    if not email:
+        return jsonify({'answer': 'कृपया अपने ई‑मेल हेडर के साथ अनुरोध भेजें।'}), 400
+    
+    data = request.json or {}
+    prompt = data.get('prompt', '')
+    if not prompt:
+        return jsonify({'error': 'No prompt provided'}), 400
+    
+    # AI Budget check
+    can_ai, limit = check_ai_budget(email)
+    if not can_ai:
+        return jsonify({'answer': f'⚠️ AI Budget Exceeded for today ({limit} requests). Please try again later or join our premium squad!'}), 429
+    
+    # Copyright scan
+    if not ai_processor.copyright_scan(prompt):
+        return jsonify({'answer': 'Sorry, copyright check failed. Please rephrase.'})
+    
+    system_instruction = (
+        "System: You are Vitox Girl, a friendly, knowledgeable, and slightly playful AI assistant who lives inside a 3-D avatar on the Vitox video platform. "
+        "Speak in a warm, conversational Hinglish (Hindi-English mix) like 'Kya aapko koi help chahiye?'. "
+        "Keep answers concise (1-2 sentences) unless the user asks for code/detail. "
+        "When asked for code, return a short snippet with markdown fences. "
+        "Always end with a friendly sign-off like '🙂 Aapka din shubh ho!'."
+    )
+    full_prompt = f"{system_instruction}\n\nUser: {prompt}"
+    
+    answer = ai_processor.ask(full_prompt, model_alias='gemini-flash')
+    
+    # Moderate response / scan response
+    if not ai_processor.copyright_scan(answer):
+        answer = "Maine kuch copyright content detect kiya hai, toh mai uska response nahi de sakti. 🙂 Aapka din shubh ho!"
+    
+    # Persist in DB
+    try:
+        conn = get_db_connection()
+        if USE_POSTGRES:
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO messages (sender_email, receiver_email, content, is_collab, is_admin) VALUES (%s, %s, %s, %s, %s)',
+                           (email, 'vitox_girl', prompt, False, False))
+            cursor.execute('INSERT INTO messages (sender_email, receiver_email, content, is_collab, is_admin) VALUES (%s, %s, %s, %s, %s)',
+                           ('vitox_girl', email, answer, False, False))
+        else:
+            conn.execute('INSERT INTO messages (sender_email, receiver_email, content, is_collab, is_admin) VALUES (?, ?, ?, ?, ?)',
+                         (email, 'vitox_girl', prompt, 0, 0))
+            conn.execute('INSERT INTO messages (sender_email, receiver_email, content, is_collab, is_admin) VALUES (?, ?, ?, ?, ?)',
+                         ('vitox_girl', email, answer, 0, 0))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Failed to persist gemini_chat message: {e}")
+    
+    return jsonify({'answer': answer})
+
+@app.route('/api/gemini_chat/history', methods=['GET'])
+def get_gemini_chat_history():
+    email = request.args.get('email')
+    if not email:
+        return jsonify([])
+    
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('''
+            SELECT * FROM messages 
+            WHERE (sender_email = %s AND receiver_email = %s)
+            OR (sender_email = %s AND receiver_email = %s)
+            ORDER BY timestamp ASC
+        ''', (email, 'vitox_girl', 'vitox_girl', email))
+        rows = cursor.fetchall()
+    else:
+        rows = conn.execute('''
+            SELECT * FROM messages 
+            WHERE (sender_email = ? AND receiver_email = ?)
+            OR (sender_email = ? AND receiver_email = ?)
+            ORDER BY timestamp ASC
+        ''', (email, 'vitox_girl', 'vitox_girl', email)).fetchall()
+        
+    messages = [dict(r) for r in rows]
+    conn.close()
+    return jsonify(messages)
+
+
 @app.route('/api/admin/backup', methods=['POST'])
 def admin_backup():
     try:

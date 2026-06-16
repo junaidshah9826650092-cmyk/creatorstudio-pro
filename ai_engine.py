@@ -15,7 +15,7 @@ class VitoxAI:
         self.budget_mode = budget_mode
 
     def _get_gemini_key(self):
-        return os.environ.get('GOOGLE_API_KEY', '').strip()
+        return (os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY', '')).strip()
 
     def _get_openrouter_key(self):
         return os.environ.get('OPENROUTER_API_KEY', '').strip()
@@ -25,8 +25,8 @@ class VitoxAI:
         
         # Define models with their types
         models = {
-            'gemini-flash': 'gemini-1.5-flash',
-            'gemini-pro': 'gemini-1.5-pro',
+            'gemini-flash': 'gemini-2.5-flash',
+            'gemini-pro': 'gemini-2.5-pro',
             'llama-3-free': 'meta-llama/llama-3-8b-instruct:free',
             'mistral-free': 'mistralai/mistral-7b-instruct:free',
             'google-gemma-free': 'google/gemma-7b-it:free',
@@ -40,7 +40,7 @@ class VitoxAI:
             elif model_alias not in models:
                 model_alias = 'llama-3-free'
         
-        selected_model = models.get(model_alias, 'gemini-1.5-flash')
+        selected_model = models.get(model_alias, 'gemini-2.5-flash')
         
         # Security: Prevent usage of unauthorized expensive models via string injection
         if self.budget_mode and not any(m in selected_model for m in [':free', 'flash', 'gemma']):
