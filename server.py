@@ -6,8 +6,8 @@ from flask_cors import CORS
 from ai_engine import VitoxAI
 ai_processor = VitoxAI()
 from datetime import datetime, date
-import psycopg2
-from psycopg2.extras import RealDictCursor
+# import psycopg2
+# from psycopg2.extras import RealDictCursor
 import requests
 import base64
 
@@ -171,7 +171,7 @@ _db_ready = False
 
 def get_db_connection():
     if USE_POSTGRES:
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        # conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
         return conn
     else:
         conn = sqlite3.connect(DB_FILE)
@@ -2267,7 +2267,7 @@ def get_chat_history():
     user2 = request.args.get('user2')
     conn = get_db_connection()
     if USE_POSTGRES:
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute('''
             SELECT * FROM messages 
             WHERE (sender_email = %s AND receiver_email = %s)
@@ -2320,7 +2320,7 @@ def get_platform_stats():
 def get_all_users():
     conn = get_db_connection()
     if USE_POSTGRES:
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute("SELECT * FROM users ORDER BY last_login DESC")
         rows = cursor.fetchall()
     else:
@@ -2398,7 +2398,7 @@ def get_admin_chat_history():
     
     conn = get_db_connection()
     if USE_POSTGRES:
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute('''
             SELECT * FROM messages 
             WHERE (sender_email = %s AND receiver_email = %s)
@@ -2450,14 +2450,14 @@ def get_posts():
     conn = get_db_connection()
     if user_email:
         if USE_POSTGRES:
-            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            # cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cursor.execute('SELECT * FROM posts WHERE user_email = %s ORDER BY timestamp DESC', (user_email,))
             rows = cursor.fetchall()
         else:
             rows = conn.execute('SELECT * FROM posts WHERE user_email = ? ORDER BY timestamp DESC', (user_email,)).fetchall()
     else:
         if USE_POSTGRES:
-            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            # cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cursor.execute('SELECT * FROM posts ORDER BY timestamp DESC')
             rows = cursor.fetchall()
         else:
@@ -2646,7 +2646,7 @@ def report_bug():
 def get_all_bugs():
     conn = get_db_connection()
     if USE_POSTGRES:
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute("SELECT * FROM bug_reports ORDER BY CASE WHEN status='open' THEN 1 ELSE 2 END, timestamp DESC")
         rows = cursor.fetchall()
     else:

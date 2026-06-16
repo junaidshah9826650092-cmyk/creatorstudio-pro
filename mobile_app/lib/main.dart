@@ -220,7 +220,7 @@ class _FeedScreenState extends State<FeedScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(Icons.v_stable, color: Color(0xFFFF0055), size: 30),
+            const Icon(Icons.bolt, color: Color(0xFFFF0055), size: 30),
             const SizedBox(width: 8),
             Text('Vitox',
                 style: GoogleFonts.outfit(

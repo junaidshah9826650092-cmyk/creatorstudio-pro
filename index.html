@@ -1,830 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitox | The Next-Gen Indian Video Platform for Creators</title>
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Vitox is India's rising video platform where small creators get real visibility. Join the Vitox Squad, upload unique content, and monetize your passion.">
-    <meta name="keywords" content="Vitox, Indian video platform, YouTube alternative India, Creator monetization, Video sharing India, Social media for creators">
-    <meta name="author" content="Junaid Shah">
-    <link rel="canonical" href="https://creatorstudio.pro/" />
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://creatorstudio.pro/">
-    <meta property="og:title" content="Vitox | The Next-Gen Indian Video Platform for Creators">
-    <meta property="og:description" content="Small creators, big visibility. Join Vitox today and start your journey as a verified Indian creator.">
-    <meta property="og:image" content="https://creatorstudio.pro/assets/branding_banner.jpg">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://creatorstudio.pro/">
-    <meta property="twitter:title" content="Vitox | The Next-Gen Indian Video Platform">
-    <meta property="twitter:description" content="Small creators, big visibility. Join Vitox today!">
-    <meta property="twitter:image" content="https://creatorstudio.pro/assets/branding_banner.jpg">
-
-    <!-- Vitox V Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path fill='%23ff0055' d='M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z'/></svg>">
-    
-    <!-- External Libraries -->
-    <link rel="preload" href="https://unpkg.com/aos@2.3.1/dist/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"></noscript>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
-    <link rel="stylesheet" href="style.css?v=20.0">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7142476355791158" crossorigin="anonymous"></script>
-    <!-- Google Analytics GA4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3TK6X8XJ2D"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3TK6X8XJ2D');
-    </script>
-    <!-- Video.js and Google IMA SDK -->
-    <link rel="preload" href="https://vjs.zencdn.net/8.10.0/video-js.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://vjs.zencdn.net/8.10.0/video-js.css"></noscript>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.css"></noscript>
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js" defer></script>
-    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.0.0/videojs-contrib-ads.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-ima/2.1.0/videojs.ima.min.js" defer></script>
-    <!-- Razorpay Checkout -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
-
-    <style id="admin-custom-css"></style>
-    <script src="sounds_manager.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vitox Platform – Web Demo</title>
+  <meta name="description" content="A premium Flutter‑style web demo for Vitox Platform, showcasing video cards with a modern dark UI." />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-dark: #0f0f0f;
+      --primary: #ff0055;
+      --accent: #ff5500;
+      --card-bg: #1e1e1e;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+    }
+    body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark), #151515);
+      color: var(--text-primary);
+    }
+    header {
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 0;
+      color: var(--primary);
+    }
+    main {
+      padding: 1rem 2rem;
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+    .video-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+    .thumb {
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; /* 16:9 */
+      background: #333;
+      position: relative;
+    }
+    .thumb::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://placehold.co/400x225?text=Thumbnail') center/cover no-repeat;
+      opacity: 0.7;
+    }
+    .info {
+      padding: 0.75rem 1rem;
+    }
+    .info h3 {
+      margin: 0 0 0.4rem 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .info p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+  </style>
 </head>
-
-<body class="dark-theme">
-    <!-- Global Platform AdSense (Revenue for Vitox Owner) -->
-    <!-- Note: Creators use their own IDs for video-specific ads via the Link AdSense feature -->
-
-    <!-- Announcement Banner -->
-    <div id="admin-announcement-banner" style="display:none; background: linear-gradient(90deg, #ff0055, #ff5500); color: white; text-align: center; padding: 10px; font-weight: 700; font-size: 0.9rem; z-index: 10001; position: relative; border-bottom: 1px solid rgba(255,255,255,0.2);">
-        <span id="announcement-text"></span>
-        <button onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:white; margin-left:15px; cursor:pointer; font-size:1.2rem; vertical-align:middle;">&times;</button>
+<body>
+  <header>
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--primary)" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7v9c0 5 5 9 10 9s10-4 10-9V7l-10-5z"/></svg>
+    <h1>Vitox Platform</h1>
+  </header>
+  <main>
+    <!-- Placeholder video cards -->
+    <div class="video-card">
+      <div class="thumb"></div>
+      <div class="info">
+        <h3>Sample Video Title 1</h3>
+        <p>Creator • 1.2M views • 2h ago</p>
+      </div>
     </div>
-
-    <!-- Top Bar -->
-    <header class="top-bar">
-        <div class="header-left">
-            <button class="icon-btn menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('active')"><i
-                    class="fas fa-bars"></i></button>
-            <div class="logo">
-                <!-- Vitox 'V' Logo -->
-                <svg width="32" height="32" viewBox="0 0 64 64" style="margin-right: 8px;">
-                    <defs>
-                        <linearGradient id="vGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#ff0055;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#ff5500;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <path fill="url(#vGradient)" d="M32 62 L4 12 L18 12 L32 40 L46 12 L60 12 Z" />
-                </svg>
-                <span class="logo-text">Vitox</span>
-                <div id="streak-indicator" style="display: none; align-items: center; gap: 4px; background: rgba(255,165,0,0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,165,0,0.3); margin-left: 12px; height: 26px;">
-                    <i class="fas fa-fire" style="color: #ffa500; font-size: 0.8rem;"></i>
-                    <span id="streak-count" style="color: #ffa500; font-size: 0.8rem; font-weight: 800;">1 Day Streak</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="header-center" id="search-bar-container">
-            <button class="icon-btn mobile-back-btn" onclick="toggleMobileSearch()"
-                style="display: none; margin-right: 8px;"><i class="fas fa-arrow-left"></i></button>
-            <div class="search-container">
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Search">
-                    <button class="search-btn" id="ai-search-btn" onclick="performAISearch()" title="Smart AI Search" style="background: transparent; border-left: 1px solid #333; border-radius: 0; margin-left: -40px; color: #ff0055; width: 40px; height: 36px; display: flex; align-items: center; justify-content: center; z-index: 5; border:none;">
-                        <i class="fas fa-sparkles"></i>
-                    </button>
-                    <button class="search-btn" onclick="performSearch()" style="margin-left: 0;"><i class="fas fa-search"></i></button>
-                </div>
-                <button class="icon-btn mic-btn" onclick="startVoiceSearch()"><i class="fas fa-microphone"></i></button>
-            </div>
-        </div>
-
-        <div class="header-right">
-            <button class="icon-btn mobile-search-trigger" onclick="toggleMobileSearch()"><i
-                    class="fas fa-search"></i></button>
-            <!-- Create Menu -->
-            <div class="create-container">
-                <button class="create-btn" id="create-btn" onclick="toggleCreateMenu()">
-                    <i class="fas fa-plus"></i> <span>Create</span>
-                </button>
-                <div class="create-dropdown" id="create-dropdown">
-                    <a href="upload.html?v=8.0"><i class="fas fa-upload"></i> Upload video</a>
-                    <a href="#" onclick="openGoLiveModal(); return false;"><i class="fas fa-tower-broadcast"></i> Vitox Broadcast</a>
-                    <a href="#"
-                        onclick="document.getElementById('create-post-modal').style.display='flex'; toggleCreateMenu(); return false;"><i
-                            class="fas fa-pen-to-square"></i> Create post</a>
-                </div>
-            </div>
-
-            <button class="icon-btn" onclick="location.href='dashboard_overview.html'" title="Creator Studio">
-                <i class="fas fa-clapperboard"></i>
-            </button>
-            <div id="login-container">
-                <div id="g_id_onload"
-                    data-client_id="392918089798-sqv6ro56e2lkdhu8jmh0j7mb1ka3lhbj.apps.googleusercontent.com"
-                    data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
-                    data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline"
-                    data-text="signin_with" data-size="medium" data-logo_alignment="left">
-                </div>
-            </div>
-            <button class="icon-btn" onclick="toggleNotifications()" title="Notifications"><i
-                    class="fas fa-bell"></i></button>
-            <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu()" title="Account Options">?</div>
-
-            <!-- Hidden User Menu -->
-            <div id="user-menu" class="dropdown-menu">
-                <div class="user-info-header" id="menu-user-info"
-                    style="display:none; padding: 12px; border-bottom: 1px solid var(--border);">
-                    <div id="menu-user-name" style="font-weight: 600;">User</div>
-                </div>
-                <a href="dashboard_overview.html"><i class="fas fa-user-circle"></i> View Channel</a>
-                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Push Notification Toast -->
-    <div id="push-notif-bar" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1a1a1a; border:1px solid rgba(255,0,85,0.4); border-radius:20px; padding:16px 24px; z-index:200001; box-shadow:0 10px 40px rgba(0,0,0,0.5); display:none; align-items:center; gap:16px; min-width:320px; max-width:480px;">
-        <div style="width:40px; height:40px; background:#ff0055; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <i class="fas fa-bell" style="color:white;"></i>
-        </div>
-        <div style="flex:1;">
-            <div id="push-notif-title" style="font-weight:800; color:white; font-size:0.9rem;">New on Vitox</div>
-            <div id="push-notif-body" style="color:#888; font-size:0.8rem; margin-top:2px;">Check out what's trending!</div>
-        </div>
-        <button onclick="document.getElementById('push-notif-bar').style.display='none'" style="background:none;border:none;color:#555;font-size:1.2rem;cursor:pointer;">&times;</button>
+    <div class="video-card">
+      <div class="thumb"></div>
+      <div class="info">
+        <h3>Sample Video Title 2</h3>
+        <p>Creator • 850K views • 5h ago</p>
+      </div>
     </div>
-
-    <div id="maintenance-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0f0f0f; z-index:999999; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; padding:40px;">
-        <i class="fas fa-hammer fa-4x" style="color:#ff0055; margin-bottom:24px;"></i>
-        <h1 style="font-size:3rem; font-weight:900;">System Upgrading</h1>
-        <p style="color:#888; font-size:1.2rem; max-width:500px; margin-top:16px;">Vitox is currently undergoing scheduled maintenance to bring you new AI features. We'll be back shortly!</p>
-        <div style="margin-top:40px; padding:12px 24px; border:1px solid #333; border-radius:12px; color:#555;">Admin? <a href="admin.html" style="color:#ff0055;">Login here</a></div>
+    <div class="video-card">
+      <div class="thumb"></div>
+      <div class="info">
+        <h3>Sample Video Title 3</h3>
+        <p>Creator • 430K views • 1d ago</p>
+      </div>
     </div>
-
-    <div class="main-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <nav class="sidebar-nav">
-                <!-- Main -->
-                <a href="#" class="nav-item active" onclick="loadVideos(); return false;"><i class="fas fa-home"></i>
-                    <span>Feed</span></a>
-                <a href="#" class="nav-item" onclick="filterByCategory('Live'); return false;"><i
-                        class="fas fa-tower-broadcast" style="color:#ff0055;"></i>
-                    <span>Pulse</span></a>
-                <a href="#" class="nav-item" onclick="loadSnapsView(); return false;"><i class="fas fa-play-circle"></i>
-                    <span>V-Snaps</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Squad'); return false;"><i
-                        class="fas fa-layer-group"></i> <span>Squad</span></a>
-                <a href="#" class="nav-item" onclick="showPricing(); return false;" style="background: linear-gradient(45deg, #121212, #252525); border: 1px solid #ffd700; margin: 12px 8px; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-                    <i class="fas fa-gem" style="color: #ffd700;"></i> <span style="color: #ffd700; font-weight: 700;">Join Premium</span></a>
-                <div style="height: 8px;"></div>
-                <hr>
-                <a href="#" class="nav-item" onclick="loadView('Trending'); return false;">
-                    <i class="fas fa-fire" style="color: #ff5500;"></i>
-                    <span>Trending</span>
-                </a>
-                <a href="#" class="nav-item" onclick="loadLeaderboardView(); return false;">
-                    <i class="fas fa-trophy" style="color: #ffd700;"></i>
-                    <span>Leaderboard</span>
-                </a>
-                <a href="#" class="nav-item" onclick="loadForYouView(); return false;">
-                    <i class="fas fa-wand-magic-sparkles" style="color: #7000ff;"></i>
-                    <span>For You</span>
-                </a>
-                <hr>
-                <a href="rules.html" class="nav-item">
-                    <i class="fas fa-book-open" style="color: #ff0055;"></i>
-                    <span style="font-weight: 600;">Vitox Rule Book</span>
-                </a>
-
-                <!-- You Section -->
-                <div class="nav-section-title"
-                    style="padding: 8px 12px; font-weight: 600; font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
-                    You <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
-                </div>
-
-                <a href="#" class="nav-item" onclick="loadView('Rewind'); return false;"><i class="fas fa-history"></i>
-                    <span>Rewind</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Collections'); return false;"><i
-                        class="fas fa-list"></i>
-                    <span>Collections</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Bookmarks'); return false;"><i class="fas fa-clock"></i>
-                    <span>Bookmarks</span></a>
-                <a href="#" class="nav-item" onclick="loadLikedVideosView(); return false;"><i
-                        class="fas fa-thumbs-up"></i> <span>Favorites</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Broadcast Studio'); return false;"><i
-                        class="fas fa-video"></i> <span>Creator Hub</span></a>
-                <a href="#" class="nav-item" onclick="loadView('Vault'); return false;"><i class="fas fa-download"></i>
-                    <span>Vault</span></a>
-                <hr>
-
-                <!-- AI Studio Section -->
-                <div class="nav-section-title"
-                    style="padding: 8px 12px; font-weight: 600; font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
-                    AI Studio <i class="fas fa-wand-sparkles" style="font-size: 0.8rem; color: #ff0055;"></i>
-                </div>
-                <a href="#" class="nav-item" onclick="loadView('AI Logo Generator'); return false;"><i class="fas fa-compass-drafting"></i> <span>AI Logo Gen</span></a>
-                <a href="#" class="nav-item" onclick="loadView('AI Thumbnail Generator'); return false;"><i class="fas fa-image"></i> <span>Thumbnail Gen</span></a>
-                <a href="#" class="nav-item" onclick="loadView('AI Image Generator'); return false;"><i class="fas fa-palette"></i> <span>Text to Image</span></a>
-                <a href="#" class="nav-item" onclick="loadView('AI Video Generator'); return false;"><i class="fas fa-film"></i> <span>V-Gen (Video)</span></a>
-                <hr>
-                <a href="#" class="nav-item" onclick="openAdminChat(); return false;" style="color: #ffd700;">
-                    <i class="fas fa-crown"></i> <span>Official Support</span></a>
-                <a href="#" class="nav-item" onclick="document.getElementById('bug-report-modal').style.display='flex'; return false;" style="color: #ff5500;">
-                    <i class="fas fa-bug"></i> <span>Report Bug</span></a>
-                <div id="admin-sidebar-link" style="display:none;">
-                    <a href="#" class="nav-item" onclick="loadView('Admin Panel'); return false;"
-                        style="color: #ff4d4d; border: 1px solid rgba(255,77,77,0.2); margin-top: 5px; background: rgba(255,77,77,0.05);">
-                        <i class="fas fa-shield-halved"></i> <span>Admin Panel</span></a>
-                </div>
-                <hr>
-                <div style="padding: 16px 24px; font-size: 0.8rem; line-height: 1.4; color: #aaa; display: flex; flex-direction: column; gap: 12px;">
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px 12px;">
-                        <a href="about.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">About</a>
-                        <a href="press.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Press</a>
-                        <a href="copyright_policy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Copyright</a>
-                        <a href="contact.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Contact us</a>
-                        <a href="creators.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Creators</a>
-                        <a href="advertise.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Advertise</a>
-                        <a href="developers.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Developers</a>
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px 12px;">
-                        <a href="terms.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms</a>
-                        <a href="privacy.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Privacy</a>
-                        <a href="safety.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Policy & Safety</a>
-                        <a href="how_it_works.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">How Vitox works</a>
-                        <a href="test_features.html" style="color: #aaa; text-decoration: none; font-weight: 600;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Test new features</a>
-                    </div>
-                    <div style="color: #717171; font-weight: 400; font-size: 0.75rem; margin-top: 4px;">© 2026 Vitox LLC</div>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- Content Area -->
-        <main class="content">
-            <!-- Categories -->
-            <div class="categories-bar">
-                <button class="chip active" onclick="filterByCategory('All')">All</button>
-                <button class="chip" onclick="filterByCategory('Drama')" style="color: #ff0055; font-weight: bold; border-color: rgba(255,0,85,0.5);"><i class="fas fa-fire"></i> Spicy Drama</button>
-                <button class="chip" onclick="filterByCategory('Music')">Music</button>
-                <button class="chip" onclick="filterByCategory('AI')">AI Studio</button>
-                <button class="chip" onclick="filterByCategory('Gaming')">Gaming</button>
-                <button class="chip" onclick="filterByCategory('Live')">Pulse</button>
-                <button class="chip" onclick="filterByCategory('Tech')">Tech</button>
-                <button class="chip" onclick="filterByCategory('News')">News</button>
-                <button class="chip" onclick="filterByCategory('Comedy')">Comedy</button>
-                <button class="chip" onclick="filterByCategory('Education')">Education</button>
-            </div>
-
-            <!-- Hook: Gamification, FOMO, Progress Tracking -->
-            <div id="retention-hooks-container" style="display: none; animation: scale-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); margin-bottom: 24px;">
-                <!-- FOMO Banner (Only visible for 24 hours/to specific users) -->
-                <div id="fomo-banner" style="background: linear-gradient(90deg, #ff0055, #ff5500); padding: 14px 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(255,0,85,0.3); margin-bottom: 16px; cursor: pointer;" onclick="const chip = document.querySelector('.chip[onclick*=\'Drama\']') || document.querySelector('.chip:nth-child(2)'); if(chip) chip.click();">
-                    <div style="color: white; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-fire fa-lg"></i>
-                        <span>Trending Drama: Top 5 Clips of the Day</span>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; color: white;">Expires in 24h</div>
-                </div>
-
-                <!-- Progress/Continue Hook -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <!-- Continue Watching -->
-                    <div id="continue-watching-card" style="background: #151515; padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: none; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='#151515'">
-                        <h4 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #888; text-transform: uppercase; font-weight: 800;"><i class="fas fa-history" style="color: #ff0055;"></i> Continue where you left off</h4>
-                        <div style="display: flex; gap: 12px; align-items: center;">
-                            <div style="width: 100px; height: 56px; background: #000; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1);">
-                                <img id="cw-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
-                                <div style="position: absolute; bottom: 0; left: 0; height: 3px; background: #ff0055; width: 60%;"></div>
-                            </div>
-                            <div style="flex: 1; overflow: hidden;">
-                                <div id="cw-title" style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Video Title</div>
-                                <div id="cw-channel" style="color: #666; font-size: 0.8rem;">Channel Name</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gamification Badge -->
-                    <div id="gamification-badge" style="background: #151515; padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 16px;">
-                        <div style="width: 56px; height: 56px; background: rgba(255,215,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.2);">
-                            <i id="badge-icon" class="fas fa-star" style="color: #ffd700; font-size: 1.5rem;"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <div id="badge-level" style="font-weight: 800; font-size: 1rem; color: #ffd700;">Novice</div>
-                            <div style="color: #aaa; font-size: 0.85rem; margin-top: 4px;">Watch videos to unlock perks!</div>
-                            <div style="margin-top: 8px; width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden;">
-                                <div id="badge-progress" style="height: 100%; width: 0%; background: #ffd700; border-radius: 3px; transition: 0.4s;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 🔥 Trending Section -->
-            <div id="trending-strip" style="margin-bottom: 28px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-                    <h2 style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
-                        <span style="background:linear-gradient(45deg,#ff5500,#ff0055); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-fire"></i> Trending Now</span>
-                    </h2>
-                    <button onclick="loadView('Trending')" style="font-size:0.8rem; color:#ff0055; background:none; border:none; cursor:pointer; font-weight:700;">See all &rarr;</button>
-                </div>
-                <div id="trending-chips" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-            </div>
-
-            <!-- ✨ For You Section -->
-            <div id="for-you-row" style="margin-bottom:28px; display:none;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-                    <h2 style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
-                        <span style="background:linear-gradient(45deg,#7000ff,#ff0055); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;"><i class="fas fa-wand-magic-sparkles"></i> Recommended For You</span>
-                    </h2>
-                    <span style="font-size:0.75rem; color:#555;">Based on your watch history</span>
-                </div>
-                <div id="for-you-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;"></div>
-            </div>
-
-    <!-- Skeleton Loader Styles -->
-    <style>
-        .skeleton-card { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
-        .skeleton-thumb { width:100%; aspect-ratio:16/9; background:#222; border-radius:12px; animation:pulse 1.5s infinite; }
-        .skeleton-row { display:flex; gap:12px; }
-        .skeleton-avatar { width:40px; height:40px; border-radius:50%; background:#222; animation:pulse 1.5s infinite; flex-shrink:0; }
-        .skeleton-text { flex:1; display:flex; flex-direction:column; gap:8px; padding-top:4px; }
-        .skeleton-title { width:85%; height:16px; background:#222; border-radius:4px; animation:pulse 1.5s infinite; }
-        .skeleton-meta { width:60%; height:14px; background:#222; border-radius:4px; animation:pulse 1.5s infinite; }
-        @keyframes pulse { 0%{opacity:1;} 50%{opacity:0.4;} 100%{opacity:1;} }
-    </style>
-
-    <link rel="preload" href="/api/videos" as="fetch" crossorigin="anonymous">
-            <div class="video-grid" id="main-video-grid">
-                <!-- Skeleton Loading State (Guarantees instant FCP & Perfect CLS) -->
-                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-row"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-title"></div><div class="skeleton-meta"></div></div></div></div>
-            </div>
-
-            <!-- ✨ Why Vitox? Value-Added Content (AdSense Compliance) -->
-            <section id="why-vitox" style="margin-top: 60px; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
-                <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 24px; background: linear-gradient(135deg, #fff 0%, #ff0055 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">The Future of Content is <span style="color: #ff0055;">You</span></h2>
-                <div style="max-width: 800px; margin: 0 auto; line-height: 1.8; color: #aaa; font-size: 1.1rem; text-align: justify;">
-                    <p style="margin-bottom: 20px;">Vitox isn't just another video platform; it's a movement built specifically for the next generation of <strong>Indian Creators</strong>. We noticed a recurring problem: small, talented creators often get lost in the noise of massive algorithms. Our mission is to change that by providing a high-visibility stage where quality and uniqueness always come first.</p>
-                    <p style="margin-bottom: 20px;">Whether you're a storyteller, a gamer, a musician, or an educator, Vitox offers the tools you need to build a real <strong>Squad</strong>. From our high-speed HD streaming and AI-powered creator tools to our unique <em>V-Snaps</em> shorts ecosystem, every feature is designed to maximize your creative potential and help you monetize your passion fairly.</p>
-                    <p>We believe in transparency, creator freedom, and the power of local communities. Join Vitox today and be part of a platform that respects your time, your talent, and your audience. Small creators, big visibility — that's the Vitox promise.</p>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 48px;">
-                    <div>
-                        <i class="fas fa-rocket" style="font-size: 2.5rem; color: #ff0055; margin-bottom: 16px;"></i>
-                        <h3 style="color: white; margin-bottom: 8px;">Instant Reach</h3>
-                        <p style="font-size: 0.9rem; color: #777;">Our algorithm prioritizes new talent, giving everyone a fair shot at trending.</p>
-                    </div>
-                    <div>
-                        <i class="fas fa-shield-halved" style="font-size: 2.5rem; color: #ff0055; margin-bottom: 16px;"></i>
-                        <h3 style="color: white; margin-bottom: 8px;">Creator Rights</h3>
-                        <p style="font-size: 0.9rem; color: #777;">You own your content. We provide the stage and the tools to protect it.</p>
-                    </div>
-                    <div>
-                        <i class="fas fa-coins" style="font-size: 2.5rem; color: #ff0055; margin-bottom: 16px;"></i>
-                        <h3 style="color: white; margin-bottom: 8px;">Fair Earnings</h3>
-                        <p style="font-size: 0.9rem; color: #777;">Multiple ways to earn, from points and brand deals to direct fan support.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Empty State if no videos -->
-            <div id="empty-state" class="empty-state" style="display: none; padding: 60px 20px; text-align: center;">
-                <div style="background: rgba(255,0,85,0.05); width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; border: 1px solid rgba(255,0,85,0.1);">
-                    <i class="fas fa-sparkles" style="font-size: 3rem; color: #ff0055;"></i>
-                </div>
-                <h2 id="spotlight-title" style="font-size: 2rem; font-weight: 800; margin-bottom: 12px;">Welcome to the Launch Phase</h2>
-                <p id="spotlight-desc" style="color: #888; max-width: 500px; margin: 0 auto 32px; font-size: 1.1rem; line-height: 1.6;">Our community is just getting started! Be one of the founding creators of Vitox. Upload your first video now and claim your spot on the leaderboard.</p>
-                <button onclick="location.href='upload.html'" style="padding: 16px 40px; background: #ff0055; color: white; border: none; border-radius: 16px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 30px rgba(255,0,85,0.3); transition: 0.3s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-plus"></i> Upload Your First Video
-                </button>
-            </div>
-            <!-- ✨ Creator Spotlight (AdSense Value) -->
-            <section id="creator-spotlight" style="margin-top: 60px; padding: 40px; background: linear-gradient(135deg, rgba(112,0,255,0.05), rgba(255,0,85,0.05)); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px;">
-                    <h2 style="font-size:1.8rem; font-weight:800; color:white;"><i class="fas fa-star" style="color:#ffd700; margin-right:10px;"></i> Creator Spotlight</h2>
-                    <span style="color:var(--text-secondary); font-size:0.9rem;">Meet the Founding Squad</span>
-                </div>
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
-                    <!-- Creator 1 -->
-                    <div style="background:rgba(255,255,255,0.03); padding:24px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); display:flex; gap:20px; align-items:center;">
-                        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(45deg, #7000ff, #ff0055); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:900; color:white; border:3px solid rgba(255,255,255,0.1);">A</div>
-                        <div>
-                            <h3 style="color:white; margin-bottom:4px;">Arjun K.</h3>
-                            <p style="color:#ff0055; font-size:0.8rem; font-weight:700; text-transform:uppercase; margin-bottom:8px;">Tech Storyteller</p>
-                            <p style="font-size:0.85rem; color:#888; line-height:1.5;">"Vitox gives me the freedom to explain complex tech in Hindi without being buried by massive global channels."</p>
-                        </div>
-                    </div>
-                    <!-- Creator 2 -->
-                    <div style="background:rgba(255,255,255,0.03); padding:24px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); display:flex; gap:20px; align-items:center;">
-                        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(45deg, #00d2ff, #3a7bd5); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:900; color:white; border:3px solid rgba(255,255,255,0.1);">S</div>
-                        <div>
-                            <h3 style="color:white; margin-bottom:4px;">Samiya V.</h3>
-                            <p style="color:#ff0055; font-size:0.8rem; font-weight:700; text-transform:uppercase; margin-bottom:8px;">Lifestyle & Art</p>
-                            <p style="font-size:0.85rem; color:#888; line-height:1.5;">"I love the V-Snaps feature. It's the perfect way to showcase my mini-vlogs to a dedicated Indian audience."</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ✨ Trending Categories (SEO Value) -->
-            <section id="trending-categories" style="margin-top: 60px; margin-bottom: 60px;">
-                <h2 style="font-size:1.8rem; font-weight:800; color:white; margin-bottom:32px; text-align:center;">Explore Vitox <span style="color:#ff0055;">Universes</span></h2>
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px;">
-                    <div style="background:rgba(255,255,255,0.02); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); transition:0.3s; cursor:pointer;" onmouseover="this.style.background='rgba(255,0,85,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                        <i class="fas fa-gamepad" style="font-size:2rem; color:#ff0055; margin-bottom:20px;"></i>
-                        <h3 style="color:white; margin-bottom:12px;">Gaming Legends</h3>
-                        <p style="font-size:0.85rem; color:#777; line-height:1.6;">Join thousands of Indian gamers streaming the latest blockbusters and mobile gaming championships. From walkthroughs to competitive esports, find your next squad here.</p>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); transition:0.3s; cursor:pointer;" onmouseover="this.style.background='rgba(112,0,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                        <i class="fas fa-code" style="font-size:2rem; color:#7000ff; margin-bottom:20px;"></i>
-                        <h3 style="color:white; margin-bottom:12px;">Tech & Innovation</h3>
-                        <p style="font-size:0.85rem; color:#777; line-height:1.6;">Stay ahead of the curve with gadget reviews, coding tutorials, and future-tech discussions curated specifically for the modern Indian student and professional.</p>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); transition:0.3s; cursor:pointer;" onmouseover="this.style.background='rgba(255,165,0,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                        <i class="fas fa-graduation-cap" style="font-size:2rem; color:#ffa500; margin-bottom:20px;"></i>
-                        <h3 style="color:white; margin-bottom:12px;">Educational Hub</h3>
-                        <p style="font-size:0.85rem; color:#777; line-height:1.6;">Learning never stops on Vitox. Explore high-quality educational content, skill-building workshops, and motivational talks to help you achieve your career goals.</p>
-                    </div>
-                </div>
-            </section>
-        <!-- Collab Chat Drawer - Full Featured -->
-        <div id="collab-chat-drawer"
-            style="position: fixed; top: 0; right: -100%; width: 420px; max-width: 100%; height: 100vh; background: #0d0d0d; z-index: 10001; box-shadow: -20px 0 60px rgba(0,0,0,0.9); transition: right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.08);">
-            
-            <!-- Header -->
-            <div style="padding: 0 20px; height: 72px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 14px; background: #111; flex-shrink:0;">
-                <button onclick="closeCollabChat()" style="background:none;border:none;color:#666;font-size:1.2rem;cursor:pointer;padding:4px;">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <div id="collab-avatar" style="width:44px;height:44px;background:linear-gradient(135deg,#ff0055,#7000ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:white;flex-shrink:0;">?</div>
-                <div style="flex:1;">
-                    <div id="collab-chat-target" style="font-weight:800;font-size:1rem;">Creator</div>
-                    <div id="collab-online-status" style="font-size:0.75rem;color:#00cc66;display:flex;align-items:center;gap:5px;">
-                        <span style="width:6px;height:6px;background:#00cc66;border-radius:50%;display:inline-block;"></span> online
-                    </div>
-                </div>
-                <!-- Collab Deal Proposal Button -->
-                <button onclick="sendCollabProposal()" style="background:rgba(255,0,85,0.1);border:1px solid rgba(255,0,85,0.3);color:#ff0055;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;">
-                    <i class="fas fa-handshake"></i> Propose Deal
-                </button>
-            </div>
-
-            <!-- Quick Collab Templates -->
-            <div id="collab-templates" style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); display:flex; gap:8px; overflow-x:auto; flex-shrink:0;">
-                <button onclick="insertTemplate('Hey! I love your content. Interested in a collab?')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">?? Say Hi</button>
-                <button onclick="insertTemplate('I want to do a collaboration video with you. Let me know your rates!')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">?? Collab Ask</button>
-                <button onclick="insertTemplate('I am interested in sponsoring your channel. What are your sponsorship rates per video?')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">?? Sponsorship</button>
-                <button onclick="insertTemplate('Would you be open to a brand deal? I represent [Brand Name].')" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#aaa;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">??? Brand Deal</button>
-            </div>
-
-            <!-- Messages -->
-            <div id="collab-messages-content"
-                style="flex:1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; background: #0d0d0d;">
-                <!-- Empty state -->
-                <div id="collab-empty" style="text-align:center;margin:auto;">
-                    <div style="font-size:3rem;margin-bottom:12px;">??</div>
-                    <div style="font-weight:800;color:#333;margin-bottom:6px;">Start a Collab Conversation</div>
-                    <div style="color:#444;font-size:0.85rem;">Use the quick replies above to break the ice!</div>
-                </div>
-            </div>
-
-            <!-- Typing indicator -->
-            <div id="collab-typing" style="padding:6px 20px;color:#666;font-size:0.75rem;flex-shrink:0;display:none;">
-                <i class="fas fa-ellipsis"></i> typing...
-            </div>
-
-            <!-- Input Area -->
-            <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.07); background: #111; flex-shrink:0;">
-                <!-- Emoji Quick Bar -->
-                <div style="display:flex;gap:8px;margin-bottom:10px;">
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;" title="Fire">??</span>
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;">??</span>
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;">??</span>
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;">??</span>
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;">??</span>
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;">??</span>
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;">??</span>
-                    <span onclick="appendEmoji('??')" style="cursor:pointer;font-size:1.2rem;">??</span>
-                </div>
-                <div style="display: flex; gap: 10px; align-items:flex-end;">
-                    <textarea id="collab-chat-input" placeholder="Type your message..." rows="1"
-                        style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 12px 18px; color: white; outline: none; font-family: inherit; font-size:0.9rem; resize:none; max-height:100px; line-height:1.4;"
-                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('collab-chat-send').click();}"
-                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';"></textarea>
-                    <button id="collab-chat-send"
-                        style="background: linear-gradient(135deg,#ff0055,#7000ff); color: white; border: none; width: 46px; height:46px; border-radius: 50%; cursor: pointer; flex-shrink:0; font-size:1rem; transition:0.2s;"
-                        onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Admin Support Chat Drawer (Alag UI) -->
-        <div id="admin-chat-drawer"
-            style="position: fixed; top: 0; right: -100%; width: 500px; max-width: 100%; height: 100vh; background: #050505; z-index: 10002; box-shadow: -20px 0 60px rgba(0,0,0,1); transition: right 0.6s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; border-left: 2px solid #ffd700;">
-            <div
-                style="padding: 25px; border-bottom: 1px solid rgba(255,215,0,0.2); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #111, #000);">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div
-                        style="width: 45px; height: 45px; background: #ffd700; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: black; font-size: 1.2rem; filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <div>
-                        <h3 style="margin:0; font-weight: 900; color: #ffd700; letter-spacing: 1px;">OFFICIAL SUPPORT
-                        </h3>
-                        <div id="admin-chat-target" style="font-size: 0.75rem; color: #aaa; text-transform: uppercase;">
-                            Direct Line to Admin</div>
-                    </div>
-                </div>
-                <button onclick="closeAdminChat()"
-                    style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer; opacity: 0.6;">&times;</button>
-            </div>
-            <div id="admin-messages-content"
-                style="flex:1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
-                <!-- Official Messages load here -->
-            </div>
-            <div style="padding: 25px; border-top: 1px solid rgba(255,215,0,0.1); background: #0a0a0a;">
-                <div
-                    style="display: flex; gap: 12px; background: #111; padding: 5px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
-                    <input type="text" id="admin-chat-input" placeholder="Type official message..."
-                        style="flex:1; background: transparent; border: none; padding: 12px 18px; color: white; outline: none; font-size: 0.95rem;">
-                    <button id="admin-chat-send"
-                        style="background: #ffd700; color: black; border: none; width: 50px; border-radius: 12px; cursor: pointer; font-weight: 900;">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bug Report Modal -->
-        <div id="bug-report-modal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200005; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-            <div style="background: #0f0f0f; border: 1px solid rgba(255,85,0,0.3); border-radius: 24px; padding: 32px; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="margin:0; font-weight: 800; display:flex; align-items:center; gap:12px;"><i class="fas fa-bug" style="color: #ff5500;"></i> Report a Bug</h2>
-                    <button onclick="document.getElementById('bug-report-modal').style.display='none'" style="background:none; border:none; color: #888; font-size: 1.5rem; cursor:pointer;">&times;</button>
-                </div>
-                <p style="color:#aaa; margin-bottom: 24px; font-size: 0.95rem;">Found a glitch? Let us know so we can squash it!</p>
-                <input type="text" id="bug-title" placeholder="Bug Title (e.g., Video won't play)" style="width: 100%; padding: 14px 18px; margin-bottom: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-family: inherit;">
-                <textarea id="bug-desc" placeholder="Describe the issue in detail. What were you doing? What happened?" rows="4" style="width: 100%; padding: 14px 18px; margin-bottom: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-family: inherit; resize: vertical;"></textarea>
-                
-                <div style="margin-bottom: 24px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
-                    <label style="color: #aaa; font-size: 0.9rem; margin-bottom: 8px; display: block;">Screenshot (optional)</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="file" id="bug-img-upload" accept="image/*" style="display: none;" onchange="uploadBugScreenshot(this)">
-                        <button onclick="document.getElementById('bug-img-upload').click()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                            <i class="fas fa-upload"></i> Upload Image
-                        </button>
-                        <span id="bug-upload-status" style="font-size: 0.85rem; color: #888;"></span>
-                        <input type="hidden" id="bug-img-url" value="">
-                    </div>
-                </div>
-
-                <button onclick="submitBugReport()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #ff5500, #ff0055); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <i class="fas fa-paper-plane"></i> Submit Report
-                </button>
-            </div>
-        </div>
-
-        <!-- Notification Drawer -->
-        <div id="notification-drawer"
-            style="position: fixed; top: 0; right: -100%; width: 400px; max-width: 100%; height: 100vh; background: rgba(10,10,10,0.95); z-index: 10005; box-shadow: -20px 0 60px rgba(0,0,0,1); transition: right 0.6s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.05);">
-            <div
-                style="padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin:0; font-weight: 800; letter-spacing: -0.5px;">Notifications</h3>
-                <button onclick="toggleNotifications()"
-                    style="background:none; border:none; color:white; font-size: 1.5rem; cursor:pointer; opacity: 0.6;">&times;</button>
-            </div>
-            <div id="notification-content"
-                style="flex:1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-                <!-- System Welcome Notification -->
-                <div
-                    style="background: rgba(255,0,85,0.05); border: 1px solid rgba(255,0,85,0.1); padding: 16px; border-radius: 16px; display: flex; gap: 12px;">
-                    <div
-                        style="width: 40px; height: 40px; background: #ff0055; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fas fa-bolt" style="color: white; font-size: 1rem;"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">System Update: Community
-                            V1 Live!</div>
-                        <div style="font-size: 0.85rem; color: #aaa; line-height: 1.4;">You can now post updates to your
-                            Squad and check the unified feed in the Squad tab.</div>
-                        <div style="font-size: 0.75rem; color: #ff0055; margin-top: 8px; font-weight: 700;">NEW FEATURE
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AdSense Monetization Notification -->
-                <div
-                    style="background: rgba(0,255,136,0.05); border: 1px solid rgba(0,255,136,0.1); padding: 16px; border-radius: 16px; display: flex; gap: 12px;">
-                    <div
-                        style="width: 40px; height: 40px; background: #00ff88; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fas fa-dollar-sign" style="color: black; font-size: 1.2rem; font-weight: 900;"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; color: #00ff88;">Monetization Unlocked!</div>
-                        <div style="font-size: 0.85rem; color: #aaa; line-height: 1.4;">Congratulations! You are now eligible to earn money. Link your Google AdSense account to start earning from your videos.</div>
-                        <button onclick="showAdSenseModal()" style="margin-top: 12px; background: #00ff88; color: black; border: none; padding: 6px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(0,255,136,0.2); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                            Link AdSense
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Snap Comments Drawer -->
-        <div id="snap-comment-backdrop" onclick="closeSnapComments()"
-            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; backdrop-filter: blur(4px);">
-        </div>
-        <div id="snap-comment-drawer"
-            style="position: fixed; top: 0; right: -100%; width: 450px; max-width: 100%; height: 100vh; background: #0f0f0f; z-index: 10000; box-shadow: -10px 0 40px rgba(0,0,0,0.8); transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column;">
-            <div
-                style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin:0; font-weight: 800; font-size: 1.2rem;">Comments</h3>
-                <button onclick="closeSnapComments()"
-                    style="background:none; border:none; color:white; font-size: 1.8rem; cursor:pointer; padding: 0 10px;">&times;</button>
-            </div>
-            <div id="snap-comments-content" style="flex:1; overflow-y: auto; padding: 20px;">
-                <!-- Comments load here -->
-            </div>
-            <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.08); background: #0f0f0f;">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    <input type="text" id="snap-comment-input" placeholder="Add a comment..."
-                        style="flex:1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 12px 20px; color: white; outline: none; font-size: 0.95rem;">
-                    <button id="snap-comment-submit"
-                        style="background: #ff0055; color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Custom Modals (Under Development Fix) -->
-        <div id="create-post-modal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 20000; backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
-            <div
-                style="background: #111; width: 500px; max-width: 100%; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="font-weight: 800; margin: 0;">Create Community Post</h2>
-                    <button onclick="document.getElementById('create-post-modal').style.display='none'"
-                        style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
-                </div>
-                <textarea id="post-content" placeholder="What's on your mind?"
-                    style="width: 100%; height: 150px; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; color: white; font-size: 1rem; outline: none; margin-bottom: 20px; resize: none;"></textarea>
-                <input type="text" id="post-image" placeholder="Image URL (optional)"
-                    style="width: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; margin-bottom: 24px;">
-                <button onclick="submitPost()"
-                    style="width: 100%; padding: 14px; background: #ff0055; color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer;">Post
-                    to Squad</button>
-            </div>
-        </div>
-
-        <div id="go-live-modal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20000; backdrop-filter: blur(15px); align-items: center; justify-content: center; padding: 20px;">
-            <div
-                style="background: #0a0a0a; width: 700px; max-width: 100%; border-radius: 24px; border: 1px solid rgba(255,0,85,0.3); padding: 32px; box-shadow: 0 20px 80px rgba(0,0,0,0.8); display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div
-                            style="width: 12px; height: 12px; background: #ff0055; border-radius: 50%; box-shadow: 0 0 15px #ff0055; animation: pulse 1s infinite;">
-                        </div>
-                        <h2 style="font-weight: 800; margin: 0; letter-spacing: -0.5px; text-transform: uppercase;">
-                            Broadcast Control Room</h2>
-                    </div>
-                    <button onclick="document.getElementById('go-live-modal').style.display='none'; stopLiveMedia();"
-                        style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.5;">&times;</button>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                    <!-- Left: Preview & Details -->
-                    <div>
-                        <div
-                            style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-                            <video id="live-preview" autoplay muted playsinline
-                                style="width: 100%; height: 100%; object-fit: cover;"></video>
-                            <div
-                                style="position: absolute; top: 12px; left: 12px; background: rgba(255,0,85,0.8); padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">
-                                BROWSER PREVIEW</div>
-                        </div>
-                        <input type="text" id="stream-title-input" placeholder="Stream Title"
-                            style="width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; color: white; outline: none; margin-bottom: 12px;">
-                        <input type="text" id="stream-thumb-input" placeholder="Custom Thumbnail URL"
-                            style="width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 10px 10px 0 0; padding: 12px; color: white; outline: none; border-bottom: none;">
-                        <div
-                            style="background: #222; padding: 10px; border-radius: 0 0 10px 10px; border: 1px solid #333; display: flex; align-items: center; gap: 10px;">
-                            <label for="live-thumb-file"
-                                style="background: #444; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 700;">
-                                <i class="fas fa-file-upload"></i> UPLOAD IMAGE
-                            </label>
-                            <input type="file" id="live-thumb-file" hidden accept="image/*"
-                                onchange="uploadLiveThumbnail(this)">
-                            <div id="thumb-upload-status" style="font-size: 0.75rem; color: #888;">From device</div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Config & OBS -->
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div
-                            style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid #222;">
-                            <label
-                                style="font-size: 0.75rem; color: #888; font-weight: 700; margin-bottom: 8px; display: block;">BROADCAST
-                                SOURCE</label>
-                            <select id="stream-source" onchange="switchSource(this.value)"
-                                style="width: 100%; background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px;">
-                                <option value="camera">Webcam & Mic</option>
-                                <option value="screen">Share Screen</option>
-                                <option value="obs">External (OBS Studio)</option>
-                            </select>
-                        </div>
-
-                        <div id="obs-config"
-                            style="display:none; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ff005533;">
-                            <h4 style="margin: 0 0 10px 0; font-size: 0.85rem; color: #ff0055;"><i
-                                    class="fas fa-tower-broadcast"></i> OBS SETUP</h4>
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 0.7rem; color: #666;">SERVER URL</label>
-                                <div style="display: flex; gap: 8px; margin-top: 4px;">
-                                    <input type="text" readonly value="rtmp://vitox-live.junaid.tv/live"
-                                        style="flex:1; background: #000; border: none; font-size: 0.75rem; color: #aaa; padding: 8px; border-radius: 4px;">
-                                    <button
-                                        onclick="navigator.clipboard.writeText('rtmp://vitox-live.junaid.tv/live'); showToast('Copied!')"
-                                        style="background: #222; border: none; color: white; padding: 0 10px; border-radius: 4px;"><i
-                                            class="fas fa-copy"></i></button>
-                                </div>
-                            </div>
-                            <div>
-                                <label style="font-size: 0.7rem; color: #666;">STREAM KEY</label>
-                                <div style="display: flex; gap: 8px; margin-top: 4px;">
-                                    <input type="text" id="obs-stream-key" readonly value="vt_live_****"
-                                        style="flex:1; background: #000; border: none; font-size: 0.75rem; color: #aaa; padding: 8px; border-radius: 4px;">
-                                    <button
-                                        onclick="document.getElementById('obs-stream-key').value='vt_live_' + Math.random().toString(36).substring(7); showToast('Generated Key!')"
-                                        style="background: #222; border: none; color: white; padding: 0 10px; border-radius: 4px;"><i
-                                            class="fas fa-sync"></i></button>
-                                </div>
-                            </div>
-                            <p style="font-size: 0.65rem; color: #555; margin-top: 10px;">Note: Real-time RTMP ingest
-                                requires Virtual Camera in OBS for this beta version.</p>
-                        </div>
-
-                        <div
-                            style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid #222;">
-                            <label
-                                style="font-size: 0.75rem; color: #888; font-weight: 700; margin-bottom: 8px; display: block;">CATEGORY</label>
-                            <select id="stream-category"
-                                style="width: 100%; background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px;">
-                                <option>Gaming</option>
-                                <option>Music</option>
-                                <option>Tech</option>
-                                <option>Social</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="startStreamingSession()"
-                    style="width: 100%; padding: 18px; background: #ff0055; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; font-size: 1.1rem; box-shadow: 0 10px 40px rgba(255,0,85,0.3);">
-                    <i class="fas fa-tower-broadcast"></i> START BROADCAST
-                </button>
-            </div>
-        </div>
-
-        <div id="toast-container"></div>
-        <!-- Inline JS extracted to main.js -->
-
-    <!-- ? Auto Festival Theme System � Server Driven -->
-    <div id="festival-banner" style="display:none; position:fixed; top:56px; left:0; right:0; z-index:99999; padding:10px 20px; text-align:center; font-weight:800; font-size:0.95rem; letter-spacing:0.5px; cursor:pointer; backdrop-filter:blur(10px);" onclick="document.getElementById('festival-banner').style.display='none'">
-        <span id="festival-banner-text"></span>
-        <span style="margin-left:12px; font-size:0.75rem; opacity:0.7;">(click to dismiss)</span>
-    </div>
-    <canvas id="festival-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:99998;" title="Click to throw colors!"></canvas>
-
-    <!-- Inline JS extracted to main.js -->
-    <!-- Inline JS extracted to main.js -->
-<script src="main.js" defer></script>
+  </main>
+  <footer>
+    © 2026 Vitox Platform – All rights reserved.
+  </footer>
 </body>
-
 </html>
