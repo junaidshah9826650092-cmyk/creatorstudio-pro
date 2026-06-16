@@ -112,7 +112,8 @@ class VitoxAI:
             return data.get('response', '')
         except Exception as e:
             return f"Ollama Error: {str(e)}"
-def suggest_content(self, topic):
+
+    def suggest_content(self, topic):
         """Specialized for content creation helpers"""
         prompt = f"Suggest a catchy video title and a 2-sentence description for a video about: {topic}. Return ONLY raw JSON format with 'title' and 'description' keys."
         raw_res = self.ask(prompt, model_alias='gemini-flash')
