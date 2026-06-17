@@ -5,6 +5,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vitox | The Next-Gen Indian Video Platform for Creators</title>
+  <script>
+    // Client-side detection for live servers (like Firebase) that bypass Flask
+    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+      const ua = navigator.userAgent.toLowerCase();
+      const isMobile = /android|iphone|ipod|blackberry|iemobile|opera mini|mobile/i.test(ua);
+      const isTablet = /ipad|tablet/i.test(ua);
+      if (isMobile && !isTablet) {
+        window.location.replace('/mobile_index.html');
+      }
+    }
+  </script>
   <!-- SEO Meta Tags -->
   <meta name="description"
     content="Vitox is India's rising video platform where small creators get real visibility. Join the Vitox Squad, upload unique content, and monetize your passion.">
