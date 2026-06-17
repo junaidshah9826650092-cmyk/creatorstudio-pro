@@ -9,6 +9,9 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  flutter_tts: ^3.5.0
+  webview_flutter: ^4.14.0
+  youtube_player_flutter: ^8.0.0
   http: ^1.1.0
   video_player: ^2.8.1
   chewie: ^1.7.1
@@ -24,4 +27,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/music_player.html
 
