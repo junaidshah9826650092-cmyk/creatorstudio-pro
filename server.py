@@ -2291,7 +2291,18 @@ def serve_css():
 @app.route('/index.html')
 def serve_index():
     from flask import make_response
-    with open(os.path.join(BASE_DIR, 'index.html'), 'r', encoding='utf-8') as f:
+    
+    # Simple User-Agent detection for mobile
+    user_agent = request.headers.get('User-Agent', '').lower()
+    is_mobile = any(x in user_agent for x in ['android', 'iphone', 'mobile', 'webos'])
+    is_tablet = any(x in user_agent for x in ['ipad', 'tablet'])
+    
+    if is_mobile and not is_tablet:
+        filename = 'mobile_index.html'
+    else:
+        filename = 'index.html'
+        
+    with open(os.path.join(BASE_DIR, filename), 'r', encoding='utf-8') as f:
         content = f.read()
     response = make_response(content)
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
