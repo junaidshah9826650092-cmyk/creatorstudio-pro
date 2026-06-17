@@ -730,7 +730,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8))),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AIChatScreen()),
+              );
+            },
             child: const Text('START CHAT',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           )
@@ -745,5 +750,172 @@ class CreateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container();
+  }
+}
+
+// --- Vitox AI Chat Screen ---
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  ChatMessage({required this.text, required this.isUser});
+}
+
+class AIChatScreen extends StatefulWidget {
+  const AIChatScreen({super.key});
+
+  @override
+  State<AIChatScreen> createState() => _AIChatScreenState();
+}
+
+class _AIChatScreenState extends State<AIChatScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final List<ChatMessage> _messages = [
+    ChatMessage(
+        text: "Hi there! I'm Vitox AI. I can help you come up with video ideas, catchy titles, or write scripts. What do you need help with today?",
+        isUser: false)
+  ];
+  bool _isLoading = false;
+
+  void _sendMessage() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      _messages.add(ChatMessage(text: text, isUser: true));
+      _isLoading = true;
+    });
+    _controller.clear();
+
+    // Simulate network delay for AI
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Dummy AI response based on keywords, ideally connect to your live API
+    String reply = "That's an interesting concept! Let's explore that idea further.";
+    if (text.toLowerCase().contains("title")) {
+      reply = "Here are 3 catchy titles:\n1. Why This Will Change Everything!\n2. The Secret Nobody Tells You About...\n3. I Tried This For 24 Hours!";
+    } else if (text.toLowerCase().contains("idea") || text.toLowerCase().contains("video")) {
+      reply = "How about a 'Day in the Life' vlog, or a reaction video to the latest tech drops? Those always do well on Vitox!";
+    } else if (text.toLowerCase().contains("script")) {
+      reply = "Sure! Here is a short script hook:\n'You won't believe what happened when I tried... stay tuned because the ending will shock you.'";
+    }
+
+    setState(() {
+      _messages.add(ChatMessage(text: reply, isUser: false));
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            const Icon(Icons.auto_awesome, color: Color(0xFFFF0055)),
+            const SizedBox(width: 8),
+            Text('Vitox AI', style: GoogleFonts.outfit(fontWeight: FontWeight.w800)),
+          ],
+        ),
+        backgroundColor: const Color(0xFF0F0F0F),
+        elevation: 1,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: Colors.white10, height: 1),
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final msg = _messages[index];
+                return Align(
+                  alignment: msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: msg.isUser ? const Color(0xFFFF0055) : const Color(0xFF1E1E1E),
+                      borderRadius: BorderRadius.circular(16).copyWith(
+                        bottomRight: msg.isUser ? const Radius.circular(0) : const Radius.circular(16),
+                        bottomLeft: msg.isUser ? const Radius.circular(16) : const Radius.circular(0),
+                      ),
+                      border: msg.isUser ? null : Border.all(color: Colors.white10),
+                    ),
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                    child: Text(
+                      msg.text,
+                      style: TextStyle(
+                        color: msg.isUser ? Colors.white : Colors.whitee70,
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: 20, height: 20,
+                  child: CircularProgressIndicator(color: Color(0xFFFF0055), strokeWidth: 2),
+                ),
+              ),
+            ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFF0F0F0F),
+              border: Border(top: BorderSide(color: Colors.white10)),
+            ),
+            child: SafeArea(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: TextField(
+                        controller: _controller,
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        decoration: const InputDecoration(
+                          hintText: 'Ask Vitox AI...',
+                          hintStyle: TextStyle(color: Colors.white38),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                        onSubmitted: (_) => _sendMessage(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(colors: [Color(0xFFFF0055), Color(0xFFFF5500)]),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.send, color: Colors.white, size: 20),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
